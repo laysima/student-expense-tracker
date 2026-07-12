@@ -770,7 +770,7 @@ export default function LandingPage() {
           </div>
 
           <p className="mt-5 text-[13px] leading-[1.7] text-white/70">
-            Deeper insights and automation for students who want more control.
+            Deeper insights and automation for students who want more control and convenience.
           </p>
 
           <div className="my-7 h-px bg-white/15" />
