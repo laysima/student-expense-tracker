@@ -1,0 +1,28 @@
+<svg width="1200" height="700" viewBox="0 0 1200 700" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="g1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#E2835F" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#E2835F" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="g2" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#A9BA9E" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#A9BA9E" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="g3" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#F5F5F3" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#F5F5F3" stop-opacity="0" />
+    </radialGradient>
+    <filter id="blur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="70" />
+    </filter>
+  </defs>
+
+  <rect width="1200" height="700" fill="#181818" />
+
+  <g filter="url(#blur)">
+    <circle cx="260" cy="220" r="320" fill="url(#g1)" />
+    <circle cx="920" cy="520" r="360" fill="url(#g2)" />
+    <circle cx="780" cy="140" r="260" fill="url(#g3)" />
+    <circle cx="180" cy="560" r="240" fill="url(#g1)" opacity="0.6" />
+  </g>
+</svg>

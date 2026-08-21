@@ -14,21 +14,25 @@ export default async function DashboardPage() {
     { data: income },
     { data: budgets },
     { data: notifications },
+    { data: savingsGoals },
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
-    supabase.from('expenses').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(50),
-    supabase.from('income').select('*').eq('user_id', user.id).order('date', { ascending: false }).limit(20),
+    supabase.from('expenses').select('*').eq('user_id', user.id).order('date', { ascending: false }),
+    supabase.from('income').select('*').eq('user_id', user.id).order('date', { ascending: false }),
     supabase.from('budgets').select('*').eq('user_id', user.id),
-    supabase.from('notifications').select('*').eq('user_id', user.id).eq('is_read', false).limit(5),
+    supabase.from('notifications').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
+    supabase.from('savings_goals').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
   ])
 
   return (
     <DashboardClient
+      userId={user.id}
       profile={profile}
       expenses={expenses ?? []}
       income={income ?? []}
       budgets={budgets ?? []}
       notifications={notifications ?? []}
+      savingsGoals={savingsGoals ?? []}
     />
   )
 }
