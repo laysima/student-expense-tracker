@@ -18,6 +18,7 @@ import SpecularButton from '@/components/react-bits/SpecularButton'
 import MaskedHeading from '@/components/react-bits/MaskedHeading'
 import PricingPicker from '@/components/PricingPicker'
 import SiteLogo from '@/components/SiteLogo'
+import GlobeSection from '@/components/GlobeSection'
 
 
 const BAR_HEIGHTS = [55, 70, 42, 88, 60, 45, 75, 95, 50, 65]
@@ -682,6 +683,9 @@ export default function LandingPage() {
     </div>
   </div>
 </section>
+
+{/* GLOBE */}
+<GlobeSection />
 
 {/* FEATURES */}
 <section

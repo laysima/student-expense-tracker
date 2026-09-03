@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Sparkles } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface SavingsGoal {
@@ -11,16 +12,29 @@ interface SavingsGoal {
   target_date: string | null
 }
 
+interface GoalSuggestion {
+  title: string
+  targetAmountCad: number
+  targetDate: string | null
+  rationale: string
+}
+
 interface Props {
   userId: string
   goal?: SavingsGoal | null
   avgMonthlySavings: number
+  suggestion?: GoalSuggestion | null
   onClose: () => void
   onSaved: () => void
 }
 
 const money = (value: number) =>
-  new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(value)
+  new Intl.NumberFormat('en-CA', {
+    style: 'currency',
+    currency: 'CAD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value)
 
 const DAYS_PER_MONTH = 30.44
 
@@ -28,12 +42,21 @@ function monthsBetween(from: Date, to: Date) {
   return (to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24 * DAYS_PER_MONTH)
 }
 
-export default function AddSavingsGoalModal({ userId, goal, avgMonthlySavings, onClose, onSaved }: Props) {
+// A date-only string ('YYYY-MM-DD') is parsed by `new Date()` as UTC midnight,
+// which lands on the previous day once converted to a timezone behind UTC —
+// appending a local time-of-day avoids that shift.
+function parseLocalDate(date: string) {
+  return new Date(`${date}T00:00:00`)
+}
+
+export default function AddSavingsGoalModal({ userId, goal, avgMonthlySavings, suggestion, onClose, onSaved }: Props) {
   const isAddingFunds = Boolean(goal)
 
-  const [title, setTitle] = useState(goal?.title ?? '')
-  const [targetAmount, setTargetAmount] = useState(goal ? String(goal.target_amount_cad) : '')
-  const [targetDate, setTargetDate] = useState(goal?.target_date ?? '')
+  const [title, setTitle] = useState(goal?.title ?? suggestion?.title ?? '')
+  const [targetAmount, setTargetAmount] = useState(
+    goal ? String(goal.target_amount_cad) : suggestion ? String(suggestion.targetAmountCad) : '',
+  )
+  const [targetDate, setTargetDate] = useState(goal?.target_date ?? suggestion?.targetDate ?? '')
   const [fundsAmount, setFundsAmount] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -46,7 +69,7 @@ export default function AddSavingsGoalModal({ userId, goal, avgMonthlySavings, o
 
   // How much they'd need to save monthly to hit the target date, versus what
   // they've actually been averaging over the last 3 months.
-  const monthsUntilTarget = targetDate ? Math.max(monthsBetween(new Date(), new Date(targetDate)), 1 / DAYS_PER_MONTH) : null
+  const monthsUntilTarget = targetDate ? Math.max(monthsBetween(new Date(), parseLocalDate(targetDate)), 1 / DAYS_PER_MONTH) : null
   const requiredMonthly = hasValidAmount && monthsUntilTarget ? amountNumber / monthsUntilTarget : null
 
   let feasibility: 'comfortable' | 'ambitious' | 'unrealistic' | 'unknown' | null = null
@@ -182,6 +205,15 @@ export default function AddSavingsGoalModal({ userId, goal, avgMonthlySavings, o
               </div>
             ) : (
               <>
+                {suggestion && (
+                  <div className="flex gap-2.5 rounded-2xl bg-[#EAF2E9] p-4 text-[12px] leading-5 text-[#3F6548]">
+                    <Sparkles size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
+                    <p>
+                      <span className="font-semibold">AI suggestion applied below. </span>
+                      {suggestion.rationale}
+                    </p>
+                  </div>
+                )}
                 <div>
                   <label className={labelClass}>What are you saving for?</label>
                   <input

@@ -32,8 +32,13 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
   const isEditing = Boolean(expense)
   const canConvert = homeCurrency !== 'CAD'
   const [showConverter, setShowConverter] = useState(Boolean(expense?.original_amount))
+  // An expense saved under a custom name shows the "Other" chip selected with
+  // that name back in the text field, so editing round-trips cleanly.
+  const savedCustomCategory =
+    expense && !CATEGORIES.includes(expense.category) ? expense.category : ''
+  const [customCategory, setCustomCategory] = useState(savedCustomCategory)
   const [form, setForm] = useState({
-    category: expense?.category ?? 'Groceries',
+    category: savedCustomCategory ? 'Other' : expense?.category ?? 'Groceries',
     amountCad: expense
       ? String(expense.split_count ? expense.split_total_cad ?? expense.amount_cad : expense.amount_cad)
       : '',
@@ -98,7 +103,9 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
     setError('')
     const supabase = createClient()
     const payload = {
-      category: form.category,
+      // Naming it is optional — an empty box just saves as "Other".
+      category:
+        form.category === 'Other' && customCategory.trim() ? customCategory.trim() : form.category,
       amount_cad: form.isSplit ? Number(form.amountCad) / splitCountNumber : Number(form.amountCad),
       original_amount: form.originalAmount ? Number(form.originalAmount) : null,
       original_currency: form.originalAmount ? homeCurrency : null,
@@ -191,6 +198,23 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
                   </button>
                 ))}
               </div>
+
+              {form.category === 'Other' && (
+                <div className="mt-3">
+                  <input
+                    type="text"
+                    value={customCategory}
+                    onChange={event => setCustomCategory(event.target.value)}
+                    placeholder="Name this category (optional) — e.g. Gym"
+                    maxLength={24}
+                    aria-label="Custom expense category"
+                    className={inputClass}
+                  />
+                  <p className="mt-2 text-[11px] text-[#91948C]">
+                    Leave blank to just file it under Other.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div>

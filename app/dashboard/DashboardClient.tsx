@@ -103,6 +103,26 @@ interface SavingsGoal {
   target_date: string | null
 }
 
+interface GoalSuggestion {
+  title: string
+  targetAmountCad: number
+  targetDate: string | null
+  rationale: string
+}
+
+interface SavingsTip {
+  category: string | null
+  title: string
+  body: string
+}
+
+interface DuePayday {
+  source: string
+  expectedAmount: number
+  cycle: string
+  dueDate: string
+}
+
 interface Props {
   userId: string
   profile: Profile | null
@@ -143,16 +163,28 @@ const CYCLE_MULTIPLIER: Record<string, number> = {
 const ICONS8_INCOME = 'https://img.icons8.com/ios-filled/50/191919/income.png'
 const ICONS8_EXPENSE = 'https://img.icons8.com/ios-filled/50/191919/expense.png'
 
+// Every figure on screen is shown to the cent. Rounding to whole dollars made
+// totals disagree with the amounts actually entered ($705.40 reading as $705).
 function formatCAD(value: number) {
   return new Intl.NumberFormat('en-CA', {
     style: 'currency',
     currency: 'CAD',
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(value)
 }
 
+// Date-only strings ('YYYY-MM-DD') are parsed by `new Date()` as UTC midnight.
+// In a timezone behind UTC, converting that back to local time for getMonth()/
+// getDate()/toLocaleDateString() rolls it back a day — so an expense dated the
+// 1st of the month can read as the last day of the previous month. Appending a
+// local time-of-day forces the string to be parsed in the local timezone instead.
+function parseLocalDate(date: string) {
+  return new Date(date.includes('T') ? date : `${date}T00:00:00`)
+}
+
 function formatDate(date: string, includeYear = false) {
-  return new Date(date).toLocaleDateString('en-CA', {
+  return parseLocalDate(date).toLocaleDateString('en-CA', {
     month: 'short',
     day: 'numeric',
     ...(includeYear ? { year: 'numeric' } : {}),
@@ -162,7 +194,7 @@ function formatDate(date: string, includeYear = false) {
 function getMonthExpenses(expenses: Expense[]) {
   const now = new Date()
   return expenses.filter(expense => {
-    const date = new Date(expense.date)
+    const date = parseLocalDate(expense.date)
     return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()
   })
 }
@@ -180,7 +212,7 @@ function getMonthlyRecurringIncome(income: Income[]) {
 function computeRunway(expenses: Expense[], income: Income[]) {
   const now = new Date()
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-  const recentExpenses = expenses.filter(expense => new Date(expense.date) >= thirtyDaysAgo)
+  const recentExpenses = expenses.filter(expense => parseLocalDate(expense.date) >= thirtyDaysAgo)
   const totalSpent = recentExpenses.reduce((total, expense) => total + expense.amount_cad, 0)
   const dailyRate = totalSpent / 30
   const balance = getMonthlyRecurringIncome(income) - totalSpent
@@ -192,11 +224,11 @@ function computeRunway(expenses: Expense[], income: Income[]) {
 function predictCategoryBudgets(expenses: Expense[], income: Income[]) {
   const now = new Date()
   const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate())
-  const recent = expenses.filter(expense => new Date(expense.date) >= threeMonthsAgo)
+  const recent = expenses.filter(expense => parseLocalDate(expense.date) >= threeMonthsAgo)
   const byCategory: Record<string, { total: number; months: Set<string> }> = {}
 
   recent.forEach(expense => {
-    const date = new Date(expense.date)
+    const date = parseLocalDate(expense.date)
     const monthKey = `${date.getFullYear()}-${date.getMonth()}`
     if (!byCategory[expense.category]) {
       byCategory[expense.category] = { total: 0, months: new Set() }
@@ -225,25 +257,42 @@ function predictCategoryBudgets(expenses: Expense[], income: Income[]) {
   return suggestions
 }
 
-// A steadier basis for "is this goal realistic" than the this-month snapshot
-// used elsewhere — averages actual spending over the last 3 months (or
-// falls back to recurring income alone if there isn't 3 months of history)
-// against monthly recurring income.
-function computeAverageMonthlySavings(expenses: Expense[], income: Income[]) {
-  const monthlyIncome = getMonthlyRecurringIncome(income)
+// A steadier basis for "what can I realistically save" than the this-month
+// snapshot: averages what actually came in and what actually went out over the
+// same trailing window.
+//
+// This used to weigh averaged real spending against the *recurring rate* for
+// income, which understated anyone whose pay lands as one-off rows — including
+// every payday confirmed through the check-in banner. Both sides now come from
+// the same ledger over the same months, so the number moves with real
+// behaviour on either side.
+function computeMonthlyAverages(expenses: Expense[], income: Income[]) {
   const now = new Date()
-  const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate())
-  const recent = expenses.filter(expense => new Date(expense.date) >= threeMonthsAgo)
+  const windowStart = new Date(now.getFullYear(), now.getMonth() - 3, now.getDate())
 
-  if (recent.length === 0) return monthlyIncome
+  const recentExpenses = expenses.filter(expense => parseLocalDate(expense.date) >= windowStart)
+  const recentIncome = income.filter(item => parseLocalDate(item.date) >= windowStart)
 
-  const monthsSeen = new Set(recent.map(expense => {
-    const date = new Date(expense.date)
-    return `${date.getFullYear()}-${date.getMonth()}`
-  }))
-  const avgMonthlySpend = recent.reduce((total, expense) => total + expense.amount_cad, 0) / Math.max(1, monthsSeen.size)
+  // One shared denominator keeps the two sides comparable — a month with
+  // spending but no logged income still drags the income average down, which
+  // is the honest reading.
+  const monthsSeen = new Set<string>()
+  for (const entry of [...recentExpenses, ...recentIncome]) {
+    const date = parseLocalDate(entry.date)
+    monthsSeen.add(`${date.getFullYear()}-${date.getMonth()}`)
+  }
+  const months = Math.max(1, monthsSeen.size)
 
-  return monthlyIncome - avgMonthlySpend
+  const avgSpend = recentExpenses.reduce((total, expense) => total + expense.amount_cad, 0) / months
+  // Nothing logged yet (fresh account, or income captured only as a recurring
+  // template) — fall back to the configured rate rather than reporting a
+  // deficit the user hasn't actually run.
+  const avgIncome =
+    recentIncome.length > 0
+      ? recentIncome.reduce((total, item) => total + item.amount_cad, 0) / months
+      : getMonthlyRecurringIncome(income)
+
+  return { avgIncome, avgSpend, months, potential: avgIncome - avgSpend }
 }
 
 function addCycle(date: Date, cycle: string | null) {
@@ -273,7 +322,7 @@ function getUpcomingPayments(expenses: Expense[]) {
   return expenses
     .filter(expense => expense.is_recurring)
     .map(expense => {
-      let nextDue = new Date(expense.date)
+      let nextDue = parseLocalDate(expense.date)
       let guard = 0
       while (nextDue.getTime() < now.getTime() && guard < 60) {
         nextDue = addCycle(nextDue, expense.recur_cycle)
@@ -283,6 +332,63 @@ function getUpcomingPayments(expenses: Expense[]) {
       return { ...expense, nextDue, daysUntil }
     })
     .sort((a, b) => a.nextDue.getTime() - b.nextDue.getTime())
+}
+
+// Local-time counterpart to toISOString().split('T')[0], which would shift the
+// date backwards a day in any timezone behind UTC (see parseLocalDate).
+function toIsoDate(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+// A payday that should have landed but has no income row yet.
+//
+// Recurring income rows double as templates: they carry the source, the normal
+// amount and the cycle. Projecting the newest row for a source forward by its
+// cycle gives the next expected payday — anything on or before today that has
+// no matching row is money the user was probably paid but never logged.
+function getDuePaydays(income: Income[]): DuePayday[] {
+  const endOfToday = new Date()
+  endOfToday.setHours(23, 59, 59, 999)
+
+  const templates = new Map<string, Income>()
+  for (const item of income) {
+    if (!item.is_recurring) continue
+    const existing = templates.get(item.source)
+    if (!existing || parseLocalDate(item.date) > parseLocalDate(existing.date)) {
+      templates.set(item.source, item)
+    }
+  }
+
+  const due: DuePayday[] = []
+
+  for (const [source, template] of templates) {
+    // Latest money in for this source — the template itself, or a later one-off
+    // row logged by confirming a previous payday prompt.
+    const lastPaid = income
+      .filter(item => item.source === source)
+      .reduce((latest, item) => {
+        const date = parseLocalDate(item.date)
+        return date > latest ? date : latest
+      }, new Date(0))
+
+    let nextDue = addCycle(lastPaid, template.recur_cycle)
+    let guard = 0
+    while (nextDue.getTime() <= endOfToday.getTime() && guard < 12) {
+      due.push({
+        source,
+        expectedAmount: template.amount_cad,
+        cycle: template.recur_cycle ?? 'monthly',
+        dueDate: toIsoDate(nextDue),
+      })
+      nextDue = addCycle(nextDue, template.recur_cycle)
+      guard++
+    }
+  }
+
+  return due.sort((a, b) => a.dueDate.localeCompare(b.dueDate))
 }
 
 function Brand() {
@@ -338,8 +444,20 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
   const [predicting, setPredicting] = useState(false)
   const [goalModalOpen, setGoalModalOpen] = useState(false)
   const [fundingGoal, setFundingGoal] = useState<SavingsGoal | null>(null)
+  const [goalSuggestion, setGoalSuggestion] = useState<GoalSuggestion | null>(null)
+  const [suggestingGoal, setSuggestingGoal] = useState(false)
+  const [goalSuggestionError, setGoalSuggestionError] = useState('')
   const [generatingInsight, setGeneratingInsight] = useState(false)
   const [insightError, setInsightError] = useState('')
+  const [savingsTips, setSavingsTips] = useState<SavingsTip[] | null>(null)
+  const [loadingTips, setLoadingTips] = useState(false)
+  const [tipsError, setTipsError] = useState('')
+  const [editingPayday, setEditingPayday] = useState(false)
+  const [paydayAmount, setPaydayAmount] = useState('')
+  const [savingPayday, setSavingPayday] = useState(false)
+  const [paydayError, setPaydayError] = useState('')
+  const [skippedPaydays, setSkippedPaydays] = useState<string[]>([])
+  const unreadCount = notifications.filter(item => !item.is_read).length
   const homeCurrency = profile?.home_currency ?? 'USD'
   const firstName = profile?.full_name?.split(' ')[0] ?? 'there'
   const initials = profile?.full_name
@@ -354,31 +472,47 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
     () => monthExpenses.reduce((total, expense) => total + expense.amount_cad, 0),
     [monthExpenses],
   )
-  const totalIncomeThisMonth = useMemo(() => {
+  const thisMonthIncome = useMemo(() => {
     const now = new Date()
     return income
       .filter(item => {
-        const date = new Date(item.date)
+        const date = parseLocalDate(item.date)
         return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()
       })
-      .reduce((total, item) => total + item.amount_cad, 0)
+      .sort((a, b) => parseLocalDate(b.date).getTime() - parseLocalDate(a.date).getTime())
   }, [income])
+  const totalIncomeThisMonth = useMemo(
+    () => thisMonthIncome.reduce((total, item) => total + item.amount_cad, 0),
+    [thisMonthIncome],
+  )
   const amountLeftThisMonth = totalIncomeThisMonth - totalSpentThisMonth
   const runway = useMemo(() => computeRunway(expenses, income), [expenses, income])
-  const monthlyRecurringIncome = useMemo(() => getMonthlyRecurringIncome(income), [income])
-  const savingsPotential = monthlyRecurringIncome - totalSpentThisMonth
-  const avgMonthlySavings = useMemo(() => computeAverageMonthlySavings(expenses, income), [expenses, income])
+  const monthlyAverages = useMemo(() => computeMonthlyAverages(expenses, income), [expenses, income])
+  const avgMonthlySavings = monthlyAverages.potential
+  const savingsPotential = avgMonthlySavings
+  const avgMonthlySpend = monthlyAverages.avgSpend
+  const avgMonthlyIncome = monthlyAverages.avgIncome
 
-  const categoryData = useMemo(
-    () =>
-      CATEGORIES.map(category => ({
-        name: category,
-        amount: monthExpenses
-          .filter(expense => expense.category === category)
-          .reduce((total, expense) => total + expense.amount_cad, 0),
-      })).filter(category => category.amount > 0),
-    [monthExpenses],
-  )
+  // Built from the categories actually present rather than the preset list, so
+  // custom categories typed under "Other" still show up here. Presets keep
+  // their familiar order; anything custom follows, biggest first.
+  const categoryData = useMemo(() => {
+    const totals = new Map<string, number>()
+    for (const expense of monthExpenses) {
+      totals.set(expense.category, (totals.get(expense.category) ?? 0) + expense.amount_cad)
+    }
+
+    const preset = CATEGORIES.filter(category => totals.has(category)).map(category => ({
+      name: category,
+      amount: totals.get(category) as number,
+    }))
+    const custom = [...totals.entries()]
+      .filter(([name]) => !CATEGORIES.includes(name))
+      .map(([name, amount]) => ({ name, amount }))
+      .sort((a, b) => b.amount - a.amount)
+
+    return [...preset, ...custom].filter(category => category.amount > 0)
+  }, [monthExpenses])
   const weeklySavingsTarget = savingsPotential / (52 / 12)
   const topSpendCategories = useMemo(
     () => [...categoryData].sort((a, b) => b.amount - a.amount).slice(0, 3),
@@ -397,6 +531,19 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [savingsBreakdownOpen])
 
+  const [incomeBreakdownOpen, setIncomeBreakdownOpen] = useState(false)
+  const incomeCardRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (incomeCardRef.current && !incomeCardRef.current.contains(event.target as Node)) {
+        setIncomeBreakdownOpen(false)
+      }
+    }
+    if (incomeBreakdownOpen) document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [incomeBreakdownOpen])
+
   const now = new Date()
   const currentMonth = now.getMonth() + 1
   const currentYear = now.getFullYear()
@@ -405,6 +552,72 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
   )
   const suggestions = useMemo(() => predictCategoryBudgets(expenses, income), [expenses, income])
   const upcomingPayments = useMemo(() => getUpcomingPayments(expenses), [expenses])
+  const duePaydays = useMemo(() => getDuePaydays(income), [income])
+  // Oldest unconfirmed payday first, so a run of missed ones is worked through
+  // one at a time rather than stacking up on screen.
+  const activePayday = duePaydays.find(
+    payday => !skippedPaydays.includes(`${payday.source}|${payday.dueDate}`),
+  )
+
+  // "Not paid" dismissals live in the browser: skipping is a per-person "don't
+  // ask me again", not financial data worth a table of its own.
+  // Reading the initial value out of localStorage on mount — the rule's own
+  // "subscribe to an external system" carve-out. It can't be a lazy useState
+  // initializer without desyncing from the server render.
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem('xtrack:skipped-paydays')
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (stored) setSkippedPaydays(JSON.parse(stored))
+    } catch {
+      // Private mode or blocked storage — prompts simply reappear next load.
+    }
+  }, [])
+
+  function skipPayday(payday: DuePayday) {
+    const key = `${payday.source}|${payday.dueDate}`
+    const next = [...skippedPaydays, key]
+    setSkippedPaydays(next)
+    setEditingPayday(false)
+    setPaydayError('')
+    try {
+      window.localStorage.setItem('xtrack:skipped-paydays', JSON.stringify(next))
+    } catch {
+      // Non-fatal: the skip still applies for this session.
+    }
+  }
+
+  async function confirmPayday(payday: DuePayday, amount: number) {
+    if (isNaN(amount) || amount <= 0) {
+      setPaydayError('Please enter a valid amount.')
+      return
+    }
+    setSavingPayday(true)
+    setPaydayError('')
+    const supabase = createClient()
+    // Logged as a one-off row, not another recurring one: the existing
+    // recurring entry is the template, and marking each payment recurring
+    // too would multiply the projected monthly income every payday.
+    const { error: saveError } = await supabase.from('income').insert({
+      user_id: userId,
+      source: payday.source,
+      amount_cad: amount,
+      date: payday.dueDate,
+      is_recurring: false,
+      recur_cycle: null,
+    })
+
+    if (saveError) {
+      setPaydayError(saveError.message)
+      setSavingPayday(false)
+      return
+    }
+
+    setSavingPayday(false)
+    setEditingPayday(false)
+    setPaydayAmount('')
+    router.refresh()
+  }
   const recentActivity = useMemo(
     () =>
       [
@@ -431,7 +644,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
           splitCount: null as number | null,
         })),
       ]
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .sort((a, b) => parseLocalDate(b.date).getTime() - parseLocalDate(a.date).getTime())
         .slice(0, 6),
     [expenses, income],
   )
@@ -529,6 +742,44 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
     }
   }
 
+  async function handleSuggestGoal() {
+    setSuggestingGoal(true)
+    setGoalSuggestionError('')
+    try {
+      const response = await fetch('/api/suggest-goal', { method: 'POST' })
+      const data = await response.json()
+      if (!response.ok) {
+        setGoalSuggestionError(data.error ?? 'Could not suggest a goal right now.')
+        return
+      }
+      setGoalSuggestion(data.suggestion)
+      setFundingGoal(null)
+      setGoalModalOpen(true)
+    } catch {
+      setGoalSuggestionError('Could not reach the server. Try again shortly.')
+    } finally {
+      setSuggestingGoal(false)
+    }
+  }
+
+  async function handleGetSavingsTips() {
+    setLoadingTips(true)
+    setTipsError('')
+    try {
+      const response = await fetch('/api/savings-advice', { method: 'POST' })
+      const data = await response.json()
+      if (!response.ok) {
+        setTipsError(data.error ?? 'Could not generate savings tips right now.')
+        return
+      }
+      setSavingsTips(data.tips)
+    } catch {
+      setTipsError('Could not reach the server. Try again shortly.')
+    } finally {
+      setLoadingTips(false)
+    }
+  }
+
   async function handlePredictBudgets() {
     setPredicting(true)
     const supabase = createClient()
@@ -563,14 +814,34 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
 
   return (
     <div className="min-h-screen bg-[#F3F3EF] text-[#242522]">
-      <aside className="fixed inset-y-0 left-0 z-20 hidden w-[236px] flex-col bg-[#191A18] px-5 py-6 lg:flex">
-        <div className="flex items-center justify-between">
-          <Brand />
-          <NotificationsPanel notifications={notifications} onChanged={() => router.refresh()} variant="dark" align="left" />
+      {/* Collapsed to an icon rail, widening over the content on hover — and on
+          keyboard focus too, so tabbing through the nav still shows its labels.
+          The page only ever reserves the collapsed width, so expanding
+          overlays rather than reflowing everything. */}
+      <aside
+        className="group/rail fixed inset-y-0 left-0 z-30 hidden w-[76px] flex-col overflow-hidden bg-[#191A18] py-6 transition-[width] duration-200 ease-out hover:w-[236px] hover:shadow-[0_0_60px_rgba(0,0,0,0.45)] focus-within:w-[236px] focus-within:shadow-[0_0_60px_rgba(0,0,0,0.45)] lg:flex"
+      >
+        <div className="flex items-center gap-2 px-[18px]">
+          <SiteLogo size="compact" surface="dark" variant="mark" className="group-hover/rail:hidden group-focus-within/rail:hidden" />
+          <div className="hidden group-hover/rail:block group-focus-within/rail:block">
+            <SiteLogo size="compact" surface="dark" />
+          </div>
+          <div className="ml-auto opacity-0 transition-opacity duration-150 group-hover/rail:opacity-100 group-focus-within/rail:opacity-100">
+            <NotificationsPanel notifications={notifications} onChanged={() => router.refresh()} variant="dark" align="left" />
+          </div>
+          {/* Keeps the unread signal alive while the bell itself is hidden. */}
+          {unreadCount > 0 && (
+            <span
+              aria-hidden="true"
+              className="absolute left-[52px] top-[22px] size-2 rounded-full bg-[#E98563] transition-opacity duration-150 group-hover/rail:opacity-0 group-focus-within/rail:opacity-0"
+            />
+          )}
         </div>
 
-        <nav aria-label="Dashboard navigation" className="mt-12 space-y-1">
-          <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/30">Workspace</p>
+        <nav aria-label="Dashboard navigation" className="mt-12 space-y-1 px-3">
+          <p className="mb-3 whitespace-nowrap px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/30 opacity-0 transition-opacity duration-150 group-hover/rail:opacity-100 group-focus-within/rail:opacity-100">
+            Workspace
+          </p>
           {NAV_ITEMS.map(item => {
             const Icon = item.icon
             const active = activeTab === item.id
@@ -580,23 +851,26 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                 type="button"
                 aria-current={active ? 'page' : undefined}
                 onClick={() => switchTab(item.id)}
-                className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-medium transition ${
+                title={item.label}
+                className={`flex w-full items-center gap-3 rounded-xl px-[11px] py-3 text-left text-sm font-medium transition ${
                   active
                     ? 'bg-white text-[#22231F] shadow-sm'
                     : 'text-white/55 hover:bg-white/[0.06] hover:text-white'
                 }`}
               >
-                <Icon size={18} strokeWidth={active ? 2.3 : 1.8} aria-hidden="true" />
-                {item.label}
+                <Icon size={18} strokeWidth={active ? 2.3 : 1.8} className="shrink-0" aria-hidden="true" />
+                <span className="whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover/rail:opacity-100 group-focus-within/rail:opacity-100">
+                  {item.label}
+                </span>
               </button>
             )
           })}
         </nav>
 
-        <div className="mt-auto">
+        <div className="mt-auto px-[18px]">
           {profile?.university && (
-            <div className="mb-4 border-b border-white/10 pb-4">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/30">Studying at</p>
+            <div className="mb-4 overflow-hidden border-b border-white/10 pb-4 opacity-0 transition-opacity duration-150 group-hover/rail:opacity-100 group-focus-within/rail:opacity-100">
+              <p className="whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.14em] text-white/30">Studying at</p>
               <p className="mt-1 truncate text-xs font-medium text-white/65">{profile.university}</p>
             </div>
           )}
@@ -604,16 +878,16 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
             <div className="grid size-9 shrink-0 place-items-center rounded-full bg-[#E98563] text-xs font-bold text-[#191919]">
               {initials}
             </div>
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 opacity-0 transition-opacity duration-150 group-hover/rail:opacity-100 group-focus-within/rail:opacity-100">
               <p className="truncate text-xs font-semibold text-white">{profile?.full_name ?? 'Student'}</p>
-              <p className="text-[10px] text-white/35">Home currency · {homeCurrency}</p>
+              <p className="whitespace-nowrap text-[10px] text-white/35">Home currency · {homeCurrency}</p>
             </div>
             <button
               type="button"
               onClick={handleSignOut}
               aria-label="Sign out"
               title="Sign out"
-              className="grid size-9 place-items-center rounded-lg text-white/40 transition hover:bg-white/[0.06] hover:text-[#E98563]"
+              className="grid size-9 shrink-0 place-items-center rounded-lg text-white/40 opacity-0 transition hover:bg-white/[0.06] hover:text-[#E98563] group-hover/rail:opacity-100 group-focus-within/rail:opacity-100"
             >
               <LogOut size={17} aria-hidden="true" />
             </button>
@@ -622,14 +896,14 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
             href="https://icons8.com"
             target="_blank"
             rel="noreferrer"
-            className="mt-5 inline-block text-[9px] text-white/20 transition hover:text-white/45"
+            className="mt-5 inline-block whitespace-nowrap text-[9px] text-white/20 opacity-0 transition hover:text-white/45 group-hover/rail:opacity-100 group-focus-within/rail:opacity-100"
           >
             Action icons by Icons8
           </a>
         </div>
       </aside>
 
-      <div className="lg:pl-[236px]">
+      <div className="lg:pl-[76px]">
         <header className="sticky top-0 z-10 border-b border-[#DFE0DA] bg-[#191A18] px-4 py-3 backdrop-blur-xl lg:hidden">
           <div className="flex items-center justify-between">
             <Brand />
@@ -676,58 +950,168 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap">
-              <button
-                type="button"
-                onClick={handleGenerateInsight}
-                disabled={generatingInsight}
-                className="col-span-2 flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#D6D8D0] bg-white px-4 text-[#4D5049] shadow-sm transition hover:-translate-y-0.5 hover:border-[#BFC2B9] hover:text-[#242522] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#686B63] disabled:opacity-60 sm:col-span-1 sm:min-h-16 sm:min-w-[132px] sm:justify-start"
-              >
-                <Sparkles size={18} strokeWidth={1.8} aria-hidden="true" />
-                <span className="text-left">
-                  <span className="block text-sm font-semibold">{generatingInsight ? 'Thinking…' : 'AI insight'}</span>
-                  <span className="hidden text-[10px] text-[#91948C] sm:block">This week&apos;s digest</span>
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowStatement(true)}
-                className="col-span-2 flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[#D6D8D0] bg-white px-4 text-[#4D5049] shadow-sm transition hover:-translate-y-0.5 hover:border-[#BFC2B9] hover:text-[#242522] hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#686B63] sm:col-span-1 sm:min-h-16 sm:min-w-[132px] sm:justify-start"
-              >
-                <Printer size={18} strokeWidth={1.8} aria-hidden="true" />
-                <span className="text-left">
-                  <span className="block text-sm font-semibold">Statement</span>
-                  <span className="hidden text-[10px] text-[#91948C] sm:block">Print or save PDF</span>
-                </span>
-              </button>
+            {/* Even 2x2 block: every tile shares one height, radius and
+                icon-plus-two-line structure, so nothing wraps raggedly.
+                Primary money actions sit on top, tools underneath. */}
+            <div className="grid w-full shrink-0 grid-cols-2 gap-3 md:w-auto md:grid-cols-[repeat(2,minmax(172px,1fr))]">
               <button
                 type="button"
                 onClick={() => setShowAddIncome(true)}
-                className="group flex min-h-16 items-center gap-3 rounded-2xl border border-[#CCD8CA] bg-[#E3EDE1] px-4 text-left transition hover:-translate-y-0.5 hover:border-[#A9BDA7] hover:shadow-[0_10px_30px_rgba(57,78,60,0.10)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#69876F] sm:min-w-[174px]"
+                className="group flex min-h-16 items-center gap-2.5 rounded-2xl border border-[#CCD8CA] bg-[#E3EDE1] px-3 text-left transition hover:-translate-y-0.5 hover:border-[#A9BDA7] sm:gap-3 sm:px-4 hover:shadow-[0_10px_30px_rgba(57,78,60,0.10)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#69876F]"
               >
                 <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#B8CEB5] transition group-hover:scale-105">
                   <Image src={ICONS8_INCOME} alt="" width={22} height={22} unoptimized />
                 </span>
-                <span>
+                <span className="min-w-0">
                   <span className="block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#69806B]">Money in</span>
-                  <span className="mt-0.5 block text-sm font-semibold text-[#27362A]">Add income</span>
+                  <span className="mt-0.5 block truncate text-sm font-semibold text-[#27362A]">Add income</span>
                 </span>
               </button>
               <button
                 type="button"
                 onClick={() => setShowAddExpense(true)}
-                className="group flex min-h-16 items-center gap-3 rounded-2xl border border-[#F0C5B5] bg-[#FFE7DE] px-4 text-left transition hover:-translate-y-0.5 hover:border-[#E6A78F] hover:shadow-[0_10px_30px_rgba(118,61,40,0.10)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D86F4E] sm:min-w-[174px]"
+                className="group flex min-h-16 items-center gap-2.5 rounded-2xl border border-[#F0C5B5] bg-[#FFE7DE] px-3 text-left transition hover:-translate-y-0.5 hover:border-[#E6A78F] sm:gap-3 sm:px-4 hover:shadow-[0_10px_30px_rgba(118,61,40,0.10)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D86F4E]"
               >
                 <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#F3AD92] transition group-hover:scale-105">
                   <Image src={ICONS8_EXPENSE} alt="" width={22} height={22} unoptimized />
                 </span>
-                <span>
+                <span className="min-w-0">
                   <span className="block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#B76245]">Money out</span>
-                  <span className="mt-0.5 block text-sm font-semibold text-[#492D24]">Add expense</span>
+                  <span className="mt-0.5 block truncate text-sm font-semibold text-[#492D24]">Add expense</span>
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={handleGenerateInsight}
+                disabled={generatingInsight}
+                className="group flex min-h-16 items-center gap-2.5 rounded-2xl border border-[#D6D8D0] bg-white px-3 text-left transition hover:-translate-y-0.5 hover:border-[#BFC2B9] sm:gap-3 sm:px-4 hover:shadow-[0_10px_30px_rgba(31,32,29,0.07)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#686B63] disabled:translate-y-0 disabled:opacity-60"
+              >
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#EFF0EB] text-[#5C5F57] transition group-hover:scale-105">
+                  <Sparkles size={18} strokeWidth={1.8} aria-hidden="true" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8A8D84]">This week</span>
+                  <span className="mt-0.5 block truncate text-sm font-semibold text-[#242522]">{generatingInsight ? 'Thinking…' : 'AI insight'}</span>
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowStatement(true)}
+                className="group flex min-h-16 items-center gap-2.5 rounded-2xl border border-[#D6D8D0] bg-white px-3 text-left transition hover:-translate-y-0.5 hover:border-[#BFC2B9] sm:gap-3 sm:px-4 hover:shadow-[0_10px_30px_rgba(31,32,29,0.07)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#686B63]"
+              >
+                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#EFF0EB] text-[#5C5F57] transition group-hover:scale-105">
+                  <Printer size={18} strokeWidth={1.8} aria-hidden="true" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8A8D84]">Export</span>
+                  <span className="mt-0.5 block truncate text-sm font-semibold text-[#242522]">Statement</span>
                 </span>
               </button>
             </div>
           </div>
+
+          {activePayday && (
+            <section
+              aria-label="Payday check-in"
+              className="mt-6 rounded-2xl border border-[#CCD8CA] bg-[#E3EDE1] p-5 sm:p-6"
+            >
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex items-start gap-3.5">
+                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#B8CEB5] text-[#27362A]">
+                    <CalendarClock size={19} aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#69806B]">
+                      Payday check-in
+                    </p>
+                    <p className="mt-1 text-[15px] font-semibold tracking-[-0.01em] text-[#27362A]">
+                      How much were you paid on {formatDate(activePayday.dueDate, true)}?
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-[#5F7361]">
+                      {activePayday.source} is set to repeat {activePayday.cycle} and normally comes in at{' '}
+                      <span className="font-semibold">{formatCAD(activePayday.expectedAmount)}</span>. Confirm the
+                      amount so it counts toward this month.
+                    </p>
+                    {paydayError && (
+                      <p className="mt-2 text-xs font-medium text-[#B9573A]">{paydayError}</p>
+                    )}
+                  </div>
+                </div>
+
+                {editingPayday ? (
+                  <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center">
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[15px] font-semibold text-[#6E7D6F]">
+                        $
+                      </span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        step="0.01"
+                        autoFocus
+                        aria-label="Amount you were paid"
+                        value={paydayAmount}
+                        onChange={event => setPaydayAmount(event.target.value)}
+                        className="w-full rounded-xl border border-[#B8CEB5] bg-white py-3 pl-8 pr-3 text-[15px] font-semibold text-[#27362A] outline-none transition focus:border-[#829A83] focus:ring-4 focus:ring-[#829A83]/15 sm:w-[150px]"
+                      />
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => confirmPayday(activePayday, Number(paydayAmount))}
+                        disabled={savingPayday}
+                        className="rounded-xl bg-[#28352A] px-5 py-3 text-[13px] font-semibold text-white shadow-[0_8px_20px_rgba(40,53,42,0.16)] transition hover:-translate-y-0.5 hover:bg-[#344637] disabled:translate-y-0 disabled:opacity-50"
+                      >
+                        {savingPayday ? 'Saving…' : 'Log payment'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setEditingPayday(false); setPaydayError('') }}
+                        className="text-[13px] font-semibold text-[#5F7361] transition hover:text-[#27362A]"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex shrink-0 flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => confirmPayday(activePayday, activePayday.expectedAmount)}
+                      disabled={savingPayday}
+                      className="rounded-xl bg-[#28352A] px-5 py-3 text-[13px] font-semibold text-white shadow-[0_8px_20px_rgba(40,53,42,0.16)] transition hover:-translate-y-0.5 hover:bg-[#344637] disabled:translate-y-0 disabled:opacity-50"
+                    >
+                      {savingPayday ? 'Saving…' : `Yes, log ${formatCAD(activePayday.expectedAmount)}`}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPaydayAmount(activePayday.expectedAmount.toFixed(2))
+                        setEditingPayday(true)
+                        setPaydayError('')
+                      }}
+                      className="rounded-xl border border-[#B8CEB5] bg-white px-5 py-3 text-[13px] font-semibold text-[#3F6548] transition hover:-translate-y-0.5 hover:border-[#93AD91]"
+                    >
+                      It was a different amount
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => skipPayday(activePayday)}
+                      className="px-1 text-[13px] font-semibold text-[#5F7361] transition hover:text-[#27362A]"
+                    >
+                      Not paid
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {duePaydays.length > 1 && (
+                <p className="mt-4 border-t border-[#CCD8CA] pt-3 text-[11px] text-[#5F7361]">
+                  {duePaydays.length - 1} earlier payday{duePaydays.length - 1 === 1 ? '' : 's'} still to confirm after this one.
+                </p>
+              )}
+            </section>
+          )}
 
           {insightError && (
             <div className="mt-4 rounded-xl bg-[#FFF0EA] px-4 py-3 text-[13px] font-medium text-[#B9573A]">{insightError}</div>
@@ -757,21 +1141,57 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                   <p className="mt-1 text-[10px] text-[#91948C] sm:text-[11px]">{monthExpenses.length} transactions</p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setShowAddIncome(true)}
-                  className="group rounded-2xl border border-[#D9E1D7] bg-white p-5 text-left transition hover:-translate-y-0.5 hover:border-[#A9C2AB] hover:shadow-[0_10px_30px_rgba(40,53,42,0.08)] sm:p-6"
-                >
+                <div ref={incomeCardRef} className="relative rounded-2xl border border-[#D9E1D7] bg-white p-5 sm:p-6">
                   <div className="flex items-center justify-between">
                     <p className="text-[11px] font-medium text-[#74776F] sm:text-xs">Income this month</p>
                     <TrendingUp size={18} className="text-[#58755F]" aria-hidden="true" />
                   </div>
                   <p className="mt-5 text-2xl font-semibold tracking-[-0.04em] text-[#242522] sm:text-3xl">{formatCAD(totalIncomeThisMonth)}</p>
-                  <p className="mt-1 flex items-center gap-1 text-[10px] text-[#91948C] sm:text-[11px]">
-                    {income.filter(item => item.is_recurring).length} recurring sources
-                    <Plus size={12} className="ml-auto shrink-0 text-[#8AA48C] transition group-hover:text-[#58755F]" aria-hidden="true" />
-                  </p>
-                </button>
+                  <p className="mt-1 text-[10px] text-[#91948C] sm:text-[11px]">{income.filter(item => item.is_recurring).length} recurring sources</p>
+                  <button
+                    type="button"
+                    onClick={() => setIncomeBreakdownOpen(value => !value)}
+                    className="mt-1.5 text-[10px] font-semibold text-[#58755F] underline underline-offset-2 transition hover:text-[#3F6548] sm:text-[11px]"
+                  >
+                    {incomeBreakdownOpen ? 'Hide entries' : 'View or edit entries'}
+                  </button>
+
+                  {incomeBreakdownOpen && (
+                    <div className="absolute left-1/2 top-full z-30 mt-2 w-[290px] max-w-[85vw] -translate-x-1/2 rounded-2xl border border-[#DFE0DA] bg-white p-4 text-left shadow-[0_20px_60px_rgba(16,17,14,0.18)]">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[#74776F]">This month&apos;s income</p>
+
+                      {thisMonthIncome.length > 0 ? (
+                        <div className="mt-2 space-y-1">
+                          {thisMonthIncome.map(item => (
+                            <button
+                              type="button"
+                              key={item.id}
+                              onClick={() => { setIncomeBreakdownOpen(false); openEditIncome(item) }}
+                              className="group/row -mx-2 flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left transition hover:bg-[#F1F4F0]"
+                            >
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-[11px] font-medium text-[#343630]">{item.source}</p>
+                                <p className="text-[10px] text-[#91948C]">{formatDate(item.date, true)}</p>
+                              </div>
+                              <Pencil size={11} className="shrink-0 text-[#C4C6BF] transition group-hover/row:text-[#58755F]" aria-hidden="true" />
+                              <span className="shrink-0 text-[11px] font-semibold text-[#4E7558]">+{formatCAD(item.amount_cad)}</span>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="mt-2 text-[11px] leading-4 text-[#85887F]">No income logged yet this month.</p>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => { setIncomeBreakdownOpen(false); setEditingIncome(null); setShowAddIncome(true) }}
+                        className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[#F1F4F0] px-3 py-2.5 text-[11px] font-semibold text-[#3F6548] transition hover:bg-[#E7EDE6]"
+                      >
+                        <Plus size={12} aria-hidden="true" /> Add income
+                      </button>
+                    </div>
+                  )}
+                </div>
 
                 <div className="rounded-2xl border border-[#DFE0DA] bg-white p-5 sm:p-6">
                   <div className="flex items-center justify-between">
@@ -792,7 +1212,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                   <p className={`mt-5 text-2xl font-semibold tracking-[-0.04em] sm:text-3xl ${savingsPotential >= 0 ? 'text-[#3F6548]' : 'text-[#C85F40]'}`}>
                     {formatCAD(savingsPotential)}
                   </p>
-                  <p className="mt-1 text-[10px] text-[#91948C] sm:text-[11px]">{savingsPotential >= 0 ? 'Available after typical costs' : 'Above your typical income'}</p>
+                  <p className="mt-1 text-[10px] text-[#91948C] sm:text-[11px]">{savingsPotential >= 0 ? 'Your average income minus average spending' : 'Spending is above your average income'}</p>
                   <button
                     type="button"
                     onClick={() => setSavingsBreakdownOpen(value => !value)}
@@ -810,23 +1230,27 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                             {formatCAD(weeklySavingsTarget)} <span className="text-[11px] font-normal text-[#91948C]">/ week</span>
                           </p>
                           <p className="mt-1 text-[11px] leading-4 text-[#85887F]">
-                            Set this aside each week and you&apos;ll bank {formatCAD(savingsPotential)} by the end of the month.
+                            Set this aside each week and you&apos;ll bank about {formatCAD(savingsPotential)} in a typical month.
                           </p>
                         </>
                       ) : (
                         <p className="text-[11px] leading-4 text-[#85887F]">
-                          You&apos;re spending more than your typical recurring income this month, so there&apos;s no savings room yet. Trimming the categories below is the fastest way to change that.
+                          Your average spending has been outpacing your average income, so there&apos;s no savings room right now. Trimming the categories below is the fastest way to change that.
                         </p>
                       )}
 
                       <div className="mt-3 space-y-1 border-t border-[#EAEBE6] pt-3 text-[11px] text-[#5F625B]">
+                        <p className="mb-1.5 text-[10px] text-[#91948C]">
+                          Averaged over {monthlyAverages.months} month{monthlyAverages.months === 1 ? '' : 's'} of your
+                          actual activity.
+                        </p>
                         <div className="flex items-center justify-between">
-                          <span>Recurring income</span>
-                          <span className="font-medium text-[#242522]">{formatCAD(monthlyRecurringIncome)}</span>
+                          <span>Average income</span>
+                          <span className="font-medium text-[#242522]">{formatCAD(avgMonthlyIncome)}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span>Spent so far</span>
-                          <span className="font-medium text-[#242522]">−{formatCAD(totalSpentThisMonth)}</span>
+                          <span>Average spending</span>
+                          <span className="font-medium text-[#242522]">−{formatCAD(avgMonthlySpend)}</span>
                         </div>
                         <div className={`flex items-center justify-between border-t border-[#EAEBE6] pt-1 font-semibold ${savingsPotential >= 0 ? 'text-[#3F6548]' : 'text-[#C85F40]'}`}>
                           <span>Savings potential</span>
@@ -1027,14 +1451,29 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                     <h2 className="text-base font-semibold tracking-[-0.02em] text-[#242522]">Savings goals</h2>
                     <p className="mt-1 text-xs text-[#85887F]">Give a purpose to what you set aside</p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => { setFundingGoal(null); setGoalModalOpen(true) }}
-                    className="shrink-0 text-xs font-semibold text-[#C96042] transition hover:text-[#9E492F]"
-                  >
-                    New goal
-                  </button>
+                  <div className="flex shrink-0 items-center gap-4">
+                    <button
+                      type="button"
+                      onClick={handleSuggestGoal}
+                      disabled={suggestingGoal}
+                      className="flex items-center gap-1 text-xs font-semibold text-[#58755F] transition hover:text-[#3F6548] disabled:opacity-50"
+                    >
+                      <Sparkles size={13} aria-hidden="true" />
+                      {suggestingGoal ? 'Thinking…' : 'Suggest with AI'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setFundingGoal(null); setGoalSuggestion(null); setGoalModalOpen(true) }}
+                      className="text-xs font-semibold text-[#C96042] transition hover:text-[#9E492F]"
+                    >
+                      New goal
+                    </button>
+                  </div>
                 </div>
+
+                {goalSuggestionError && (
+                  <p className="border-b border-[#EAEBE6] px-5 py-3 text-[12px] font-medium text-[#B9573A] sm:px-6">{goalSuggestionError}</p>
+                )}
 
                 {savingsGoals.length > 0 ? (
                   <div className="divide-y divide-[#EEEFEA] px-5 sm:px-6">
@@ -1045,7 +1484,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                       const reached = goal.current_amount_cad >= goal.target_amount_cad
                       const remaining = Math.max(0, goal.target_amount_cad - goal.current_amount_cad)
                       const monthsRemaining = goal.target_date
-                        ? Math.max((new Date(goal.target_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 30.44), 1 / 30.44)
+                        ? Math.max((parseLocalDate(goal.target_date).getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 30.44), 1 / 30.44)
                         : null
                       const monthsNeeded = avgMonthlySavings > 0 ? remaining / avgMonthlySavings : null
                       const pace = !reached && monthsRemaining !== null && monthsNeeded !== null
@@ -1103,13 +1542,24 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                     <Target size={22} className="text-[#B7BAB2]" aria-hidden="true" />
                     <p className="mt-3 text-sm font-medium text-[#555851]">No goals yet</p>
                     <p className="mt-1 text-xs text-[#91948C]">Flight home, a laptop, an emergency fund — give your savings a target.</p>
-                    <button
-                      type="button"
-                      onClick={() => { setFundingGoal(null); setGoalModalOpen(true) }}
-                      className="mt-4 text-xs font-semibold text-[#C96042] hover:underline"
-                    >
-                      Set a goal
-                    </button>
+                    <div className="mt-4 flex flex-wrap justify-center gap-4">
+                      <button
+                        type="button"
+                        onClick={() => { setFundingGoal(null); setGoalSuggestion(null); setGoalModalOpen(true) }}
+                        className="text-xs font-semibold text-[#C96042] hover:underline"
+                      >
+                        Set a goal
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSuggestGoal}
+                        disabled={suggestingGoal}
+                        className="flex items-center gap-1 text-xs font-semibold text-[#58755F] hover:underline disabled:opacity-50"
+                      >
+                        <Sparkles size={13} aria-hidden="true" />
+                        {suggestingGoal ? 'Thinking…' : 'Suggest with AI'}
+                      </button>
+                    </div>
                   </div>
                 )}
               </section>
@@ -1175,8 +1625,53 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                   <h2 className="text-base font-semibold text-[#242522]">All expenses</h2>
                   <p className="mt-1 text-xs text-[#85887F]">{expenses.length} recorded transactions</p>
                 </div>
-                <p className="text-sm font-semibold text-[#C96042]">{formatCAD(expenses.reduce((total, item) => total + item.amount_cad, 0))}</p>
+                <div className="flex items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={handleGetSavingsTips}
+                    disabled={loadingTips}
+                    className="flex items-center gap-1 text-xs font-semibold text-[#58755F] transition hover:text-[#3F6548] disabled:opacity-50"
+                  >
+                    <Sparkles size={13} aria-hidden="true" />
+                    {loadingTips ? 'Thinking…' : 'Get savings tips'}
+                  </button>
+                  <p className="text-sm font-semibold text-[#C96042]">{formatCAD(expenses.reduce((total, item) => total + item.amount_cad, 0))}</p>
+                </div>
               </div>
+
+              {tipsError && (
+                <p className="border-b border-[#EAEBE6] px-5 py-3 text-[12px] font-medium text-[#B9573A] sm:px-6">{tipsError}</p>
+              )}
+
+              {savingsTips && savingsTips.length > 0 && (
+                <div className="space-y-3 border-b border-[#EAEBE6] bg-[#F7FAF6] px-5 py-5 sm:px-6">
+                  <div className="flex items-center justify-between">
+                    <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#58755F]">
+                      <Sparkles size={13} aria-hidden="true" /> Savings tips
+                    </p>
+                    <button type="button" onClick={() => setSavingsTips(null)} className="text-[11px] font-semibold text-[#85887F] transition hover:text-[#242522]">
+                      Dismiss
+                    </button>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {savingsTips.map((tip, index) => {
+                      const Icon = tip.category ? (CATEGORY_ICONS[tip.category] ?? CreditCard) : Sparkles
+                      return (
+                        <div key={index} className="rounded-2xl border border-[#DCE6DB] bg-white p-4">
+                          <div className="flex items-center gap-2">
+                            <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[#EAF2E9] text-[#58755F]">
+                              <Icon size={13} aria-hidden="true" />
+                            </span>
+                            <p className="text-[12px] font-semibold text-[#343630]">{tip.title}</p>
+                          </div>
+                          <p className="mt-2 text-[11px] leading-5 text-[#5F625B]">{tip.body}</p>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
               {expenses.length > 0 ? (
                 <div className="divide-y divide-[#EEEFEA] px-5 sm:px-6">
                   {expenses.map(expense => (
@@ -1301,7 +1796,8 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
           userId={userId}
           goal={fundingGoal}
           avgMonthlySavings={avgMonthlySavings}
-          onClose={() => setGoalModalOpen(false)}
+          suggestion={fundingGoal ? null : goalSuggestion}
+          onClose={() => { setGoalModalOpen(false); setGoalSuggestion(null) }}
           onSaved={handleEntrySaved}
         />
       )}

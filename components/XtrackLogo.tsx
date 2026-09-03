@@ -1,5 +1,16 @@
 interface Props {
   className?: string
+  /**
+   * 'mark' crops the viewBox to just the icon, for tight spots like a
+   * collapsed sidebar rail where the wordmark would have to be clipped.
+   */
+  variant?: 'full' | 'mark'
+}
+
+// The icon occupies x 22–164 of the artwork; the wordmark runs to x 481.
+const VIEW_BOX = {
+  full: '18 18 467 122',
+  mark: '18 18 152 122',
 }
 
 /**
@@ -12,10 +23,10 @@ interface Props {
  * pick up CSS from the referencing page, which is why that approach
  * always rendered the SVG's original navy fill regardless of theme.
  */
-export default function XtrackLogo({ className = '' }: Props) {
+export default function XtrackLogo({ className = '', variant = 'full' }: Props) {
   return (
     <svg
-      viewBox="18 18 467 122"
+      viewBox={VIEW_BOX[variant]}
       className={className}
       xmlns="http://www.w3.org/2000/svg"
       role="img"

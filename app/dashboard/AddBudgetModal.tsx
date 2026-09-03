@@ -27,14 +27,27 @@ interface Props {
 }
 
 export default function AddBudgetModal({ userId, month, year, existingBudgets, suggestions, initialCategory, onClose, onSaved }: Props) {
-  const [category, setCategory] = useState(initialCategory ?? CATEGORIES[0])
+  // Opening an existing budget for a custom category selects "Other" and puts
+  // the name back in the text field.
+  const savedCustomCategory =
+    initialCategory && !CATEGORIES.includes(initialCategory) ? initialCategory : ''
+  const [customCategory, setCustomCategory] = useState(savedCustomCategory)
+  const [category, setCategory] = useState(
+    savedCustomCategory ? 'Other' : initialCategory ?? CATEGORIES[0],
+  )
   const [amount, setAmount] = useState(
     existingBudgets.find(budget => budget.category === (initialCategory ?? CATEGORIES[0]))?.amount_cad.toString() ?? '',
   )
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const suggestion = suggestions.find(item => item.category === category)
-  const existingForCategory = existingBudgets.find(budget => budget.category === category)
+
+  // What actually gets written and matched against — the typed name when one
+  // is given, otherwise the chip itself.
+  const effectiveCategory =
+    category === 'Other' && customCategory.trim() ? customCategory.trim() : category
+
+  const suggestion = suggestions.find(item => item.category === effectiveCategory)
+  const existingForCategory = existingBudgets.find(budget => budget.category === effectiveCategory)
 
   function selectCategory(next: string) {
     setCategory(next)
@@ -54,12 +67,12 @@ export default function AddBudgetModal({ userId, month, year, existingBudgets, s
           .from('budgets')
           .update({ amount_cad: Number(amount) })
           .eq('user_id', userId)
-          .eq('category', category)
+          .eq('category', effectiveCategory)
           .eq('month', month)
           .eq('year', year)
       : await supabase
           .from('budgets')
-          .insert({ user_id: userId, category, amount_cad: Number(amount), month, year })
+          .insert({ user_id: userId, category: effectiveCategory, amount_cad: Number(amount), month, year })
 
     if (saveError) {
       setError(saveError.message)
@@ -118,6 +131,23 @@ export default function AddBudgetModal({ userId, month, year, existingBudgets, s
                   </button>
                 ))}
               </div>
+
+              {category === 'Other' && (
+                <div className="mt-3">
+                  <input
+                    type="text"
+                    value={customCategory}
+                    onChange={event => setCustomCategory(event.target.value)}
+                    placeholder="Name this category (optional) — e.g. Gym"
+                    maxLength={24}
+                    aria-label="Custom budget category"
+                    className={inputClass}
+                  />
+                  <p className="mt-2 text-[11px] text-[#91948C]">
+                    Match the name you used on your expenses so spending counts toward it.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div>
@@ -142,7 +172,8 @@ export default function AddBudgetModal({ userId, month, year, existingBudgets, s
                   Use suggested {new Intl.NumberFormat('en-CA', {
                     style: 'currency',
                     currency: 'CAD',
-                    maximumFractionDigits: 0,
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
                   }).format(suggestion.suggested)} based on recent spending
                 </button>
               )}

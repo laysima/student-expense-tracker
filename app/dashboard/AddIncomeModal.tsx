@@ -29,8 +29,12 @@ export default function AddIncomeModal({ userId, homeCurrency, income, onClose, 
   const isEditing = Boolean(income)
   const canConvert = homeCurrency !== 'CAD'
   const [showConverter, setShowConverter] = useState(Boolean(income?.original_amount))
+  // Income saved under a custom name reopens with "Other" selected and the
+  // name back in the text field, so editing round-trips cleanly.
+  const savedCustomSource = income && !SOURCES.includes(income.source) ? income.source : ''
+  const [customSource, setCustomSource] = useState(savedCustomSource)
   const [form, setForm] = useState({
-    source: income?.source ?? 'Part-time job',
+    source: savedCustomSource ? 'Other' : income?.source ?? 'Part-time job',
     amountCad: income ? String(income.amount_cad) : '',
     originalAmount: income?.original_amount ? String(income.original_amount) : '',
     date: income?.date ?? new Date().toISOString().split('T')[0],
@@ -82,7 +86,8 @@ export default function AddIncomeModal({ userId, homeCurrency, income, onClose, 
     setError('')
     const supabase = createClient()
     const payload = {
-      source: form.source,
+      // Naming it is optional — an empty box just saves as "Other".
+      source: form.source === 'Other' && customSource.trim() ? customSource.trim() : form.source,
       amount_cad: Number(form.amountCad),
       original_amount: form.originalAmount ? Number(form.originalAmount) : null,
       original_currency: form.originalAmount ? homeCurrency : null,
@@ -151,6 +156,23 @@ export default function AddIncomeModal({ userId, homeCurrency, income, onClose, 
                   </button>
                 ))}
               </div>
+
+              {form.source === 'Other' && (
+                <div className="mt-3">
+                  <input
+                    type="text"
+                    value={customSource}
+                    onChange={event => setCustomSource(event.target.value)}
+                    placeholder="Name this source (optional) — e.g. Walmart"
+                    maxLength={24}
+                    aria-label="Custom income source"
+                    className={inputClass}
+                  />
+                  <p className="mt-2 text-[11px] text-[#91948C]">
+                    Leave blank to just file it under Other.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div>

@@ -69,7 +69,7 @@ export async function POST() {
   const summary = {
     last30DaysSpendByCategory: spendByCategory,
     totalSpentLast30Days: Object.values(spendByCategory).reduce((a, b) => a + b, 0),
-    monthlyRecurringIncomeCad: Math.round(monthlyIncome),
+    monthlyRecurringIncomeCad: Math.round(monthlyIncome * 100) / 100,
     currentBudgets: (budgets ?? []).map(b => ({ category: b.category, limitCad: b.amount_cad })),
   }
 

@@ -2,7 +2,6 @@
 
 import {
   CSSProperties,
-  ElementType,
   HTMLAttributes,
   useCallback,
   useEffect,
@@ -308,7 +307,12 @@ const MaskedHeading = ({
     return () => tweenRef.current?.kill()
   }, [reveal, trigger, duration, stagger, words])
 
-  const Tag = tag as ElementType
+  // `tag` is a runtime-computed element type, typed `any` (rather than
+  // ElementType) because once @react-three/fiber's types are loaded anywhere
+  // in the program, its ThreeElements augmentation makes JSX's structural
+  // lookup for a dynamic `keyof JSX.IntrinsicElements` collapse to `never`.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const Tag = tag as any
 
   return (
     <Tag
