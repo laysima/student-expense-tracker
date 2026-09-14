@@ -6,6 +6,16 @@ import { createClient } from '@/lib/supabase/client'
 const CATEGORIES = ['Groceries', 'Rent', 'Tuition', 'Transport', 'Utilities', 'Entertainment', 'Other']
 const CYCLES = ['weekly', 'biweekly', 'monthly', 'yearly']
 
+// `toISOString()` is UTC: in any timezone behind it, that returns tomorrow's
+// date all evening, so a new entry would default to the wrong day (and on the
+// last of the month, the wrong month). Build the default from local parts.
+function todayIso() {
+  const now = new Date()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${now.getFullYear()}-${month}-${day}`
+}
+
 interface ExpenseRecord {
   id: string
   category: string
@@ -44,7 +54,7 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
       : '',
     originalAmount: expense?.original_amount ? String(expense.original_amount) : '',
     note: expense?.note ?? '',
-    date: expense?.date ?? new Date().toISOString().split('T')[0],
+    date: expense?.date ?? todayIso(),
     isRecurring: expense?.is_recurring ?? false,
     recurCycle: expense?.recur_cycle ?? 'monthly',
     isSplit: Boolean(expense?.split_count),

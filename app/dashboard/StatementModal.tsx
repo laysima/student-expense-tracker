@@ -65,14 +65,44 @@ function periodStart(period: Period, now: Date) {
 
 export default function StatementModal({ fullName, university, expenses, income, onClose }: Props) {
   const [period, setPeriod] = useState<Period>('month')
+  // '' means "use the rolling period above". Anything else is a single closed
+  // month ('2026-08'), which the preset windows could never isolate — they all
+  // run from some point in the past up to today.
+  const [singleMonth, setSingleMonth] = useState('')
   const now = new Date()
-  const start = periodStart(period, now)
-  const periodLabel = PERIODS.find(option => option.id === period)?.label ?? 'Statement'
+
+  // Every month that actually has a transaction, newest first.
+  const monthOptions = useMemo(() => {
+    const seen = new Map<string, string>()
+    for (const entry of [...expenses, ...income]) {
+      const date = asLocalDate(entry.date)
+      if (date > now) continue
+      const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+      if (!seen.has(key)) {
+        seen.set(key, date.toLocaleDateString('en-CA', { month: 'long', year: 'numeric' }))
+      }
+    }
+    return [...seen.entries()].sort((a, b) => b[0].localeCompare(a[0]))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expenses, income])
+
+  const monthStart = singleMonth
+    ? new Date(Number(singleMonth.slice(0, 4)), Number(singleMonth.slice(5, 7)) - 1, 1)
+    : null
+  const monthEnd = monthStart
+    ? new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0, 23, 59, 59, 999)
+    : null
+
+  const start = monthStart ?? periodStart(period, now)
+  const periodLabel = singleMonth
+    ? monthOptions.find(([key]) => key === singleMonth)?.[1] ?? 'Statement'
+    : PERIODS.find(option => option.id === period)?.label ?? 'Statement'
 
   const transactions = useMemo(() => {
+    const cutoff = monthEnd ?? now
     const inPeriod = (date: string) => {
       const value = asLocalDate(date)
-      return (!start || value >= start) && value <= now
+      return (!start || value >= start) && value <= cutoff
     }
 
     return [
@@ -93,9 +123,9 @@ export default function StatementModal({ fullName, university, expenses, income,
         expense: item.amount_cad,
       })),
     ].sort((a, b) => asLocalDate(b.date).getTime() - asLocalDate(a.date).getTime())
-    // `start` and `now` intentionally follow the selected period on every render.
+    // `start`, `cutoff` and `now` intentionally follow the selection on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [expenses, income, period])
+  }, [expenses, income, period, singleMonth])
 
   const totalIncome = transactions.reduce((total, item) => total + item.income, 0)
   const totalExpenses = transactions.reduce((total, item) => total + item.expense, 0)
@@ -138,16 +168,37 @@ export default function StatementModal({ fullName, university, expenses, income,
                 <button
                   key={option.id}
                   type="button"
-                  aria-pressed={period === option.id}
-                  onClick={() => setPeriod(option.id)}
+                  aria-pressed={!singleMonth && period === option.id}
+                  onClick={() => { setSingleMonth(''); setPeriod(option.id) }}
                   className={`flex-1 whitespace-nowrap rounded-lg px-3 py-2.5 text-[11px] font-semibold transition ${
-                    period === option.id ? 'bg-white text-[#242522] shadow-sm' : 'text-[#74776F] hover:text-[#242522]'
+                    !singleMonth && period === option.id
+                      ? 'bg-white text-[#242522] shadow-sm'
+                      : 'text-[#74776F] hover:text-[#242522]'
                   }`}
                 >
                   {option.label}
                 </button>
               ))}
             </div>
+
+            {monthOptions.length > 0 && (
+              <div className="mt-2 flex items-center gap-2">
+                <label htmlFor="statement-month" className="whitespace-nowrap text-[11px] font-medium text-[#85887F]">
+                  Or one month:
+                </label>
+                <select
+                  id="statement-month"
+                  value={singleMonth}
+                  onChange={event => setSingleMonth(event.target.value)}
+                  className="min-w-0 flex-1 rounded-lg border border-[#DFE0DA] bg-white px-3 py-2 text-[12px] font-medium text-[#242522] outline-none transition focus:border-[#829A83]"
+                >
+                  <option value="">Use the range above</option>
+                  {monthOptions.map(([key, label]) => (
+                    <option key={key} value={key}>{label}</option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-6">

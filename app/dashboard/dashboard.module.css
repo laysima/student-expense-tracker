@@ -1,0 +1,145 @@
+.dashboard {
+  min-height: 100vh;
+  background: #f5f5f1;
+  color: #242522;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.dashboard :where(button:not(:disabled), a) {
+  cursor: pointer;
+}
+
+.dashboard :where(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid #c96042;
+  outline-offset: 4px;
+}
+
+.panel {
+  min-width: 0;
+  border: 1px solid #e3e4dc;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 3px 16px rgb(31 32 29 / 3%);
+}
+
+.summaryCard {
+  position: relative;
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #e3e4dc;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 3px 16px rgb(31 32 29 / 3%);
+}
+
+.summaryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 36px;
+}
+
+.summaryLabel {
+  color: #6e7269;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.summaryIcon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: 10px;
+  background: #f2f3ee;
+}
+
+.summaryValue {
+  margin-top: 20px;
+  overflow-wrap: anywhere;
+  font-size: clamp(1.25rem, 2vw, 1.875rem);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.045em;
+}
+
+.summaryNote {
+  margin-top: 8px;
+  color: #7a7e74;
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+.runwayCard {
+  overflow: hidden;
+  border-color: #292c25;
+  background: linear-gradient(135deg, #292c25, #1e201c);
+  color: #fff;
+  box-shadow: 0 8px 24px rgb(31 32 29 / 10%);
+}
+
+.runwayCard .summaryLabel {
+  color: #c2c6bb;
+}
+
+.runwayCard .summaryIcon {
+  background: rgb(233 133 99 / 12%);
+}
+
+.runwayCard .summaryNote {
+  color: #b0b5a9;
+}
+
+.savingsCard {
+  border-color: #dce5d8;
+  background: linear-gradient(145deg, #fff, #f3f7f0);
+}
+
+.sectionHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #eeefe9;
+}
+
+@media (max-width: 639px) {
+  .summaryCard {
+    padding: 16px;
+  }
+
+  .runwayCard {
+    grid-column: 1 / -1;
+  }
+
+  .summaryLabel {
+    font-size: 11px;
+  }
+
+  .summaryValue {
+    font-size: 22px;
+  }
+
+  .summaryNote {
+    font-size: 10px;
+  }
+
+  .sectionHeader {
+    padding: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard *,
+  .dashboard *::before,
+  .dashboard *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -1,7 +1,8 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { motion } from 'motion/react'
+import { useRef } from 'react'
+import { motion, useInView } from 'motion/react'
 import type { GlobeConfig } from '@/components/ui/globe'
 
 const World = dynamic(() => import('@/components/ui/globe').then(m => m.World), {
@@ -66,6 +67,9 @@ const sampleArcs = studentRoutes.map(route => ({
 }))
 
 export default function GlobeSection() {
+  const globeContainer = useRef<HTMLDivElement>(null)
+  const showGlobe = useInView(globeContainer, { once: true, margin: '160px' })
+
   return (
     <section className="section-reveal border-t border-white/[0.06] px-6 py-24 md:px-8 lg:py-32">
       <div className="mx-auto max-w-[1120px]">
@@ -87,9 +91,9 @@ export default function GlobeSection() {
           </p>
         </motion.div>
 
-        <div className="relative -mx-6 mt-4 h-[420px] overflow-hidden md:-mx-8 md:h-[520px]">
+        <div ref={globeContainer} className="relative -mx-6 mt-4 h-[420px] overflow-hidden md:-mx-8 md:h-[520px]">
           <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-24 bg-gradient-to-b from-[#1A1A1A] to-transparent" />
-          <World data={sampleArcs} globeConfig={globeConfig} />
+          {showGlobe && <World data={sampleArcs} globeConfig={globeConfig} />}
         </div>
       </div>
     </section>

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
+import { describeAnthropicError } from '@/lib/anthropic-error'
 
 const CYCLE_MULTIPLIER: Record<string, number> = {
   weekly: 52 / 12,
@@ -80,8 +81,9 @@ export async function POST() {
 
   try {
     const message = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 300,
+      model: 'claude-opus-5',
+      max_tokens: 16000,
+      output_config: { effort: 'low' },
       system:
         'You are a calm, encouraging financial coach for international students. ' +
         'Given a JSON summary of the last 30 days of spending, respond with ONLY a JSON object ' +
@@ -96,8 +98,12 @@ export async function POST() {
     const parsed = JSON.parse(raw)
     title = typeof parsed.title === 'string' ? parsed.title : title
     body = typeof parsed.body === 'string' ? parsed.body : raw
-  } catch {
-    return NextResponse.json({ error: 'Could not generate an insight right now. Try again shortly.' }, { status: 502 })
+  } catch (error) {
+    const { message, status } = describeAnthropicError(
+      error,
+      'Could not generate an insight right now. Try again shortly.',
+    )
+    return NextResponse.json({ error: message }, { status })
   }
 
   if (!body) {

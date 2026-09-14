@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
+import { describeAnthropicError } from '@/lib/anthropic-error'
 
 export async function POST() {
   const apiKey = process.env.ANTHROPIC_API_KEY
@@ -69,8 +70,9 @@ export async function POST() {
 
   try {
     const message = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 500,
+      model: 'claude-opus-5',
+      max_tokens: 16000,
+      output_config: { effort: 'low' },
       system:
         'You are a calm, encouraging financial coach for international students. ' +
         'Given a JSON summary of their last 30 days of spending by category, recurring expenses, and current ' +
@@ -100,8 +102,12 @@ export async function POST() {
         }))
         .filter((tip: { category: string | null; title: string; body: string }) => tip.title && tip.body)
     }
-  } catch {
-    return NextResponse.json({ error: 'Could not generate savings tips right now. Try again shortly.' }, { status: 502 })
+  } catch (error) {
+    const { message, status } = describeAnthropicError(
+      error,
+      'Could not generate savings tips right now. Try again shortly.',
+    )
+    return NextResponse.json({ error: message }, { status })
   }
 
   if (!tips || tips.length === 0) {

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import { Menu } from 'lucide-react'
+import { ArrowUpRight, Check, GraduationCap, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Sheet,
@@ -19,6 +19,7 @@ import MaskedHeading from '@/components/react-bits/MaskedHeading'
 import PricingPicker from '@/components/PricingPicker'
 import SiteLogo from '@/components/SiteLogo'
 import GlobeSection from '@/components/GlobeSection'
+import HeroOrbit from '@/components/landing/HeroOrbit'
 
 
 const BAR_HEIGHTS = [55, 70, 42, 88, 60, 45, 75, 95, 50, 65]
@@ -133,11 +134,11 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1A1A1A] p-[10px] transition-colors duration-500">
-      <div className="min-h-[calc(100vh-20px)] overflow-hidden border-[20px] border-[#E2835F] bg-[#1A1A1A] transition-colors duration-500 flex flex-col">
+    <div className="min-h-screen bg-[#1A1A1A] p-2 transition-colors duration-500 sm:p-[10px]">
+      <div className="min-h-[calc(100vh-20px)] overflow-hidden rounded-[20px] border-[8px] border-[#E2835F] bg-[#1A1A1A] transition-colors duration-500 flex flex-col sm:rounded-[24px] sm:border-[12px] lg:border-[16px]">
 
         {/* NAVBAR */}
-        <nav className="flex items-center justify-between px-8 py-5">
+        <nav className="flex items-center justify-between border-b border-white/[0.06] px-5 py-5 sm:px-8">
           <Link href="/" aria-label="Xtrack home" className="flex items-center">
             <SiteLogo size="compact" />
           </Link>
@@ -208,13 +209,13 @@ export default function LandingPage() {
             <div className="hidden lg:flex items-center gap-3">
               <Link
                 href="/login"
-                className="text-[14px] font-medium text-[#F5F5F3] border border-[#E2835F] px-5 py-2 hover:bg-[#E2835F] transition-colors"
+                className="rounded-xl text-[14px] font-medium text-[#F5F5F3] border border-[#E2835F]/50 px-5 py-2 hover:bg-[#E2835F] transition-colors"
               >
                 Sign in
               </Link>
               <SpecularButton
                 size="sm"
-                radius={4}
+                radius={12}
                 tint="#E2835F"
                 tintOpacity={1}
                 textColor="#ffffff"
@@ -297,13 +298,11 @@ export default function LandingPage() {
         </nav>
 
         {/* HERO */}
-        <section className="flex-1 flex flex-col lg:flex-row items-center justify-between px-8 py-12 lg:py-16 gap-12 max-w-[1200px] mx-auto w-full">
+        <section className="relative flex-1 flex flex-col lg:grid lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] items-center px-5 py-12 sm:px-8 lg:py-16 gap-12 max-w-[1200px] mx-auto w-full">
 
           {/* Left text */}
-          <div className="flex-none lg:w-[42%] max-w-[480px]">
-            <p className="text-[12px] font-medium text-[#E2835F] tracking-[0.1em] uppercase mb-5">
-              For international students
-            </p>
+          <div className="relative z-10 w-full max-w-[480px]">
+  
             <h1 className="mb-6 flex flex-col text-[#F5F5F3]">
               <FoldText
                 text={'Know exactly\nwhere your'}
@@ -337,10 +336,10 @@ export default function LandingPage() {
             <p className="text-[15px] text-[#9B9B94] leading-[1.7] max-w-[380px] mb-8">
               Track spending across currencies and know exactly how long your budget will last.
             </p>
-            <div className="flex items-center gap-5">
+            <div className="flex flex-wrap items-center gap-5">
               <SpecularButton
                 size="md"
-                radius={4}
+                radius={12}
                 tint="#E2835F"
                 tintOpacity={1}
                 textColor="#ffffff"
@@ -352,19 +351,23 @@ export default function LandingPage() {
                 Get started free
               </SpecularButton>
               <Link
-                href="/login"
-                className="text-[15px] font-medium text-[#F5F5F3] underline underline-offset-4 hover:text-[#E2835F] transition-colors"
+                href="#how-it-works"
+                className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[#F5F5F3] hover:text-[#E2835F] transition-colors"
               >
-                View demo
+                See how it works <ArrowUpRight size={15} aria-hidden="true" />
               </Link>
+            </div>
+            <div className="mt-7 flex flex-wrap gap-x-5 gap-y-2 text-[10px] text-[#85857E] sm:text-[11px]">
+              <span className="flex items-center gap-1.5"><Check size={13} className="text-[#A9BA9E]" aria-hidden="true" />Free to get started</span>
+              <span className="flex items-center gap-1.5"><Check size={13} className="text-[#A9BA9E]" aria-hidden="true" />No bank connection needed</span>
             </div>
           </div>
 
 {/* Right product visual */}
-<div className="w-full flex-none lg:relative lg:mx-auto lg:h-[610px] lg:w-[55%] lg:max-w-[620px]">
+<div data-hero-visual className="isolate w-full lg:relative lg:mx-auto lg:h-[540px] lg:max-w-[620px] xl:h-[610px]">
 
 {/* Compact summary card — mobile & tablet only */}
-<div className="lg:hidden mx-auto w-full max-w-[400px]">
+<div className="product-visual lg:hidden mx-auto w-full max-w-[400px]">
   <div className="hero-dashboard rounded-[24px] border border-white/[0.08] bg-[#222222] p-5 shadow-[0_25px_70px_rgba(0,0,0,0.4)]">
     <div className="mb-4 flex items-center justify-between">
       <div>
@@ -415,21 +418,9 @@ export default function LandingPage() {
 </div>
 
 {/* Full dashboard mockup — desktop only */}
-<div className="product-visual hidden lg:block lg:absolute lg:left-1/2 lg:top-1/2 lg:h-[610px] lg:w-[620px] lg:origin-center lg:-translate-x-1/2 lg:-translate-y-1/2">
+<div className="product-visual hidden lg:block lg:absolute lg:left-1/2 lg:top-1/2 lg:h-[610px] lg:w-[620px] lg:origin-center lg:-translate-x-1/2 lg:-translate-y-1/2 lg:scale-[0.82] xl:scale-100">
 
-  {/* Background atmosphere */}
-  <div className="pointer-events-none absolute inset-0">
-    <div className="absolute left-1/2 top-1/2 h-[440px] w-[440px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#E2835F]/10 blur-[80px]" />
-
-    <div className="absolute left-1/2 top-1/2 h-[455px] w-[455px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/[0.07]" />
-
-    <div className="absolute left-1/2 top-1/2 h-[355px] w-[355px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#E2835F]/10" />
-
-    <div className="absolute left-[60px] top-[150px] h-2.5 w-2.5 rounded-full bg-[#E2835F]" />
-    <div className="absolute right-[75px] top-[105px] h-2 w-2 rounded-full bg-[#A9BA9E]" />
-    <div className="absolute bottom-[90px] left-[110px] h-2 w-2 rounded-full bg-[#F5F5F3]/40" />
-    <div className="absolute bottom-[135px] right-[35px] h-3 w-3 rounded-full bg-[#E2835F]/70" />
-  </div>
+  <HeroOrbit />
 
   {/* Main dashboard */}
   <div className="absolute left-1/2 top-1/2 z-20 w-[390px] -translate-x-1/2 -translate-y-1/2">
@@ -472,7 +463,7 @@ export default function LandingPage() {
 
             <div className="flex items-end justify-between">
               <p className="text-[11px] text-white/65">
-                Updated moments ago
+                Sample overview
               </p>
 
               <p className="text-[11px] font-medium text-white">
@@ -519,17 +510,16 @@ export default function LandingPage() {
           {/* Tabs */}
           <div className="mb-4 flex rounded-full bg-white/[0.04] p-1">
             {TABS.slice(0, 3).map((tab, index) => (
-              <button
+              <span
                 key={tab}
-                type="button"
-                className={`flex-1 rounded-full py-2 text-[10px] font-medium transition-colors ${
+                className={`flex-1 rounded-full py-2 text-center text-[10px] font-medium transition-colors ${
                   index === 0
                     ? 'bg-[#F5F5F3] text-[#1A1A1A]'
                     : 'text-[#777770] hover:text-[#F5F5F3]'
                 }`}
               >
                 {tab}
-              </button>
+              </span>
             ))}
           </div>
 
@@ -540,12 +530,11 @@ export default function LandingPage() {
                 Recent transactions
               </p>
 
-              <button
-                type="button"
+              <span
                 className="text-[10px] font-medium text-[#E2835F]"
               >
                 View all
-              </button>
+              </span>
             </div>
 
             <div className="space-y-1">
@@ -611,7 +600,7 @@ export default function LandingPage() {
         </p>
 
         <span className="rounded-full bg-[#1A1A1A]/10 px-2 py-1 text-[9px] font-medium text-[#1A1A1A]">
-          Live
+          Example
         </span>
       </div>
 
@@ -661,6 +650,7 @@ export default function LandingPage() {
   </div>
 
 </div>
+<p className="mt-5 text-center text-[10px] tracking-[0.04em] text-[#73736D] lg:absolute lg:inset-x-0 lg:-bottom-5 lg:mt-0">Dashboard preview · Sample amounts</p>
 </div>
         </section>
 
@@ -675,7 +665,7 @@ export default function LandingPage() {
       {UNIVERSITIES.map(uni => (
         <span
           key={uni}
-          className="text-[15px] font-medium tracking-[-0.2px] text-[#3F3F3B] transition-colors duration-300 hover:text-[#E2835F]"
+          className="text-[15px] font-medium tracking-[-0.2px] text-[#85857E] transition-colors duration-300 hover:text-[#E2835F]"
         >
           {uni}
         </span>
@@ -991,7 +981,7 @@ export default function LandingPage() {
       <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
         <SpecularButton
           size="md"
-          radius={4}
+          radius={12}
           tint="#ffffff"
           tintOpacity={1}
           textColor="#E2835F"
@@ -1004,10 +994,10 @@ export default function LandingPage() {
         </SpecularButton>
 
         <Link
-          href="/login"
-          className="border border-white/30 px-7 py-3 text-[13px] font-medium text-white transition-colors hover:bg-white/10"
+          href="#features"
+          className="rounded-xl border border-white/30 px-7 py-3 text-[13px] font-medium text-white transition-colors hover:bg-white/10"
         >
-          View demo
+          Explore features
         </Link>
       </div>
     </div>

@@ -15,6 +15,7 @@ export default async function DashboardPage() {
     { data: budgets },
     { data: notifications },
     { data: savingsGoals },
+    { data: spendingLimit },
   ] = await Promise.all([
     supabase.from('profiles').select('*').eq('id', user.id).single(),
     supabase.from('expenses').select('*').eq('user_id', user.id).order('date', { ascending: false }),
@@ -22,6 +23,7 @@ export default async function DashboardPage() {
     supabase.from('budgets').select('*').eq('user_id', user.id),
     supabase.from('notifications').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20),
     supabase.from('savings_goals').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+    supabase.from('spending_limits').select('*').eq('user_id', user.id).maybeSingle(),
   ])
 
   return (
@@ -33,6 +35,7 @@ export default async function DashboardPage() {
       budgets={budgets ?? []}
       notifications={notifications ?? []}
       savingsGoals={savingsGoals ?? []}
+      spendingLimit={spendingLimit ?? null}
     />
   )
 }

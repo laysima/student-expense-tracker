@@ -1,5 +1,7 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+Spending-limit alerts require a Supabase migration. See [spending alert setup](docs/spending-alerts.md) for in-app notifications, device push delivery, and the scheduled worker.
+
 ## Getting Started
 
 First, run the development server:
