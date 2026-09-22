@@ -36,6 +36,7 @@ import AddBudgetModal from './AddBudgetModal'
 import AddExpenseModal from './AddExpenseModal'
 import AddIncomeModal from './AddIncomeModal'
 import AddSavingsGoalModal from './AddSavingsGoalModal'
+import BankSyncPanel from './BankSyncPanel'
 import NotificationsPanel from './NotificationsPanel'
 import StatementModal from './StatementModal'
 import FinancialChart from './FinancialChart'
@@ -1250,6 +1251,8 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
               )}
             </section>
           )}
+
+          <BankSyncPanel expenses={expenses} income={income} />
 
           {insightError && (
             <div className="mt-4 rounded-xl bg-[#FFF0EA] px-4 py-3 text-[13px] font-medium text-[#B9573A]">{insightError}</div>
