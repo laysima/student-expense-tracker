@@ -20,7 +20,6 @@ interface StatementIncome {
 
 interface Props {
   fullName: string
-  university?: string
   expenses: StatementExpense[]
   income: StatementIncome[]
   onClose: () => void
@@ -63,7 +62,7 @@ function periodStart(period: Period, now: Date) {
   return null
 }
 
-export default function StatementModal({ fullName, university, expenses, income, onClose }: Props) {
+export default function StatementModal({ fullName, expenses, income, onClose }: Props) {
   const [period, setPeriod] = useState<Period>('month')
   // '' means "use the rolling period above". Anything else is a single closed
   // month ('2026-08'), which the preset windows could never isolate — they all
@@ -206,7 +205,7 @@ export default function StatementModal({ fullName, university, expenses, income,
               <div className="flex items-start justify-between gap-6 border-b-2 border-[#20211E] pb-6">
                 <div className="flex items-center gap-3">
                   <SiteLogo size="compact" surface="light" />
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#85887F]">Student finance statement</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#85887F]">Personal finance statement</p>
                 </div>
                 <div className="text-right">
                   <p className="text-[13px] font-semibold">{periodLabel}</p>
@@ -218,7 +217,6 @@ export default function StatementModal({ fullName, university, expenses, income,
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#91948C]">Prepared for</p>
                   <p className="mt-1 text-[15px] font-semibold">{fullName}</p>
-                  {university && <p className="mt-0.5 text-[11px] text-[#74776F]">{university}</p>}
                 </div>
                 <p className="text-[10px] text-[#91948C]">Generated {formatDate(now)}</p>
               </div>

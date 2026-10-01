@@ -15,6 +15,7 @@ import {
   Home,
   LayoutDashboard,
   LogOut,
+  Settings,
   Pencil,
   PiggyBank,
   Plus,
@@ -44,6 +45,7 @@ import SpendingLimitCard from './SpendingLimitCard'
 import SpendingAlertSync from './SpendingAlertSync'
 import type { SpendingLimitSettings } from '@/lib/spending-limits'
 import styles from './dashboard.module.css'
+import SettingsPanel from './SettingsPanel'
 import { categoryColor } from './chart-data'
 
 interface Profile {
@@ -131,6 +133,7 @@ interface DuePayday {
 
 interface Props {
   userId: string
+  email: string
   profile: Profile | null
   expenses: Expense[]
   income: Income[]
@@ -140,7 +143,7 @@ interface Props {
   spendingLimit: SpendingLimitSettings | null
 }
 
-type Tab = 'overview' | 'expenses' | 'income'
+type Tab = 'overview' | 'expenses' | 'income' | 'settings'
 
 // The three AI features (insight, goal suggestion, savings tips) are built and
 // wired end to end — they just need credits on the Anthropic account. Until
@@ -543,7 +546,7 @@ function EmptyState({ type, onAction }: { type: 'expense' | 'income'; onAction: 
   )
 }
 
-export default function DashboardClient({ userId, profile, expenses, income, budgets, notifications, savingsGoals, spendingLimit }: Props) {
+export default function DashboardClient({ userId, email, profile, expenses, income, budgets, notifications, savingsGoals, spendingLimit }: Props) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [notificationsOpen, setNotificationsOpen] = useState(false)
@@ -1126,6 +1129,22 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
               </button>
             )
           })}
+          <button
+            type="button"
+            aria-current={activeTab === 'settings' ? 'page' : undefined}
+            onClick={() => switchTab('settings')}
+            title="Settings"
+            className={`flex w-full items-center gap-3 rounded-xl px-[11px] py-3 text-left text-sm font-medium transition ${
+              activeTab === 'settings'
+                ? 'bg-[#F6E7DF] text-[#472E24] shadow-sm'
+                : 'text-white/55 hover:bg-white/[0.06] hover:text-white'
+            }`}
+          >
+            <Settings size={18} strokeWidth={activeTab === 'settings' ? 2.3 : 1.8} className="shrink-0" aria-hidden="true" />
+            <span className="whitespace-nowrap opacity-0 transition-opacity duration-150 group-hover/rail:opacity-100 group-focus-within/rail:opacity-100 group-data-[notifications-open=true]/rail:opacity-100">
+              Settings
+            </span>
+          </button>
           <NotificationsPanel
             notifications={notifications}
             onReviewSpendingLimit={reviewSpendingLimit}
@@ -1136,19 +1155,13 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
         </nav>
 
         <div className="mt-auto px-[18px]">
-          {profile?.university && (
-            <div className="mb-4 overflow-hidden border-b border-white/10 pb-4 opacity-0 transition-opacity duration-150 group-hover/rail:opacity-100 group-focus-within/rail:opacity-100 group-data-[notifications-open=true]/rail:opacity-100">
-              <p className="whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.14em] text-white/30">Studying at</p>
-              <p className="mt-1 truncate text-xs font-medium text-white/65">{profile.university}</p>
-            </div>
-          )}
           <div className="flex items-center gap-3">
             <div className="grid size-9 shrink-0 place-items-center rounded-full bg-[#E98563] text-xs font-bold text-[#191919]">
               {initials}
             </div>
             <div className="min-w-0 flex-1 opacity-0 transition-opacity duration-150 group-hover/rail:opacity-100 group-focus-within/rail:opacity-100 group-data-[notifications-open=true]/rail:opacity-100">
-              <p className="truncate text-xs font-semibold text-white">{profile?.full_name ?? 'Student'}</p>
-              <p className="whitespace-nowrap text-[10px] text-white/35">Home currency · {homeCurrency}</p>
+              <p className="truncate text-xs font-semibold text-white">{profile?.full_name ?? 'Xtrack user'}</p>
+              <p className="whitespace-nowrap text-[10px] text-white/35">Currency · {homeCurrency}</p>
             </div>
             <button
               type="button"
@@ -1179,11 +1192,12 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
               <NotificationsPanel notifications={notifications} onChanged={() => router.refresh()} variant="dark" onReviewSpendingLimit={reviewSpendingLimit} />
               <button
                 type="button"
-                onClick={handleSignOut}
-                aria-label="Sign out"
-                className="grid size-10 place-items-center rounded-xl bg-white/10 text-white/70"
+                onClick={() => switchTab('settings')}
+                aria-label="Settings"
+                aria-current={activeTab === 'settings' ? 'page' : undefined}
+                className={`grid size-10 place-items-center rounded-xl ${activeTab === 'settings' ? 'bg-[#F6E7DF] text-[#472E24]' : 'bg-white/10 text-white/70'}`}
               >
-                <LogOut size={18} aria-hidden="true" />
+                <Settings size={18} aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -1205,6 +1219,16 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
         </header>
 
         <main className="mx-auto max-w-[1500px] px-4 py-6 sm:px-7 sm:py-8 xl:px-10 xl:py-10">
+          {activeTab === 'settings' ? (
+            <SettingsPanel
+              userId={userId}
+              email={email}
+              fullName={profile?.full_name ?? ''}
+              homeCurrency={homeCurrency}
+              onSignOut={handleSignOut}
+            />
+          ) : (
+          <>
           <div className="flex flex-col gap-6 border-b border-[#E0E2D9] pb-8 md:flex-row md:items-center md:justify-between md:gap-8">
             <div className="min-w-0">
               <p className="inline-flex items-center gap-2 rounded-full border border-[#EEDDD3] bg-[#FAEEE7] px-3 py-1.5 text-[10px] font-semibold tracking-[0.04em] text-[#AC5A3D] sm:text-[11px]">
@@ -2073,6 +2097,8 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
               </section>
             </div>
           )}
+                  </>
+          )}
         </main>
       </div>
 
@@ -2111,8 +2137,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
 
       {showStatement && (
         <StatementModal
-          fullName={profile?.full_name ?? 'Student'}
-          university={profile?.university}
+          fullName={profile?.full_name ?? 'Account holder'}
           expenses={expenses}
           income={income}
           onClose={() => setShowStatement(false)}

@@ -11,7 +11,7 @@ const PLANS = [
     price: '$0',
     cadence: 'forever',
     description:
-      'Everything you need to build a clear, consistent picture of your student finances.',
+      'Everything you need to build a clear, consistent picture of your finances.',
     features: [
       'Expense and income tracking',
       'Home-currency conversion',
@@ -27,7 +27,7 @@ const PLANS = [
     price: '$4.99',
     cadence: 'per month',
     description:
-      'Deeper guidance and flexible reporting for students who want to plan further ahead.',
+      'Deeper guidance and flexible reporting for anyone who wants to plan further ahead.',
     features: [
       'Everything in Free',
       'Advanced AI recommendations',
@@ -98,7 +98,7 @@ export default function PricingPicker() {
               <div className="mt-10 border-t border-white/[0.07] pt-6">
                 <div className="flex items-center gap-3 text-[13px] text-[#85857E]">
                   <Sparkles className="h-4 w-4 text-[#E2835F]" aria-hidden="true" />
-                  Made for student budgets
+                  Made for everyday budgets
                 </div>
               </div>
             </div>

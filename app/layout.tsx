@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import LaunchSplash from "@/components/launch-splash/LaunchSplash";
 import { SPLASH_SEEN_KEY } from "@/components/launch-splash/constants";
+import { SPLASH_CSS } from "@/components/launch-splash/splash-styles";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -11,8 +12,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Xtrack — Student Expense Tracker",
-  description: "Track your expenses as an international student",
+  title: "Xtrack — Expense Tracker",
+  description: "Track your spending, income and budgets in one place",
 };
 
 // Runs while the HTML is parsed, before first paint, so the splash is on screen
@@ -29,6 +30,7 @@ export default function RootLayout({
     // The splash script sets data-splash on <html> before React hydrates.
     <html lang="en" className={`${poppins.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
+        <style dangerouslySetInnerHTML={{ __html: SPLASH_CSS }} />
         <script dangerouslySetInnerHTML={{ __html: SPLASH_SCRIPT }} />
       </head>
       <body

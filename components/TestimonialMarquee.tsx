@@ -4,32 +4,32 @@ const TESTIMONIALS = [
   {
     quote: 'I finally know exactly how many days my money will last.',
     name: 'Amara O.',
-    school: 'Waterloo',
+    place: 'Waterloo',
   },
   {
     quote: 'Switching between cedis and dollars in my head was exhausting. Xtrack just does it.',
     name: 'Kwame A.',
-    school: 'Lakehead',
+    place: 'Thunder Bay',
   },
   {
     quote: 'The runway number changed how I budget for rent every month.',
     name: 'Priya S.',
-    school: 'UBC',
+    place: 'Vancouver',
   },
   {
     quote: 'Setup took two minutes. I was tracking spending the same day.',
     name: 'Daniel K.',
-    school: 'McGill',
+    place: 'Montréal',
   },
   {
-    quote: 'It feels built for international students, not adapted for us.',
+    quote: 'It feels built for real life, not adapted from a banking app.',
     name: 'Grace M.',
-    school: 'UofT',
+    place: 'Toronto',
   },
   {
     quote: 'AI insights caught patterns I never noticed in my own spending.',
     name: 'Tariq H.',
-    school: 'Queens',
+    place: 'Kingston',
   },
 ]
 
@@ -64,7 +64,7 @@ export default function TestimonialMarquee({ className = '' }: { className?: str
               </span>
               <div>
                 <p className="text-[13px] font-medium text-white">{item.name}</p>
-                <p className="text-[12px] text-white/45">{item.school}</p>
+                <p className="text-[12px] text-white/45">{item.place}</p>
               </div>
             </div>
           </div>

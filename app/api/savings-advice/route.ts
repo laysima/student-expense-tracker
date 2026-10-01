@@ -74,13 +74,13 @@ export async function POST() {
       max_tokens: 16000,
       output_config: { effort: 'low' },
       system:
-        'You are a calm, encouraging financial coach for international students. ' +
+        'You are a calm, encouraging financial coach for people managing their everyday money. ' +
         'Given a JSON summary of their last 30 days of spending by category, recurring expenses, and current ' +
         'budgets, give 2-4 concrete, actionable tips on how they could save more. Respond with ONLY a JSON ' +
         'object: {"tips": [{"category": string or null, "title": string, "body": string}]}. Each title is under ' +
         '6 words. Each body is 1-2 short sentences, references real numbers/categories from the data, suggests a ' +
-        'specific concrete action (not vague advice like "spend less"), friendly but direct, realistic for a ' +
-        'student budget. Prioritize categories that are over budget or have notably high spend, and flag ' +
+        'specific concrete action (not vague advice like "spend less"), friendly but direct, realistic for an ' +
+        'everyday budget. Prioritize categories that are over budget or have notably high spend, and flag ' +
         'recurring/subscription costs worth reconsidering if there are several. Set category to null only for a ' +
         'tip that is not about one specific category. No markdown, no preamble, just the JSON object.',
       messages: [{ role: 'user', content: JSON.stringify(summary) }],

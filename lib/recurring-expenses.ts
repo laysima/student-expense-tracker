@@ -2,7 +2,7 @@ import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { dueOccurrences, localIsoDate } from './recurrence'
 
-// Xtrack is built for students in Canada; used until a timezone is saved.
+// Most Xtrack users are in Canada; used until a timezone is saved.
 const FALLBACK_TIMEZONE = 'America/Toronto'
 
 interface Template {

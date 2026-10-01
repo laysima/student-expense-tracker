@@ -35,13 +35,13 @@ const globeConfig: GlobeConfig = {
 const ORANGE = '#E2835F'
 const SAGE = '#A9BA9E'
 
-// Home countries students come from, arcing toward the Canadian cities where
-// they study — Toronto, Vancouver and Montreal.
+// Arcs from around the world toward Toronto, Vancouver and Montreal — money
+// and people moving between home and wherever life is now.
 const TORONTO = { lat: 43.6532, lng: -79.3832 }
 const VANCOUVER = { lat: 49.2827, lng: -123.1207 }
 const MONTREAL = { lat: 45.5019, lng: -73.5674 }
 
-const studentRoutes = [
+const worldRoutes = [
   { order: 1, start: { lat: 5.6037, lng: -0.187 }, end: TORONTO, arcAlt: 0.4, color: ORANGE }, // Accra, Ghana
   { order: 1, start: { lat: 6.5244, lng: 3.3792 }, end: TORONTO, arcAlt: 0.42, color: ORANGE }, // Lagos, Nigeria
   { order: 2, start: { lat: 28.6139, lng: 77.209 }, end: VANCOUVER, arcAlt: 0.5, color: SAGE }, // New Delhi, India
@@ -56,7 +56,7 @@ const studentRoutes = [
   { order: 6, start: { lat: 24.7136, lng: 46.6753 }, end: TORONTO, arcAlt: 0.45, color: SAGE }, // Riyadh, Saudi Arabia
 ]
 
-const sampleArcs = studentRoutes.map(route => ({
+const sampleArcs = worldRoutes.map(route => ({
   order: route.order,
   startLat: route.start.lat,
   startLng: route.start.lng,
@@ -87,7 +87,7 @@ export default function GlobeSection() {
             We&apos;re all around the world.
           </h2>
           <p className="mx-auto mt-6 max-w-[440px] text-[14px] leading-[1.75] text-[#85857E]">
-            Xtrack is built for students who left home to study — wherever that home is.
+            Xtrack works in your currency and fits your life — wherever you call home.
           </p>
         </motion.div>
 

@@ -249,14 +249,14 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
 
             <div className="flex items-center justify-between border-t border-[#E7E8E2] pt-5">
               <div>
-                <p className="text-[13px] font-semibold text-[#343630]">Split with roommates</p>
+                <p className="text-[13px] font-semibold text-[#343630]">Split with others</p>
                 <p className="mt-0.5 text-[11px] text-[#91948C]">Only your share counts toward your spending</p>
               </div>
               <button
                 type="button"
                 role="switch"
                 aria-checked={form.isSplit}
-                aria-label="Split with roommates"
+                aria-label="Split with others"
                 onClick={() => update('isSplit', !form.isSplit)}
                 className={`tap-target relative h-7 w-12 shrink-0 rounded-full transition-colors ${form.isSplit ? 'bg-[#E98563]' : 'bg-[#D7D9D2]'}`}
               >

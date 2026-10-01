@@ -36,7 +36,7 @@ const STEPS = [
     number: '01',
     title: 'Create your account',
     description:
-      'Choose your home currency and tell Xtrack where you are currently studying.',
+      'Sign up in a minute and choose the currency you want to see your money in.',
   },
   {
     number: '02',
@@ -60,7 +60,7 @@ const AUTOMATION_LEDGER = [
   },
   {
     title: 'Recurring bills',
-    description: 'Rent, subscriptions and tuition tracked automatically',
+    description: 'Rent, subscriptions and bills tracked automatically',
     pct: 78,
   },
   {
@@ -75,9 +75,9 @@ const AUTOMATION_LAST_MONTH = 61
 
 const FAQS = [
   {
-    question: 'Is Xtrack only for international students?',
+    question: 'Who is Xtrack for?',
     answer:
-      'Xtrack is designed around the financial challenges international students face, but any student can use it to manage expenses and understand their budget.',
+      "Everyone. Whether you're studying, working, freelancing or running a household, Xtrack shows you where your money goes and how long it will last.",
   },
   {
     question: 'Can I track more than one currency?',
@@ -102,7 +102,6 @@ const TRANSACTIONS = [
   { name: 'Rent — October', status: 'Monthly', amount: '−$750', type: 'expense' },
 ]
 
-const UNIVERSITIES = ['Lakehead', 'UofT', 'McGill', 'UBC', 'Waterloo', 'Queens']
 
 const TABS = ['Analytics', 'Revenue', 'Expenses', 'Sector']
 
@@ -655,24 +654,6 @@ export default function LandingPage() {
         </section>
 
         {/* TRUST STRIP */}
-<section className="border-t border-white/[0.06] px-8 py-10">
-  <div className="mx-auto flex max-w-[1100px] flex-col items-center gap-6">
-    <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-[#777770]">
-      Designed for students studying across Canada
-    </p>
-
-    <div className="flex w-full flex-wrap items-center justify-center gap-x-12 gap-y-5">
-      {UNIVERSITIES.map(uni => (
-        <span
-          key={uni}
-          className="text-[15px] font-medium tracking-[-0.2px] text-[#85857E] transition-colors duration-300 hover:text-[#E2835F]"
-        >
-          {uni}
-        </span>
-      ))}
-    </div>
-  </div>
-</section>
 
 {/* GLOBE */}
 <GlobeSection />
@@ -915,7 +896,7 @@ export default function LandingPage() {
       </h2>
 
       <p className="mt-5 max-w-[350px] text-[14px] leading-[1.75] text-[#85857E]">
-        Xtrack is being built around real student experiences, not generic
+        Xtrack is being built around how real people spend, not generic
         personal-finance assumptions.
       </p>
     </div>
@@ -953,7 +934,7 @@ export default function LandingPage() {
 
     <div className="relative z-10 mx-auto max-w-[700px]">
       <p className="mb-5 text-[11px] font-medium uppercase tracking-[0.14em] text-white/65">
-        Take control of your student budget
+        Take control of your budget
       </p>
 
       <h2 className="flex justify-center">
@@ -1013,8 +994,7 @@ export default function LandingPage() {
       </Link>
 
       <p className="mt-3 max-w-[310px] text-[11px] leading-[1.7] text-[#666660]">
-        A simpler way for international students to understand and manage their
-        money.
+        A simpler way for anyone to understand and manage their money.
       </p>
     </div>
 
@@ -1040,7 +1020,7 @@ export default function LandingPage() {
 
   <div className="mx-auto mt-8 flex max-w-[1120px] flex-col justify-between gap-3 text-[10px] text-[#4F4F4A] sm:flex-row">
     <p>© 2026 Xtrack. All rights reserved.</p>
-    <p>Built for students studying away from home.</p>
+    <p>Built for everyone, wherever home is.</p>
   </div>
 </footer>
 

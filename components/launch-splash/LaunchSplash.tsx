@@ -102,7 +102,7 @@ export default function LaunchSplash() {
   }, [])
 
   return (
-    <div ref={overlayRef} className="xt-splash" role="status" aria-label="Opening Xtrack">
+    <div ref={overlayRef} className="xt-splash" role="status" aria-label="Opening Xtrack" style={{ display: 'none' }}>
       <div ref={stageRef} className="xt-splash__stage" aria-hidden="true" />
       <span className="xt-splash__mark" aria-hidden="true">
         <XtrackLogo variant="mark" className="h-auto w-full" />

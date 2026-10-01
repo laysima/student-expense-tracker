@@ -34,6 +34,7 @@ export default async function DashboardPage() {
   return (
     <DashboardClient
       userId={user.id}
+      email={user.email ?? ''}
       profile={profile}
       expenses={expenses ?? []}
       income={income ?? []}

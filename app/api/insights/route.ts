@@ -85,7 +85,7 @@ export async function POST() {
       max_tokens: 16000,
       output_config: { effort: 'low' },
       system:
-        'You are a calm, encouraging financial coach for international students. ' +
+        'You are a calm, encouraging financial coach for people managing their everyday money. ' +
         'Given a JSON summary of the last 30 days of spending, respond with ONLY a JSON object ' +
         '{"title": string, "body": string}. Title is under 8 words. Body is 1-2 short sentences, ' +
         'specific and actionable (reference real numbers/categories from the data), friendly but direct. ' +
