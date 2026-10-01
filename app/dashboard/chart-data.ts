@@ -28,7 +28,7 @@ const CATEGORY_COLORS: Record<string, string> = {
 }
 const CUSTOM_COLORS = ['#B68571', '#8398AD', '#A3A56F', '#AB8FAB', '#72A29B']
 
-function categoryColor(name: string) {
+export function categoryColor(name: string) {
   if (Object.hasOwn(CATEGORY_COLORS, name)) return CATEGORY_COLORS[name]
   const hash = Array.from(name).reduce((value, char) => (value * 31 + char.charCodeAt(0)) >>> 0, 0)
   return CUSTOM_COLORS[hash % CUSTOM_COLORS.length]

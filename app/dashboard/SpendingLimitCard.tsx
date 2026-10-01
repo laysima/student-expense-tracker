@@ -87,7 +87,7 @@ export default function SpendingLimitCard({ settings, expenses, income, onSaved 
   const monthLabel = new Date(`${summary.month}-15T12:00:00Z`).toLocaleDateString('en-CA', { month: 'long', year: 'numeric', timeZone: 'UTC' })
 
   return (
-    <section id="spending-limit" tabIndex={-1} aria-labelledby="spending-limit-title" className={`${styles.panel} scroll-mt-6 p-5 sm:p-6`}>
+    <section id="spending-limit" data-tone="limit" tabIndex={-1} aria-labelledby="spending-limit-title" className={`${styles.panel} scroll-mt-6 p-5 sm:p-6`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-start gap-3">
           <span className={`grid size-10 shrink-0 place-items-center rounded-xl ${urgent || warning ? 'bg-[#FFF0EA] text-[#C96042]' : 'bg-[#EDF2E8] text-[#58755F]'}`}><ShieldCheck size={20} aria-hidden="true" /></span>

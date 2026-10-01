@@ -1,6 +1,6 @@
 .dashboard {
   min-height: 100vh;
-  background: #f5f5f1;
+  background: #ecede6;
   color: #242522;
   font-weight: 400;
   font-variant-numeric: tabular-nums;
@@ -16,21 +16,32 @@
 }
 
 .panel {
+  --tone: transparent;
   min-width: 0;
-  border: 1px solid #e3e4dc;
+  border: 1px solid #d9dad1;
+  border-top: 3px solid var(--tone);
   border-radius: 20px;
   background: #fff;
-  box-shadow: 0 3px 16px rgb(31 32 29 / 3%);
+  box-shadow: 0 1px 2px rgb(31 32 29 / 4%), 0 10px 28px rgb(31 32 29 / 5%);
 }
+
+/* Each section gets its own accent so they read as separate blocks instead of
+   one long run of white cards. Colours come from the category palette. */
+.panel[data-tone='ink'] { --tone: #3f4a40; }
+.panel[data-tone='spend'] { --tone: #e98563; }
+.panel[data-tone='earn'] { --tone: #829a83; }
+.panel[data-tone='plan'] { --tone: #8d9fb9; }
+.panel[data-tone='limit'] { --tone: #ceab68; }
+.panel[data-tone='neutral'] { --tone: #a7aaa0; }
 
 .summaryCard {
   position: relative;
   min-width: 0;
   padding: 20px;
-  border: 1px solid #e3e4dc;
+  border: 1px solid #d9dad1;
   border-radius: 18px;
   background: #fff;
-  box-shadow: 0 3px 16px rgb(31 32 29 / 3%);
+  box-shadow: 0 1px 2px rgb(31 32 29 / 4%), 0 10px 28px rgb(31 32 29 / 5%);
 }
 
 .summaryHeader {
@@ -95,8 +106,27 @@
 }
 
 .savingsCard {
-  border-color: #dce5d8;
-  background: linear-gradient(145deg, #fff, #f3f7f0);
+  border-color: #cbdcc8;
+  background: linear-gradient(145deg, #fbfdfa, #e9f1e7);
+}
+
+.savingsCard .summaryIcon,
+.earnedCard .summaryIcon {
+  background: #dfeadc;
+}
+
+.spentCard {
+  border-color: #f0cfc2;
+  background: linear-gradient(145deg, #fffaf8, #fdebe3);
+}
+
+.spentCard .summaryIcon {
+  background: #fbdccf;
+}
+
+.earnedCard {
+  border-color: #cbdcc8;
+  background: linear-gradient(145deg, #fbfdfa, #edf4eb);
 }
 
 .sectionHeader {
@@ -105,8 +135,24 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 20px 24px;
-  border-bottom: 1px solid #eeefe9;
+  padding: 18px 24px;
+  border-bottom: 1px solid #e6e7e0;
+  background: #fafaf7;
+}
+
+/* Month divider inside the Expenses and Income lists. */
+.monthDivider {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 24px;
+  border-block: 1px solid #e6e7e0;
+  background: #f3f4ee;
+}
+
+.monthDivider:first-child {
+  border-top: 0;
 }
 
 @media (max-width: 639px) {
@@ -131,7 +177,11 @@
   }
 
   .sectionHeader {
-    padding: 20px;
+    padding: 16px 20px;
+  }
+
+  .monthDivider {
+    padding: 10px 20px;
   }
 }
 

@@ -34,7 +34,7 @@ export default function FinancialChart({ expenses, income, scope, month, onAddEx
   const tooltipStyle = { background: '#252822', border: '1px solid #3C4036', borderRadius: 14, padding: '12px 16px', fontSize: 11, boxShadow: '0 8px 24px #20211e20' }
 
   return (
-    <section className={`${styles.panel} flex flex-col p-5 sm:p-6`} aria-labelledby={`${gradientId}-heading`}>
+    <section data-tone="ink" className={`${styles.panel} flex flex-col p-5 sm:p-6`} aria-labelledby={`${gradientId}-heading`}>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-center gap-3">
           <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#FAEEE7] text-[#C56A49]">

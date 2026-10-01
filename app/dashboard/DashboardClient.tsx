@@ -44,6 +44,7 @@ import SpendingLimitCard from './SpendingLimitCard'
 import SpendingAlertSync from './SpendingAlertSync'
 import type { SpendingLimitSettings } from '@/lib/spending-limits'
 import styles from './dashboard.module.css'
+import { categoryColor } from './chart-data'
 
 interface Profile {
   full_name: string
@@ -501,11 +502,20 @@ function Brand() {
   )
 }
 
+// Tinted with the category's chart colour, so a list of expenses scans by
+// category instead of reading as one block of orange.
 function CategoryIcon({ category }: { category: string }) {
   const Icon = CATEGORY_ICONS[category] ?? CreditCard
+  const color = categoryColor(category)
 
   return (
-    <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#FFF0EA] text-[#D86F4E]">
+    <div
+      className="grid size-10 shrink-0 place-items-center rounded-xl"
+      style={{
+        backgroundColor: `color-mix(in srgb, ${color} 18%, white)`,
+        color: `color-mix(in srgb, ${color} 75%, #1f201d)`,
+      }}
+    >
       <Icon size={18} strokeWidth={2} aria-hidden="true" />
     </div>
   )
@@ -1400,12 +1410,12 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                   <p className={styles.summaryNote}>At your current spending rate</p>
                 </div>
 
-                <div className={styles.summaryCard}>
+                <div className={`${styles.summaryCard} ${styles.spentCard}`}>
                   <div className={styles.summaryHeader}>
                     <p className={styles.summaryLabel}>{showingRunning ? 'Spent in total' : `Spent ${monthWord}`}</p>
                     <span className={styles.summaryIcon}><ReceiptText size={16} className="text-[#D86F4E]" aria-hidden="true" /></span>
                   </div>
-                  <p className={styles.summaryValue}>{formatCAD(spentFigure)}</p>
+                  <p className={`${styles.summaryValue} text-[#B9573A]`}>{formatCAD(spentFigure)}</p>
                   <p className={styles.summaryNote}>
                     {showingRunning
                       ? `${formatCAD(totalSpentThisMonth)} of it ${viewingCurrentMonth ? 'this month' : monthWord}`
@@ -1413,12 +1423,12 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                   </p>
                 </div>
 
-                <div ref={incomeCardRef} className={styles.summaryCard}>
+                <div ref={incomeCardRef} className={`${styles.summaryCard} ${styles.earnedCard}`}>
                   <div className={styles.summaryHeader}>
                     <p className={styles.summaryLabel}>{showingRunning ? 'Earned in total' : `Income ${monthWord}`}</p>
                     <span className={styles.summaryIcon}><TrendingUp size={16} className="text-[#58755F]" aria-hidden="true" /></span>
                   </div>
-                  <p className={styles.summaryValue}>{formatCAD(earnedFigure)}</p>
+                  <p className={`${styles.summaryValue} text-[#3F6548]`}>{formatCAD(earnedFigure)}</p>
                   <p className={styles.summaryNote}>
                     {showingRunning
                       ? `${formatCAD(totalIncomeThisMonth)} of it ${viewingCurrentMonth ? 'this month' : monthWord}`
@@ -1576,7 +1586,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                   onAddIncome={() => setShowAddIncome(true)}
                 />
 
-                <div className={`${styles.panel} p-5 sm:p-6`}>
+                <div data-tone="plan" className={`${styles.panel} p-5 sm:p-6`}>
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <h2 className="text-base font-semibold tracking-[-0.02em] text-[#242522]">Monthly budgets</h2>
@@ -1660,7 +1670,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                 </div>
               </section>
 
-              <section className={`${styles.panel} overflow-hidden`}>
+              <section data-tone="spend" className={`${styles.panel} overflow-hidden`}>
                 <div className={styles.sectionHeader}>
                   <div>
                     <h2 className="text-base font-semibold tracking-[-0.02em] text-[#242522]">Upcoming payments</h2>
@@ -1682,8 +1692,15 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                       const Icon = CATEGORY_ICONS[payment.category] ?? CreditCard
                       return (
                         <div key={payment.id} className="grid grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 py-4 sm:flex sm:gap-4">
-                          <div className={`row-span-2 grid size-10 shrink-0 place-items-center rounded-xl sm:row-span-1 ${urgent ? 'bg-[#FFE7DE] text-[#C96042]' : 'bg-[#FFF0EA] text-[#D86F4E]'}`}>
-                            <Icon size={18} strokeWidth={2} aria-hidden="true" />
+                          {/* Coral is reserved for what's due soon; the rest use their category colour. */}
+                          <div className="row-span-2 sm:row-span-1">
+                            {urgent ? (
+                              <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#FFE7DE] text-[#C96042]">
+                                <Icon size={18} strokeWidth={2} aria-hidden="true" />
+                              </div>
+                            ) : (
+                              <CategoryIcon category={payment.category} />
+                            )}
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-semibold text-[#343630]">{payment.note ?? payment.category}</p>
@@ -1706,7 +1723,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                 )}
               </section>
 
-              <section className={`${styles.panel} overflow-hidden`}>
+              <section data-tone="earn" className={`${styles.panel} overflow-hidden`}>
                 <div className={styles.sectionHeader}>
                   <div>
                     <h2 className="text-base font-semibold tracking-[-0.02em] text-[#242522]">Savings goals</h2>
@@ -1828,7 +1845,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                 )}
               </section>
 
-              <section className={`${styles.panel} overflow-hidden`}>
+              <section data-tone="neutral" className={`${styles.panel} overflow-hidden`}>
                 <div className={styles.sectionHeader}>
                   <div>
                     <h2 className="text-base font-semibold tracking-[-0.02em] text-[#242522]">Recent activity</h2>
@@ -1890,7 +1907,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
           {activeTab === 'expenses' && (
             <div className="mt-7">
               {monthControls}
-              <section className={`${styles.panel} mt-4 overflow-hidden`}>
+              <section data-tone="spend" className={`${styles.panel} mt-4 overflow-hidden`}>
                 <div className={styles.sectionHeader}>
                   <div>
                     <h2 className="text-base font-semibold text-[#242522]">{showingRunning ? 'All expenses' : `Expenses · ${viewedMonthLabel}`}</h2>
@@ -1902,7 +1919,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                       onClick={AI_FEATURES_ENABLED ? handleGetSavingsTips : undefined}
                       disabled={!AI_FEATURES_ENABLED || loadingTips}
                       title={AI_FEATURES_ENABLED ? undefined : 'AI savings tips are coming soon'}
-                      className="flex items-center gap-1 text-xs font-semibold text-[#58755F] transition hover:text-[#3F6548] disabled:opacity-50"
+                      className={`${AI_FEATURES_ENABLED ? 'flex' : 'hidden sm:flex'} items-center gap-1 text-xs font-semibold text-[#58755F] transition hover:text-[#3F6548] disabled:opacity-50`}
                     >
                       <Sparkles size={13} aria-hidden="true" />
                       {!AI_FEATURES_ENABLED ? 'Savings tips · Soon' : loadingTips ? 'Thinking…' : 'Get savings tips'}
@@ -1950,9 +1967,12 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                   <p className="px-5 py-10 text-center text-sm text-[#85887F] sm:px-6">No expenses recorded in {viewedMonthLabel}.</p>
                 ) : expenseGroups.map(group => (
                   <div key={group.key}>
-                    <div className="flex items-center justify-between border-y border-[#EEEFEA] bg-[#F7F8F3] px-5 py-2.5 sm:px-6">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#74776F]">{group.label} · {group.entries.length}</p>
-                      <p className="text-[12px] font-semibold text-[#C96042]">−{formatCAD(group.total)}</p>
+                    <div className={styles.monthDivider}>
+                      <p className="flex items-center gap-2 text-[13px] font-semibold tracking-[-0.01em] text-[#242522]">
+                        {group.label}
+                        <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-[#74776F] ring-1 ring-[#E0E1D9]">{group.entries.length}</span>
+                      </p>
+                      <p className="text-[13px] font-semibold text-[#B9573A]">−{formatCAD(group.total)}</p>
                     </div>
                     <div className="divide-y divide-[#EEEFEA] px-5 sm:px-6">
                       {group.entries.map(expense => (
@@ -1960,7 +1980,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                           type="button"
                           key={expense.id}
                           onClick={() => openEditExpense(expense)}
-                          className="group flex w-full items-center gap-3 rounded-xl px-2 py-4 text-left transition hover:bg-[#F7F8F3] sm:gap-4"
+                          className="group flex w-full items-center gap-3 rounded-xl px-2 py-3 text-left transition hover:bg-[#F7F8F3] sm:gap-4"
                         >
                           <CategoryIcon category={expense.category} />
                           <div className="min-w-0 flex-1">
@@ -1985,7 +2005,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                             <span className="hidden text-[11px] text-[#91948C] sm:block">{expense.original_currency} {expense.original_amount}</span>
                           )}
                           <Pencil size={13} className="shrink-0 text-[#C4C6BF] transition group-hover:text-[#85887F]" aria-hidden="true" />
-                          <span className="shrink-0 text-sm font-semibold text-[#C96042]">−{formatCAD(expense.amount_cad)}</span>
+                          <span className="shrink-0 text-sm font-semibold text-[#2E302B]">−{formatCAD(expense.amount_cad)}</span>
                         </button>
                       ))}
                     </div>
@@ -1998,7 +2018,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
           {activeTab === 'income' && (
             <div className="mt-7">
               {monthControls}
-              <section className={`${styles.panel} mt-4 overflow-hidden`}>
+              <section data-tone="earn" className={`${styles.panel} mt-4 overflow-hidden`}>
                 <div className={styles.sectionHeader}>
                   <div>
                     <h2 className="text-base font-semibold text-[#242522]">{showingRunning ? 'All income' : `Income · ${viewedMonthLabel}`}</h2>
@@ -2012,9 +2032,12 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                   <p className="px-5 py-10 text-center text-sm text-[#85887F] sm:px-6">No income recorded in {viewedMonthLabel}.</p>
                 ) : incomeGroups.map(group => (
                   <div key={group.key}>
-                    <div className="flex items-center justify-between border-y border-[#EEEFEA] bg-[#F7F8F3] px-5 py-2.5 sm:px-6">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#74776F]">{group.label} · {group.entries.length}</p>
-                      <p className="text-[12px] font-semibold text-[#4E7558]">+{formatCAD(group.total)}</p>
+                    <div className={styles.monthDivider}>
+                      <p className="flex items-center gap-2 text-[13px] font-semibold tracking-[-0.01em] text-[#242522]">
+                        {group.label}
+                        <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-[#74776F] ring-1 ring-[#E0E1D9]">{group.entries.length}</span>
+                      </p>
+                      <p className="text-[13px] font-semibold text-[#3F6548]">+{formatCAD(group.total)}</p>
                     </div>
                     <div className="divide-y divide-[#EEEFEA] px-5 sm:px-6">
                       {group.entries.map(item => (
@@ -2022,7 +2045,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                           type="button"
                           key={item.id}
                           onClick={() => openEditIncome(item)}
-                          className="group flex w-full items-center gap-3 rounded-xl px-2 py-4 text-left transition hover:bg-[#F7F8F3] sm:gap-4"
+                          className="group flex w-full items-center gap-3 rounded-xl px-2 py-3 text-left transition hover:bg-[#F7F8F3] sm:gap-4"
                         >
                           <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#EAF2E9] text-[#58755F]">
                             <TrendingUp size={18} strokeWidth={2} />
