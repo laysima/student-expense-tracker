@@ -8,7 +8,7 @@ import ServiceWorker from "@/components/ServiceWorker";
 
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
   variable: "--font-poppins",
 });
 
@@ -17,7 +17,7 @@ const poppins = Poppins({
 // is the splash's first frame at one iPhone size (public/splash/), so the hand
 // off to the live splash is seamless. [css width, css height, pixel ratio]
 const IPHONE_SCREENS = [
-  [440, 956, 3], [430, 932, 3], [428, 926, 3], [414, 896, 3], [414, 896, 2],
+  [440, 956, 3], [420, 912, 3], [430, 932, 3], [428, 926, 3], [414, 896, 3], [414, 896, 2],
   [402, 874, 3], [393, 852, 3], [390, 844, 3], [375, 812, 3], [375, 667, 2],
 ] as const;
 

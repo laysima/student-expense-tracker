@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -28,7 +26,9 @@ body {
   margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Poppins', sans-serif;
+  /* Self-hosted by next/font (app/layout.tsx). Loading Poppins from Google
+     here as well blocked the first paint on a second server round trip. */
+  font-family: var(--font-poppins), sans-serif;
   font-weight: 300;
 }
 
