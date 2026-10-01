@@ -327,7 +327,7 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
             <div className="flex items-center justify-between border-t border-[#E7E8E2] pt-5">
               <div>
                 <p className="text-[13px] font-semibold text-[#343630]">Repeat this expense</p>
-                <p className="mt-0.5 text-[11px] text-[#91948C]">Useful for rent, bills, or subscriptions</p>
+                <p className="mt-0.5 text-[11px] text-[#91948C]">Logged for you automatically each time it comes due</p>
               </div>
               <button
                 type="button"

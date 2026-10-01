@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test:charts": "node --test app/dashboard/chart-data.test.mjs",
-    "test:spending": "node --test lib/spending-limits.test.mjs supabase/tests/spending-limits.test.mjs tests/spending-sw.test.mjs"
+    "test:spending": "node --test lib/spending-limits.test.mjs supabase/tests/spending-limits.test.mjs tests/spending-sw.test.mjs",
+    "test:recurrence": "node --test lib/recurrence.test.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.109.0",

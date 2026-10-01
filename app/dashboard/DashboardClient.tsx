@@ -63,6 +63,8 @@ interface Expense {
   recur_cycle: string | null
   split_total_cad: number | null
   split_count: number | null
+  // Set on charges logged automatically from a recurring expense.
+  recurring_source_id?: string | null
   // Present when the table tracks it; the "Just added" badge simply never
   // shows if the column isn't there, so this degrades quietly.
   created_at?: string | null
@@ -245,6 +247,46 @@ function getCategoryData(expenses: Expense[]) {
 
 function startOfMonth(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), 1)
+}
+
+function monthKey(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+}
+
+interface MonthGroup<T> {
+  key: string
+  label: string
+  entries: T[]
+  // Totals skip anything dated after today, matching the overview: a bill
+  // logged ahead of time hasn't left your account yet.
+  total: number
+  upcoming: Set<string>
+}
+
+// Newest month first, newest entry first within each month.
+function groupByMonth<T extends { id: string; date: string; amount_cad: number }>(entries: T[]): MonthGroup<T>[] {
+  const cutoff = endOfToday()
+  const groups = new Map<string, MonthGroup<T>>()
+  const sorted = [...entries].sort((a, b) => parseLocalDate(b.date).getTime() - parseLocalDate(a.date).getTime())
+  for (const entry of sorted) {
+    const date = parseLocalDate(entry.date)
+    const key = monthKey(date)
+    let group = groups.get(key)
+    if (!group) {
+      group = {
+        key,
+        label: date.toLocaleDateString('en-CA', { month: 'long', year: 'numeric' }),
+        entries: [],
+        total: 0,
+        upcoming: new Set(),
+      }
+      groups.set(key, group)
+    }
+    group.entries.push(entry)
+    if (date > cutoff) group.upcoming.add(entry.id)
+    else group.total += entry.amount_cad
+  }
+  return [...groups.values()]
 }
 
 const RECENTLY_ADDED_MS = 24 * 60 * 60 * 1000
@@ -597,6 +639,87 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
   // actually have", not "what has happened since the 1st".
   const [summaryScope, setSummaryScope] = useState<'running' | 'month'>('running')
   const showingRunning = summaryScope === 'running'
+
+  // The Expenses and Income tabs follow the same scope as the overview: every
+  // month stacked newest-first, or only the month on screen.
+  const expenseGroups = useMemo(() => {
+    const groups = groupByMonth(expenses)
+    return showingRunning ? groups : groups.filter(group => group.key === monthKey(viewedMonth))
+  }, [expenses, showingRunning, viewedMonth])
+  const incomeGroups = useMemo(() => {
+    const groups = groupByMonth(income)
+    return showingRunning ? groups : groups.filter(group => group.key === monthKey(viewedMonth))
+  }, [income, showingRunning, viewedMonth])
+  const listedExpenseCount = expenseGroups.reduce((count, group) => count + group.entries.length, 0)
+  const listedExpenseTotal = expenseGroups.reduce((total, group) => total + group.total, 0)
+  const listedIncomeCount = incomeGroups.reduce((count, group) => count + group.entries.length, 0)
+  const listedIncomeTotal = incomeGroups.reduce((total, group) => total + group.total, 0)
+
+  // Shared by the overview, Expenses and Income tabs so picking a month in one
+  // carries over to the others.
+  const monthControls = (
+    <div className="flex flex-wrap items-center gap-3">
+      <div className="flex gap-1 rounded-xl border border-[#E0E2D9] bg-[#ECEDE6] p-1" role="group" aria-label="Summary scope">
+        {([
+          { id: 'running', label: 'Running total' },
+          { id: 'month', label: 'By month' },
+        ] as const).map(option => (
+          <button
+            key={option.id}
+            type="button"
+            aria-pressed={summaryScope === option.id}
+            onClick={() => setSummaryScope(option.id)}
+            className={`whitespace-nowrap rounded-lg px-3 py-2 text-[11px] font-semibold transition ${
+              summaryScope === option.id
+                ? 'bg-white text-[#242522] shadow-sm'
+                : 'text-[#74776F] hover:text-[#242522]'
+            }`}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+
+      {showingRunning ? (
+        <p aria-live="polite" className="text-xs leading-5 text-[#74776F]">
+          All your activity, carried forward.
+        </p>
+      ) : (
+        <>
+          <button
+            type="button"
+            onClick={() => setMonthOffset(offset => offset - 1)}
+            disabled={!canGoBackAMonth}
+            aria-label="Previous month"
+            className="grid size-9 place-items-center rounded-xl border border-[#DFE0DA] bg-white text-[#5C5F57] transition hover:border-[#BFC2B9] hover:text-[#242522] disabled:cursor-not-allowed disabled:opacity-35"
+          >
+            <ChevronLeft size={16} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setMonthOffset(offset => Math.min(0, offset + 1))}
+            disabled={viewingCurrentMonth}
+            aria-label="Next month"
+            className="grid size-9 place-items-center rounded-xl border border-[#DFE0DA] bg-white text-[#5C5F57] transition hover:border-[#BFC2B9] hover:text-[#242522] disabled:cursor-not-allowed disabled:opacity-35"
+          >
+            <ChevronRight size={16} aria-hidden="true" />
+          </button>
+          <p aria-live="polite" className="text-sm font-semibold tracking-[-0.01em] text-[#242522]">
+            {viewedMonthLabel}
+          </p>
+          {!viewingCurrentMonth && (
+            <button
+              type="button"
+              onClick={() => setMonthOffset(0)}
+              className="ml-auto rounded-lg px-3 py-1.5 text-xs font-semibold text-[#C96042] transition hover:bg-[#FFF0EA]"
+            >
+              Back to this month
+            </button>
+          )}
+        </>
+      )}
+    </div>
+  )
 
   const spentFigure = showingRunning ? runningTotals.spent : totalSpentThisMonth
   const earnedFigure = showingRunning ? runningTotals.earned : totalIncomeThisMonth
@@ -1262,67 +1385,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
             <div className="mt-7 space-y-6">
               {/* Step back through closed months instead of the dashboard
                   resetting to zero every 1st. */}
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex gap-1 rounded-xl border border-[#E0E2D9] bg-[#ECEDE6] p-1" role="group" aria-label="Summary scope">
-                  {([
-                    { id: 'running', label: 'Running total' },
-                    { id: 'month', label: 'By month' },
-                  ] as const).map(option => (
-                    <button
-                      key={option.id}
-                      type="button"
-                      aria-pressed={summaryScope === option.id}
-                      onClick={() => setSummaryScope(option.id)}
-                      className={`whitespace-nowrap rounded-lg px-3 py-2 text-[11px] font-semibold transition ${
-                        summaryScope === option.id
-                          ? 'bg-white text-[#242522] shadow-sm'
-                          : 'text-[#74776F] hover:text-[#242522]'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-
-                {showingRunning ? (
-                  <p aria-live="polite" className="text-xs leading-5 text-[#74776F]">
-                    All your activity, carried forward.
-                  </p>
-                ) : (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => setMonthOffset(offset => offset - 1)}
-                      disabled={!canGoBackAMonth}
-                      aria-label="Previous month"
-                      className="grid size-9 place-items-center rounded-xl border border-[#DFE0DA] bg-white text-[#5C5F57] transition hover:border-[#BFC2B9] hover:text-[#242522] disabled:cursor-not-allowed disabled:opacity-35"
-                    >
-                      <ChevronLeft size={16} aria-hidden="true" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setMonthOffset(offset => Math.min(0, offset + 1))}
-                      disabled={viewingCurrentMonth}
-                      aria-label="Next month"
-                      className="grid size-9 place-items-center rounded-xl border border-[#DFE0DA] bg-white text-[#5C5F57] transition hover:border-[#BFC2B9] hover:text-[#242522] disabled:cursor-not-allowed disabled:opacity-35"
-                    >
-                      <ChevronRight size={16} aria-hidden="true" />
-                    </button>
-                    <p aria-live="polite" className="text-sm font-semibold tracking-[-0.01em] text-[#242522]">
-                      {viewedMonthLabel}
-                    </p>
-                    {!viewingCurrentMonth && (
-                      <button
-                        type="button"
-                        onClick={() => setMonthOffset(0)}
-                        className="ml-auto rounded-lg px-3 py-1.5 text-xs font-semibold text-[#C96042] transition hover:bg-[#FFF0EA]"
-                      >
-                        Back to this month
-                      </button>
-                    )}
-                  </>
-                )}
-              </div>
+              {monthControls}
 
               <section aria-label={showingRunning ? 'Running summary' : 'Monthly summary'} className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5 xl:gap-4">
                 <div className={`${styles.summaryCard} ${styles.runwayCard}`}>
@@ -1825,142 +1888,167 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
           )}
 
           {activeTab === 'expenses' && (
-            <section className={`${styles.panel} mt-7 overflow-hidden`}>
-              <div className={styles.sectionHeader}>
-                <div>
-                  <h2 className="text-base font-semibold text-[#242522]">All expenses</h2>
-                  <p className="mt-1 text-xs text-[#85887F]">{expenses.length} recorded transactions</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <button
-                    type="button"
-                    onClick={AI_FEATURES_ENABLED ? handleGetSavingsTips : undefined}
-                    disabled={!AI_FEATURES_ENABLED || loadingTips}
-                    title={AI_FEATURES_ENABLED ? undefined : 'AI savings tips are coming soon'}
-                    className="flex items-center gap-1 text-xs font-semibold text-[#58755F] transition hover:text-[#3F6548] disabled:opacity-50"
-                  >
-                    <Sparkles size={13} aria-hidden="true" />
-                    {!AI_FEATURES_ENABLED ? 'Savings tips · Soon' : loadingTips ? 'Thinking…' : 'Get savings tips'}
-                  </button>
-                  <p className="text-sm font-semibold text-[#C96042]">{formatCAD(expenses.reduce((total, item) => total + item.amount_cad, 0))}</p>
-                </div>
-              </div>
-
-              {tipsError && (
-                <p className="border-b border-[#EAEBE6] px-5 py-3 text-[12px] font-medium text-[#B9573A] sm:px-6">{tipsError}</p>
-              )}
-
-              {savingsTips && savingsTips.length > 0 && (
-                <div className="space-y-3 border-b border-[#EAEBE6] bg-[#F7FAF6] px-5 py-5 sm:px-6">
-                  <div className="flex items-center justify-between">
-                    <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#58755F]">
-                      <Sparkles size={13} aria-hidden="true" /> Savings tips
-                    </p>
-                    <button type="button" onClick={() => setSavingsTips(null)} className="text-[11px] font-semibold text-[#85887F] transition hover:text-[#242522]">
-                      Dismiss
-                    </button>
+            <div className="mt-7">
+              {monthControls}
+              <section className={`${styles.panel} mt-4 overflow-hidden`}>
+                <div className={styles.sectionHeader}>
+                  <div>
+                    <h2 className="text-base font-semibold text-[#242522]">{showingRunning ? 'All expenses' : `Expenses · ${viewedMonthLabel}`}</h2>
+                    <p className="mt-1 text-xs text-[#85887F]">{listedExpenseCount} recorded transaction{listedExpenseCount === 1 ? '' : 's'}</p>
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {savingsTips.map((tip, index) => {
-                      const Icon = tip.category ? (CATEGORY_ICONS[tip.category] ?? CreditCard) : Sparkles
-                      return (
-                        <div key={index} className="rounded-2xl border border-[#DCE6DB] bg-white p-4">
-                          <div className="flex items-center gap-2">
-                            <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[#EAF2E9] text-[#58755F]">
-                              <Icon size={13} aria-hidden="true" />
-                            </span>
-                            <p className="text-[12px] font-semibold text-[#343630]">{tip.title}</p>
-                          </div>
-                          <p className="mt-2 text-[11px] leading-5 text-[#5F625B]">{tip.body}</p>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {expenses.length > 0 ? (
-                <div className="divide-y divide-[#EEEFEA] px-5 sm:px-6">
-                  {expenses.map(expense => (
+                  <div className="flex items-center gap-4">
                     <button
                       type="button"
-                      key={expense.id}
-                      onClick={() => openEditExpense(expense)}
-                      className="group flex w-full items-center gap-3 rounded-xl px-2 py-4 text-left transition hover:bg-[#F7F8F3] sm:gap-4"
+                      onClick={AI_FEATURES_ENABLED ? handleGetSavingsTips : undefined}
+                      disabled={!AI_FEATURES_ENABLED || loadingTips}
+                      title={AI_FEATURES_ENABLED ? undefined : 'AI savings tips are coming soon'}
+                      className="flex items-center gap-1 text-xs font-semibold text-[#58755F] transition hover:text-[#3F6548] disabled:opacity-50"
                     >
-                      <CategoryIcon category={expense.category} />
-                      <div className="min-w-0 flex-1">
-                        <p className="flex items-center truncate text-sm font-semibold text-[#343630]">
-                          <span className="truncate">{expense.note ?? expense.category}</span>
-                          {isRecentlyAdded(expense.created_at, now) && (
-                              <span className="ml-2 rounded-full bg-[#EAF2E9] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-[#3F6548]">Just added</span>
-                            )}
-                        </p>
-                        <p className="mt-0.5 text-[11px] text-[#91948C]">
-                          {expense.category} · {formatDate(expense.date, true)}
-                          {expense.split_count && (
-                            <span className="ml-2 inline-flex items-center gap-1 font-medium text-[#7C8378]">
-                              <Users size={11} aria-hidden="true" /> Split {expense.split_count} ways
-                            </span>
-                          )}
-                        </p>
-                      </div>
-                      {expense.original_amount && expense.original_currency && (
-                        <span className="hidden text-[11px] text-[#91948C] sm:block">{expense.original_currency} {expense.original_amount}</span>
-                      )}
-                      <Pencil size={13} className="shrink-0 text-[#C4C6BF] transition group-hover:text-[#85887F]" aria-hidden="true" />
-                      <span className="shrink-0 text-sm font-semibold text-[#C96042]">−{formatCAD(expense.amount_cad)}</span>
+                      <Sparkles size={13} aria-hidden="true" />
+                      {!AI_FEATURES_ENABLED ? 'Savings tips · Soon' : loadingTips ? 'Thinking…' : 'Get savings tips'}
                     </button>
-                  ))}
+                    <p className="text-sm font-semibold text-[#C96042]">{formatCAD(listedExpenseTotal)}</p>
+                  </div>
                 </div>
-              ) : (
-                <EmptyState type="expense" onAction={() => setShowAddExpense(true)} />
-              )}
-            </section>
+
+                {tipsError && (
+                  <p className="border-b border-[#EAEBE6] px-5 py-3 text-[12px] font-medium text-[#B9573A] sm:px-6">{tipsError}</p>
+                )}
+
+                {savingsTips && savingsTips.length > 0 && (
+                  <div className="space-y-3 border-b border-[#EAEBE6] bg-[#F7FAF6] px-5 py-5 sm:px-6">
+                    <div className="flex items-center justify-between">
+                      <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#58755F]">
+                        <Sparkles size={13} aria-hidden="true" /> Savings tips
+                      </p>
+                      <button type="button" onClick={() => setSavingsTips(null)} className="text-[11px] font-semibold text-[#85887F] transition hover:text-[#242522]">
+                        Dismiss
+                      </button>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {savingsTips.map((tip, index) => {
+                        const Icon = tip.category ? (CATEGORY_ICONS[tip.category] ?? CreditCard) : Sparkles
+                        return (
+                          <div key={index} className="rounded-2xl border border-[#DCE6DB] bg-white p-4">
+                            <div className="flex items-center gap-2">
+                              <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-[#EAF2E9] text-[#58755F]">
+                                <Icon size={13} aria-hidden="true" />
+                              </span>
+                              <p className="text-[12px] font-semibold text-[#343630]">{tip.title}</p>
+                            </div>
+                            <p className="mt-2 text-[11px] leading-5 text-[#5F625B]">{tip.body}</p>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {expenses.length === 0 ? (
+                  <EmptyState type="expense" onAction={() => setShowAddExpense(true)} />
+                ) : expenseGroups.length === 0 ? (
+                  <p className="px-5 py-10 text-center text-sm text-[#85887F] sm:px-6">No expenses recorded in {viewedMonthLabel}.</p>
+                ) : expenseGroups.map(group => (
+                  <div key={group.key}>
+                    <div className="flex items-center justify-between border-y border-[#EEEFEA] bg-[#F7F8F3] px-5 py-2.5 sm:px-6">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#74776F]">{group.label} · {group.entries.length}</p>
+                      <p className="text-[12px] font-semibold text-[#C96042]">−{formatCAD(group.total)}</p>
+                    </div>
+                    <div className="divide-y divide-[#EEEFEA] px-5 sm:px-6">
+                      {group.entries.map(expense => (
+                        <button
+                          type="button"
+                          key={expense.id}
+                          onClick={() => openEditExpense(expense)}
+                          className="group flex w-full items-center gap-3 rounded-xl px-2 py-4 text-left transition hover:bg-[#F7F8F3] sm:gap-4"
+                        >
+                          <CategoryIcon category={expense.category} />
+                          <div className="min-w-0 flex-1">
+                            <p className="flex items-center truncate text-sm font-semibold text-[#343630]">
+                              <span className="truncate">{expense.note ?? expense.category}</span>
+                              {isRecentlyAdded(expense.created_at, now) && (
+                                  <span className="ml-2 rounded-full bg-[#EAF2E9] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-[#3F6548]">Just added</span>
+                                )}
+                              {expense.recurring_source_id && <span className="ml-2 rounded-full bg-[#EFF0EB] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-[#74776F]">Auto-renewed</span>}
+                              {group.upcoming.has(expense.id) && <span className="ml-2 rounded-full bg-[#EFF0EB] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-[#74776F]">Upcoming</span>}
+                            </p>
+                            <p className="mt-0.5 text-[11px] text-[#91948C]">
+                              {expense.category} · {formatDate(expense.date, true)}
+                              {expense.split_count && (
+                                <span className="ml-2 inline-flex items-center gap-1 font-medium text-[#7C8378]">
+                                  <Users size={11} aria-hidden="true" /> Split {expense.split_count} ways
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                          {expense.original_amount && expense.original_currency && (
+                            <span className="hidden text-[11px] text-[#91948C] sm:block">{expense.original_currency} {expense.original_amount}</span>
+                          )}
+                          <Pencil size={13} className="shrink-0 text-[#C4C6BF] transition group-hover:text-[#85887F]" aria-hidden="true" />
+                          <span className="shrink-0 text-sm font-semibold text-[#C96042]">−{formatCAD(expense.amount_cad)}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </section>
+            </div>
           )}
 
           {activeTab === 'income' && (
-            <section className={`${styles.panel} mt-7 overflow-hidden`}>
-              <div className={styles.sectionHeader}>
-                <div>
-                  <h2 className="text-base font-semibold text-[#242522]">All income</h2>
-                  <p className="mt-1 text-xs text-[#85887F]">{income.length} recorded sources</p>
+            <div className="mt-7">
+              {monthControls}
+              <section className={`${styles.panel} mt-4 overflow-hidden`}>
+                <div className={styles.sectionHeader}>
+                  <div>
+                    <h2 className="text-base font-semibold text-[#242522]">{showingRunning ? 'All income' : `Income · ${viewedMonthLabel}`}</h2>
+                    <p className="mt-1 text-xs text-[#85887F]">{listedIncomeCount} recorded payment{listedIncomeCount === 1 ? '' : 's'}</p>
+                  </div>
+                  <p className="text-sm font-semibold text-[#4E7558]">{formatCAD(listedIncomeTotal)}</p>
                 </div>
-                <p className="text-sm font-semibold text-[#4E7558]">{formatCAD(income.reduce((total, item) => total + item.amount_cad, 0))}</p>
-              </div>
-              {income.length > 0 ? (
-                <div className="divide-y divide-[#EEEFEA] px-5 sm:px-6">
-                  {income.map(item => (
-                    <button
-                      type="button"
-                      key={item.id}
-                      onClick={() => openEditIncome(item)}
-                      className="group flex w-full items-center gap-3 rounded-xl px-2 py-4 text-left transition hover:bg-[#F7F8F3] sm:gap-4"
-                    >
-                      <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#EAF2E9] text-[#58755F]">
-                        <TrendingUp size={18} strokeWidth={2} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="flex items-center truncate text-sm font-semibold text-[#343630]">
-                          <span className="truncate">{item.source}</span>
-                          {isRecentlyAdded(item.created_at, now) && (
-                              <span className="ml-2 rounded-full bg-[#EAF2E9] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-[#3F6548]">Just added</span>
-                            )}
-                        </p>
-                        <p className="mt-0.5 text-[11px] text-[#91948C]">
-                          {formatDate(item.date, true)}
-                          {item.is_recurring && <span className="ml-2 font-medium text-[#69876F]">Recurring · {item.recur_cycle}</span>}
-                        </p>
-                      </div>
-                      <Pencil size={13} className="shrink-0 text-[#C4C6BF] transition group-hover:text-[#85887F]" aria-hidden="true" />
-                      <span className="shrink-0 text-sm font-semibold text-[#4E7558]">+{formatCAD(item.amount_cad)}</span>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <EmptyState type="income" onAction={() => setShowAddIncome(true)} />
-              )}
-            </section>
+                {income.length === 0 ? (
+                  <EmptyState type="income" onAction={() => setShowAddIncome(true)} />
+                ) : incomeGroups.length === 0 ? (
+                  <p className="px-5 py-10 text-center text-sm text-[#85887F] sm:px-6">No income recorded in {viewedMonthLabel}.</p>
+                ) : incomeGroups.map(group => (
+                  <div key={group.key}>
+                    <div className="flex items-center justify-between border-y border-[#EEEFEA] bg-[#F7F8F3] px-5 py-2.5 sm:px-6">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#74776F]">{group.label} · {group.entries.length}</p>
+                      <p className="text-[12px] font-semibold text-[#4E7558]">+{formatCAD(group.total)}</p>
+                    </div>
+                    <div className="divide-y divide-[#EEEFEA] px-5 sm:px-6">
+                      {group.entries.map(item => (
+                        <button
+                          type="button"
+                          key={item.id}
+                          onClick={() => openEditIncome(item)}
+                          className="group flex w-full items-center gap-3 rounded-xl px-2 py-4 text-left transition hover:bg-[#F7F8F3] sm:gap-4"
+                        >
+                          <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#EAF2E9] text-[#58755F]">
+                            <TrendingUp size={18} strokeWidth={2} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="flex items-center truncate text-sm font-semibold text-[#343630]">
+                              <span className="truncate">{item.source}</span>
+                              {isRecentlyAdded(item.created_at, now) && (
+                                  <span className="ml-2 rounded-full bg-[#EAF2E9] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-[#3F6548]">Just added</span>
+                                )}
+                              {group.upcoming.has(item.id) && <span className="ml-2 rounded-full bg-[#EFF0EB] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.08em] text-[#74776F]">Upcoming</span>}
+                            </p>
+                            <p className="mt-0.5 text-[11px] text-[#91948C]">
+                              {formatDate(item.date, true)}
+                              {item.is_recurring && <span className="ml-2 font-medium text-[#69876F]">Recurring · {item.recur_cycle}</span>}
+                            </p>
+                          </div>
+                          <Pencil size={13} className="shrink-0 text-[#C4C6BF] transition group-hover:text-[#85887F]" aria-hidden="true" />
+                          <span className="shrink-0 text-sm font-semibold text-[#4E7558]">+{formatCAD(item.amount_cad)}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </section>
+            </div>
           )}
         </main>
       </div>

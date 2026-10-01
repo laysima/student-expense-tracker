@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { renewRecurringExpenses } from '@/lib/recurring-expenses'
 import DashboardClient from './DashboardClient'
 
 export default async function DashboardPage() {
@@ -7,6 +8,10 @@ export default async function DashboardPage() {
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  // Fill in any subscription or bill charges that came due since the last
+  // visit, before reading expenses so they show up on this load.
+  await renewRecurringExpenses(supabase, user.id)
 
   const [
     { data: profile },
