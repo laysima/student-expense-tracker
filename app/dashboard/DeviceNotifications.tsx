@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Bell, BellRing } from 'lucide-react'
+import { registerServiceWorker } from '@/lib/service-worker'
 
 export default function DeviceNotifications() {
   const [status, setStatus] = useState<'loading' | 'unsupported' | 'unavailable' | 'off' | 'on' | 'blocked'>('loading')
@@ -62,7 +63,7 @@ export default function DeviceNotifications() {
           if (permission === 'default') setError('Notifications weren’t enabled. You can try again whenever you’re ready.')
           return
         }
-        await navigator.serviceWorker.register('/spending-sw.js', { scope: '/', updateViaCache: 'none' })
+        await registerServiceWorker()
         const registration = await navigator.serviceWorker.ready
         const existing = await registration.pushManager.getSubscription()
         const padded = publicKey.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - publicKey.length % 4) % 4)

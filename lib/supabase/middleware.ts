@@ -26,7 +26,10 @@ export async function updateSession(request: NextRequest) {
 
   // Refreshes the session and syncs it to cookies — required so server
   // components see the session set by client-side sign-in immediately.
-  await supabase.auth.getUser()
+  // getClaims verifies the JWT locally against the project's signing keys
+  // (ES256), so a normal request no longer waits on a round trip to the
+  // Supabase Auth server. It still refreshes an expired session.
+  await supabase.auth.getClaims()
 
   return supabaseResponse
 }

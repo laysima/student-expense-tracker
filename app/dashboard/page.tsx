@@ -6,8 +6,12 @@ import DashboardClient from './DashboardClient'
 export default async function DashboardPage() {
   const supabase = await createClient()
 
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  // Verified locally against the project's signing keys — no network round
+  // trip before the data queries below can start.
+  const { data: auth } = await supabase.auth.getClaims()
+  const claims = auth?.claims
+  if (!claims?.sub) redirect('/login')
+  const user = { id: claims.sub, email: typeof claims.email === 'string' ? claims.email : undefined }
 
   // Fill in any subscription or bill charges that came due since the last
   // visit, before reading expenses so they show up on this load.

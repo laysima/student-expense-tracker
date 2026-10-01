@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
@@ -46,6 +45,7 @@ import SpendingAlertSync from './SpendingAlertSync'
 import type { SpendingLimitSettings } from '@/lib/spending-limits'
 import styles from './dashboard.module.css'
 import SettingsPanel from './SettingsPanel'
+import AnimatedMoney from './AnimatedMoney'
 import { categoryColor } from './chart-data'
 
 interface Profile {
@@ -176,8 +176,6 @@ const CYCLE_MULTIPLIER: Record<string, number> = {
   yearly: 1 / 12,
 }
 
-const ICONS8_INCOME = 'https://img.icons8.com/ios-filled/50/191919/income.png'
-const ICONS8_EXPENSE = 'https://img.icons8.com/ios-filled/50/191919/expense.png'
 
 // Every figure on screen is shown to the cent. Rounding to whole dollars made
 // totals disagree with the amounts actually entered ($705.40 reading as $705).
@@ -737,6 +735,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
   const spentFigure = showingRunning ? runningTotals.spent : totalSpentThisMonth
   const earnedFigure = showingRunning ? runningTotals.earned : totalIncomeThisMonth
   const leftFigure = showingRunning ? runningTotals.balance : amountLeftThisMonth
+  const spentShare = earnedFigure > 0 ? (spentFigure / earnedFigure) * 100 : 0
   const runway = useMemo(() => computeRunway(expenses, income), [expenses, income])
   const monthlyAverages = useMemo(() => computeMonthlyAverages(expenses, income), [expenses, income])
   const avgMonthlySavings = monthlyAverages.potential
@@ -1173,14 +1172,6 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
               <LogOut size={17} aria-hidden="true" />
             </button>
           </div>
-          <a
-            href="https://icons8.com"
-            target="_blank"
-            rel="noreferrer"
-            className="mt-5 inline-block whitespace-nowrap text-[9px] text-white/20 opacity-0 transition hover:text-white/45 group-hover/rail:opacity-100 group-focus-within/rail:opacity-100 group-data-[notifications-open=true]/rail:opacity-100"
-          >
-            Action icons by Icons8
-          </a>
         </div>
       </aside>
 
@@ -1229,78 +1220,63 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
             />
           ) : (
           <>
-          <div className="flex flex-col gap-6 border-b border-[#E0E2D9] pb-8 md:flex-row md:items-center md:justify-between md:gap-8">
+          <div className="flex flex-col gap-5 border-b border-[#E0E2D9] pb-6 md:flex-row md:items-center md:justify-between md:gap-8 md:pb-8">
             <div className="min-w-0">
               <p className="inline-flex items-center gap-2 rounded-full border border-[#EEDDD3] bg-[#FAEEE7] px-3 py-1.5 text-[10px] font-semibold tracking-[0.04em] text-[#AC5A3D] sm:text-[11px]">
                 <CalendarDays size={13} aria-hidden="true" />
                 {now.toLocaleDateString('en-CA', { weekday: 'long', month: 'long', day: 'numeric' })}
               </p>
-              <h1 className="mt-4 text-[clamp(1.8rem,3.4vw,2.5rem)] font-semibold leading-tight tracking-[-0.045em] text-[#20211E]">
+              <h1 className="mt-3 text-[clamp(1.8rem,3.4vw,2.5rem)] sm:mt-4 font-semibold leading-tight tracking-[-0.045em] text-[#20211E]">
                 Good to see you, {firstName}.
               </h1>
-              <p className="mt-3 max-w-md text-[13px] leading-6 text-[#74776F]">
+              <p className="mt-3 hidden max-w-md text-[13px] leading-6 text-[#74776F] sm:block">
                 Your spending, savings, and upcoming payments at a glance.
               </p>
             </div>
 
-            {/* Even 2x2 block: every tile shares one height, radius and
-                icon-plus-two-line structure, so nothing wraps raggedly.
-                Primary money actions sit on top, tools underneath. */}
-            <div className="grid w-full shrink-0 grid-cols-2 gap-2.5 md:w-auto md:grid-cols-[repeat(2,minmax(172px,1fr))]">
-              <button
-                type="button"
-                onClick={() => setShowAddIncome(true)}
-                className="group flex min-h-16 items-center gap-2.5 rounded-2xl border border-[#CCD8CA] bg-[#E3EDE1] px-3 text-left transition hover:-translate-y-0.5 hover:border-[#A9BDA7] sm:gap-3 sm:px-4 hover:shadow-[0_10px_30px_rgba(57,78,60,0.10)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#69876F]"
-              >
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#B8CEB5] transition group-hover:scale-105">
-                  <Image src={ICONS8_INCOME} alt="" width={22} height={22} unoptimized />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#69806B]">Money in</span>
-                  <span className="mt-0.5 block truncate text-sm font-semibold text-[#27362A]">Add income</span>
-                </span>
-              </button>
+            {/* A quiet toolbar: the figures below are the point of the page, so
+                actions stay compact. One filled primary, one outlined, and the
+                tools as plain text (icon-only on phones). */}
+            <div className="flex w-full items-center gap-2 md:w-auto">
               <button
                 type="button"
                 onClick={() => setShowAddExpense(true)}
-                className="group flex min-h-16 items-center gap-2.5 rounded-2xl border border-[#F0C5B5] bg-[#FFE7DE] px-3 text-left transition hover:-translate-y-0.5 hover:border-[#E6A78F] sm:gap-3 sm:px-4 hover:shadow-[0_10px_30px_rgba(118,61,40,0.10)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D86F4E]"
+                className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#242522] px-4 text-[13px] font-semibold text-white transition hover:bg-[#353731] md:flex-none"
               >
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#F3AD92] transition group-hover:scale-105">
-                  <Image src={ICONS8_EXPENSE} alt="" width={22} height={22} unoptimized />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#B76245]">Money out</span>
-                  <span className="mt-0.5 block truncate text-sm font-semibold text-[#492D24]">Add expense</span>
-                </span>
+                <Plus size={15} strokeWidth={2.4} aria-hidden="true" />
+                <span className="sm:hidden">Expense</span>
+                <span className="hidden sm:inline">Add expense</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAddIncome(true)}
+                className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-[#D3D5CC] bg-white px-4 text-[13px] font-semibold text-[#27362A] transition hover:border-[#A9BDA7] md:flex-none"
+              >
+                <Plus size={15} strokeWidth={2.4} aria-hidden="true" />
+                <span className="sm:hidden">Income</span>
+                <span className="hidden sm:inline">Add income</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowStatement(true)}
+                aria-label="Statement"
+                title="Export statement"
+                className="flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl px-2.5 text-[13px] font-semibold text-[#5C5F57] transition hover:bg-[#E3E4DD] hover:text-[#242522] max-sm:w-10"
+              >
+                <Printer size={16} aria-hidden="true" />
+                <span className="hidden sm:inline">Statement</span>
               </button>
               <button
                 type="button"
                 onClick={AI_FEATURES_ENABLED ? handleGenerateInsight : undefined}
                 disabled={!AI_FEATURES_ENABLED || generatingInsight}
-                title={AI_FEATURES_ENABLED ? undefined : 'AI insights are coming soon'}
-                className="group flex min-h-16 items-center gap-2.5 rounded-2xl border border-[#D6D8D0] bg-white px-3 text-left transition hover:-translate-y-0.5 hover:border-[#BFC2B9] sm:gap-3 sm:px-4 hover:shadow-[0_10px_30px_rgba(31,32,29,0.07)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#686B63] disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-[#D6D8D0] disabled:hover:shadow-none"
+                aria-label={AI_FEATURES_ENABLED ? 'AI insight' : 'AI insight, coming soon'}
+                title={AI_FEATURES_ENABLED ? 'AI insight' : 'AI insights are coming soon'}
+                className="flex h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl px-2.5 text-[13px] font-semibold text-[#5C5F57] transition hover:bg-[#E3E4DD] hover:text-[#242522] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent max-sm:w-10"
               >
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#EFF0EB] text-[#5C5F57] transition group-hover:scale-105">
-                  <Sparkles size={18} strokeWidth={1.8} aria-hidden="true" />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8A8D84]">
-                    {AI_FEATURES_ENABLED ? 'This week' : 'Coming soon'}
-                  </span>
-                  <span className="mt-0.5 block truncate text-sm font-semibold text-[#242522]">{AI_FEATURES_ENABLED && generatingInsight ? 'Thinking…' : 'AI insight'}</span>
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowStatement(true)}
-                className="group flex min-h-16 items-center gap-2.5 rounded-2xl border border-[#D6D8D0] bg-white px-3 text-left transition hover:-translate-y-0.5 hover:border-[#BFC2B9] sm:gap-3 sm:px-4 hover:shadow-[0_10px_30px_rgba(31,32,29,0.07)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#686B63]"
-              >
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#EFF0EB] text-[#5C5F57] transition group-hover:scale-105">
-                  <Printer size={18} strokeWidth={1.8} aria-hidden="true" />
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-[10px] font-semibold uppercase tracking-[0.12em] text-[#8A8D84]">Export</span>
-                  <span className="mt-0.5 block truncate text-sm font-semibold text-[#242522]">Statement</span>
+                <Sparkles size={16} aria-hidden="true" />
+                <span className="hidden sm:inline">
+                  {AI_FEATURES_ENABLED ? (generatingInsight ? 'Thinking…' : 'AI insight') : 'AI insight · Soon'}
                 </span>
               </button>
             </div>
@@ -1421,17 +1397,39 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                   resetting to zero every 1st. */}
               {monthControls}
 
-              <section aria-label={showingRunning ? 'Running summary' : 'Monthly summary'} className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5 xl:gap-4">
-                <div className={`${styles.summaryCard} ${styles.runwayCard}`}>
-                  <div aria-hidden="true" className="pointer-events-none absolute -bottom-12 -right-10 size-36 rounded-full border-[22px] border-white/[0.035]" />
+              <section aria-label={showingRunning ? 'Running summary' : 'Monthly summary'} className="grid grid-cols-2 gap-3 lg:grid-cols-4 xl:gap-4">
+                {/* The one number that answers "what do I actually have". */}
+                <div className={`${styles.summaryCard} ${styles.heroCard} col-span-2 lg:row-span-2`}>
+                  <div aria-hidden="true" className="pointer-events-none absolute -bottom-16 -right-12 size-56 rounded-full border-[28px] border-white/[0.035]" />
                   <div className={styles.summaryHeader}>
-                    <p className={styles.summaryLabel}>Budget runway</p>
-                    <span className={styles.summaryIcon}><WalletCards size={16} className="text-[#E98563]" aria-hidden="true" /></span>
+                    <p className={styles.summaryLabel}>{showingRunning ? 'Balance left' : `Left ${monthWord}`}</p>
+                    <span className={styles.summaryIcon}><Wallet size={16} className="text-[#E98563]" aria-hidden="true" /></span>
                   </div>
-                  <p className={styles.summaryValue}>
-                    {runway ?? '—'} <span className="text-sm font-medium tracking-normal text-white/60">days</span>
+                  <AnimatedMoney
+                    value={leftFigure}
+                    className={`${styles.heroValue} ${leftFigure >= 0 ? 'text-white' : 'text-[#F2A68B]'}`}
+                    centsClassName={styles.heroCents}
+                  />
+                  <p className={styles.summaryNote}>
+                    {showingRunning
+                      ? 'Everything earned minus everything spent'
+                      : `${formatCAD(balanceBroughtForward)} carried in${amountLeftThisMonth >= 0 ? '' : ' · spending outpaced income'}`}
                   </p>
-                  <p className={styles.summaryNote}>At your current spending rate</p>
+                  <div className="relative mt-auto pt-6">
+                    <div className="mb-2 flex items-baseline justify-between gap-3 text-[11px] text-[#B0B5A9]">
+                      <span>
+                        {earnedFigure > 0
+                          ? `You've spent ${Math.round(spentShare)}% of what you earned`
+                          : spentFigure > 0 ? 'Spending with no income logged yet' : 'Nothing logged yet'}
+                      </span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-white/10" aria-hidden="true">
+                      <div
+                        className={`h-full rounded-full ${spentShare >= 100 ? 'bg-[#F2A68B]' : 'bg-[#E98563]'}`}
+                        style={{ width: `${Math.min(100, spentShare)}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className={`${styles.summaryCard} ${styles.spentCard}`}>
@@ -1439,7 +1437,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                     <p className={styles.summaryLabel}>{showingRunning ? 'Spent in total' : `Spent ${monthWord}`}</p>
                     <span className={styles.summaryIcon}><ReceiptText size={16} className="text-[#D86F4E]" aria-hidden="true" /></span>
                   </div>
-                  <p className={`${styles.summaryValue} text-[#B9573A]`}>{formatCAD(spentFigure)}</p>
+                  <AnimatedMoney value={spentFigure} className={`${styles.summaryValue} text-[#B9573A]`} centsClassName={styles.summaryCents} />
                   <p className={styles.summaryNote}>
                     {showingRunning
                       ? `${formatCAD(totalSpentThisMonth)} of it ${viewingCurrentMonth ? 'this month' : monthWord}`
@@ -1452,7 +1450,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                     <p className={styles.summaryLabel}>{showingRunning ? 'Earned in total' : `Income ${monthWord}`}</p>
                     <span className={styles.summaryIcon}><TrendingUp size={16} className="text-[#58755F]" aria-hidden="true" /></span>
                   </div>
-                  <p className={`${styles.summaryValue} text-[#3F6548]`}>{formatCAD(earnedFigure)}</p>
+                  <AnimatedMoney value={earnedFigure} className={`${styles.summaryValue} text-[#3F6548]`} centsClassName={styles.summaryCents} />
                   <p className={styles.summaryNote}>
                     {showingRunning
                       ? `${formatCAD(totalIncomeThisMonth)} of it ${viewingCurrentMonth ? 'this month' : monthWord}`
@@ -1504,29 +1502,16 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                   )}
                 </div>
 
-                <div className={styles.summaryCard}>
-                  <div className={styles.summaryHeader}>
-                    <p className={styles.summaryLabel}>{showingRunning ? 'Balance left' : `Left ${monthWord}`}</p>
-                    <span className={styles.summaryIcon}><Wallet size={16} className={leftFigure >= 0 ? 'text-[#58755F]' : 'text-[#D86F4E]'} aria-hidden="true" /></span>
-                  </div>
-                  <p className={`${styles.summaryValue} ${leftFigure >= 0 ? 'text-[#242522]' : 'text-[#C85F40]'}`}>
-                    {formatCAD(leftFigure)}
-                  </p>
-                  <p className={styles.summaryNote}>
-                    {showingRunning
-                      ? 'Everything earned minus everything spent'
-                      : `${formatCAD(balanceBroughtForward)} carried in${amountLeftThisMonth >= 0 ? '' : ' · spending outpaced income'}`}
-                  </p>
-                </div>
-
                 <div ref={savingsCardRef} className={`${styles.summaryCard} ${savingsPotential >= 0 ? styles.savingsCard : ''}`}>
                   <div className={styles.summaryHeader}>
                     <p className={styles.summaryLabel}>Savings potential</p>
                     <span className={styles.summaryIcon}><PiggyBank size={16} className={savingsPotential >= 0 ? 'text-[#58755F]' : 'text-[#D86F4E]'} aria-hidden="true" /></span>
                   </div>
-                  <p className={`${styles.summaryValue} ${savingsPotential >= 0 ? 'text-[#3F6548]' : 'text-[#C85F40]'}`}>
-                    {formatCAD(savingsPotential)}
-                  </p>
+                  <AnimatedMoney
+                    value={savingsPotential}
+                    className={`${styles.summaryValue} ${savingsPotential >= 0 ? 'text-[#3F6548]' : 'text-[#C85F40]'}`}
+                    centsClassName={styles.summaryCents}
+                  />
                   <p className={styles.summaryNote}>{savingsPotential >= 0 ? 'Your average income minus average spending' : 'Spending is above your average income'}</p>
                   <button
                     type="button"
@@ -1589,6 +1574,17 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                       )}
                     </div>
                   )}
+                </div>
+
+                <div className={styles.summaryCard}>
+                  <div className={styles.summaryHeader}>
+                    <p className={styles.summaryLabel}>Budget runway</p>
+                    <span className={styles.summaryIcon}><WalletCards size={16} className="text-[#D86F4E]" aria-hidden="true" /></span>
+                  </div>
+                  <p className={`${styles.summaryValue} text-[#242522]`}>
+                    {runway ?? '—'} <span className="text-sm font-medium tracking-normal text-[#85887F]">days</span>
+                  </p>
+                  <p className={styles.summaryNote}>How long your balance lasts at your current spending rate</p>
                 </div>
               </section>
 
