@@ -146,12 +146,12 @@ export default function StatementModal({ fullName, university, expenses, income,
   return (
     <>
       <div className="fixed inset-0 z-40 bg-[#171814]/50 backdrop-blur-[6px]" onClick={onClose} />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
+      <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6">
         <div
           role="dialog"
           aria-modal="true"
           aria-labelledby="statement-title"
-          className="flex max-h-[94vh] w-full max-w-[860px] flex-col overflow-hidden rounded-[28px] bg-[#F7F7F3] shadow-[0_30px_90px_rgba(16,17,14,0.28)]"
+          className="xt-sheet flex max-h-[94dvh] w-full max-w-[860px] flex-col overflow-hidden rounded-t-[28px] sm:max-h-[94vh] sm:rounded-[28px] bg-[#F7F7F3] shadow-[0_30px_90px_rgba(16,17,14,0.28)]"
         >
           <div className="statement-print-controls flex flex-col gap-5 border-b border-[#E1E2DC] px-5 py-5 sm:px-7">
             <div className="flex items-start justify-between gap-5">
@@ -160,7 +160,7 @@ export default function StatementModal({ fullName, university, expenses, income,
                 <h2 id="statement-title" className="mt-1 text-[22px] font-semibold tracking-[-0.035em] text-[#242522]">Print a statement</h2>
                 <p className="mt-1 text-[12px] text-[#85887F]">Choose the period you want to review or save as a PDF.</p>
               </div>
-              <button type="button" onClick={onClose} className="py-1 text-[12px] font-semibold text-[#85887F] hover:text-[#242522]">Close</button>
+              <button type="button" onClick={onClose} className="-mr-3 rounded-lg px-3 py-2 text-[13px] font-semibold text-[#85887F] hover:text-[#242522]">Close</button>
             </div>
 
             <div className="flex flex-wrap gap-1 rounded-xl bg-[#E9EAE4] p-1" role="group" aria-label="Statement period">
@@ -190,7 +190,7 @@ export default function StatementModal({ fullName, university, expenses, income,
                   id="statement-month"
                   value={singleMonth}
                   onChange={event => setSingleMonth(event.target.value)}
-                  className="min-w-0 flex-1 rounded-lg border border-[#DFE0DA] bg-white px-3 py-2 text-[12px] font-medium text-[#242522] outline-none transition focus:border-[#829A83]"
+                  className="min-w-0 flex-1 rounded-lg border border-[#DFE0DA] bg-white px-3 py-2 text-base font-medium text-[#242522] outline-none transition focus:border-[#829A83] sm:text-[12px]"
                 >
                   <option value="">Use the range above</option>
                   {monthOptions.map(([key, label]) => (
@@ -201,7 +201,7 @@ export default function StatementModal({ fullName, university, expenses, income,
             )}
           </div>
 
-          <div className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-6">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-6">
             <section className="statement-print-area mx-auto min-h-[720px] max-w-[760px] bg-white px-6 py-7 text-[#20211E] shadow-sm sm:px-10 sm:py-9">
               <div className="flex items-start justify-between gap-6 border-b-2 border-[#20211E] pb-6">
                 <div className="flex items-center gap-3">

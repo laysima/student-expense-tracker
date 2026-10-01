@@ -1324,7 +1324,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                         aria-label="Amount you were paid"
                         value={paydayAmount}
                         onChange={event => setPaydayAmount(event.target.value)}
-                        className="w-full rounded-xl border border-[#B8CEB5] bg-white py-3 pl-8 pr-3 text-[15px] font-semibold text-[#27362A] outline-none transition focus:border-[#829A83] focus:ring-4 focus:ring-[#829A83]/15 sm:w-[150px]"
+                        className="w-full rounded-xl border border-[#B8CEB5] bg-white py-3 pl-8 pr-3 text-base font-semibold text-[#27362A] sm:text-[15px] outline-none transition focus:border-[#829A83] focus:ring-4 focus:ring-[#829A83]/15 sm:w-[150px]"
                       />
                     </div>
                     <div className="flex items-center gap-3">
@@ -1438,7 +1438,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                     type="button"
                     onClick={() => setIncomeBreakdownOpen(value => !value)}
                     aria-expanded={incomeBreakdownOpen}
-                    className="mt-1.5 text-[10px] font-semibold text-[#58755F] underline underline-offset-2 transition hover:text-[#3F6548] sm:text-[11px]"
+                    className="tap-target mt-1.5 text-[11px] font-semibold text-[#58755F] underline underline-offset-2 transition hover:text-[#3F6548] sm:text-[11px]"
                   >
                     {incomeBreakdownOpen ? 'Hide entries' : 'View or edit entries'}
                   </button>
@@ -1508,7 +1508,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                     type="button"
                     onClick={() => setSavingsBreakdownOpen(value => !value)}
                     aria-expanded={savingsBreakdownOpen}
-                    className="mt-1.5 text-[10px] font-semibold text-[#58755F] underline underline-offset-2 transition hover:text-[#3F6548] sm:text-[11px]"
+                    className="tap-target mt-1.5 text-[11px] font-semibold text-[#58755F] underline underline-offset-2 transition hover:text-[#3F6548] sm:text-[11px]"
                   >
                     {savingsBreakdownOpen ? 'Hide breakdown' : 'See how to get there'}
                   </button>
@@ -1653,13 +1653,13 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                       <p className="mt-4 text-sm font-semibold text-[#41443E]">Give every dollar a plan</p>
                       <p className="mt-1 max-w-[240px] text-xs leading-5 text-[#91948C]">Set a monthly limit yourself or use a suggestion based on recent spending.</p>
                       <div className="mt-4 flex flex-wrap justify-center gap-3">
-                        <button type="button" onClick={() => setShowAddBudget(true)} className="text-xs font-semibold text-[#C96042] hover:underline">Set a budget</button>
+                        <button type="button" onClick={() => setShowAddBudget(true)} className="tap-target text-xs font-semibold text-[#C96042] hover:underline">Set a budget</button>
                         {suggestions.length > 0 && (
                           <button
                             type="button"
                             onClick={handlePredictBudgets}
                             disabled={predicting}
-                            className="text-xs font-semibold text-[#58755F] hover:underline disabled:opacity-50"
+                            className="tap-target text-xs font-semibold text-[#58755F] hover:underline disabled:opacity-50"
                           >
                             {predicting ? 'Creating…' : 'Use smart suggestions'}
                           </button>
@@ -1826,7 +1826,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                       <button
                         type="button"
                         onClick={() => { setFundingGoal(null); setGoalSuggestion(null); setGoalModalOpen(true) }}
-                        className="text-xs font-semibold text-[#C96042] hover:underline"
+                        className="tap-target text-xs font-semibold text-[#C96042] hover:underline"
                       >
                         Set a goal
                       </button>
@@ -1852,7 +1852,7 @@ export default function DashboardClient({ userId, profile, expenses, income, bud
                     <p className="mt-1 text-xs text-[#85887F]">Your latest money movements</p>
                   </div>
                   {recentActivity.length > 0 && (
-                    <button type="button" onClick={() => switchTab('expenses')} className="flex items-center gap-1 text-xs font-semibold text-[#666A62] hover:text-[#242522]">
+                    <button type="button" onClick={() => switchTab('expenses')} className="tap-target flex items-center gap-1 text-xs font-semibold text-[#666A62] hover:text-[#242522]">
                       View expenses <ChevronRight size={14} />
                     </button>
                   )}

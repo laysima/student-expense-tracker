@@ -10,6 +10,29 @@
   cursor: pointer;
 }
 
+/* Touch: no grey flash, no double-tap-to-zoom wait, and a visible press state.
+   Tailwind only applies hover: styles on devices that can hover, so without
+   this a tap on a phone gave no feedback at all. */
+.dashboard :where(button, a, [role='button'], [role='switch']) {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+@media (hover: none) {
+  .dashboard :where(button:not(:disabled), a, [role='button']):active {
+    opacity: 0.8;
+    scale: 0.97;
+    transition: scale 80ms ease, opacity 80ms ease;
+  }
+
+  /* Full-width list rows: shade instead of shrinking the whole row. */
+  .dashboard :where(button.group:not(:disabled)):active {
+    scale: none;
+    opacity: 1;
+    background-color: #eeefe8;
+  }
+}
+
 .dashboard :where(button, a, input, select, textarea):focus-visible {
   outline: 2px solid #c96042;
   outline-offset: 4px;
@@ -173,7 +196,7 @@
   }
 
   .summaryNote {
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .sectionHeader {

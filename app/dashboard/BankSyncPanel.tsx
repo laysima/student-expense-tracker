@@ -435,7 +435,7 @@ export default function BankSyncPanel({ expenses, income }: Props) {
                       value={chosen}
                       onChange={event => setChoices(current => ({ ...current, [transaction.id]: event.target.value }))}
                       aria-label={transaction.direction === 'out' ? 'Expense category' : 'Income source'}
-                      className="rounded-lg border border-[#DFE0DA] bg-white px-2.5 py-2 text-[12px] font-medium text-[#242522] outline-none focus:border-[#829A83]"
+                      className="rounded-lg border border-[#DFE0DA] bg-white px-2.5 py-2 text-base font-medium text-[#242522] outline-none sm:text-[12px] focus:border-[#829A83]"
                     >
                       {selectOptions.map(option => (
                         <option key={option} value={option}>{option}</option>

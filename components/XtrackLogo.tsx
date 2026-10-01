@@ -3,14 +3,16 @@ interface Props {
   /**
    * 'mark' crops the viewBox to just the icon, for tight spots like a
    * collapsed sidebar rail where the wordmark would have to be clipped.
+   * 'word' crops to the "track" lettering, for layouts that stack it under the mark.
    */
-  variant?: 'full' | 'mark'
+  variant?: 'full' | 'mark' | 'word'
 }
 
-// The icon occupies x 22–164 of the artwork; the wordmark runs to x 481.
+// The icon occupies x 22–164 of the artwork; the wordmark runs x 189–481.
 const VIEW_BOX = {
   full: '18 18 467 122',
   mark: '18 18 152 122',
+  word: '186 36 298 94',
 }
 
 /**

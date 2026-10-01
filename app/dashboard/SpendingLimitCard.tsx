@@ -28,7 +28,7 @@ function LimitForm({ settings, summary, onCancel, onSave }: {
   const [enabled, setEnabled] = useState(settings?.enabled ?? true)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  const inputClass = 'mt-2 w-full rounded-xl border border-[#DFE3D8] bg-white px-3.5 py-3 text-sm text-[#242522] outline-none focus:border-[#829A83] focus:ring-2 focus:ring-[#829A83]/20'
+  const inputClass = 'mt-2 w-full rounded-xl border border-[#DFE3D8] bg-white px-3.5 py-3 text-base text-[#242522] outline-none sm:text-sm focus:border-[#829A83] focus:ring-2 focus:ring-[#829A83]/20'
 
   async function save(event: React.FormEvent) {
     event.preventDefault()
