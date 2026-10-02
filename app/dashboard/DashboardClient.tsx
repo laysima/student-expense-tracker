@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   BusFront,
   CalendarClock,
   CalendarDays,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clapperboard,
@@ -46,6 +47,8 @@ import type { SpendingLimitSettings } from '@/lib/spending-limits'
 import styles from './dashboard.module.css'
 import SettingsPanel from './SettingsPanel'
 import AnimatedMoney from './AnimatedMoney'
+import MonthPicker, { monthKey as pickerMonthKey } from './MonthPicker'
+import { budgetsInForce } from '@/lib/budgets'
 import { categoryColor } from './chart-data'
 
 interface Profile {
@@ -311,18 +314,6 @@ function getMonthlyRecurringIncome(income: Income[]) {
         total + item.amount_cad * (CYCLE_MULTIPLIER[item.recur_cycle ?? 'monthly'] ?? 1),
       0,
     )
-}
-
-function computeRunway(expenses: Expense[], income: Income[]) {
-  const now = new Date()
-  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-  const recentExpenses = expenses.filter(expense => parseLocalDate(expense.date) >= thirtyDaysAgo)
-  const totalSpent = recentExpenses.reduce((total, expense) => total + expense.amount_cad, 0)
-  const dailyRate = totalSpent / 30
-  const balance = getMonthlyRecurringIncome(income) - totalSpent
-
-  if (dailyRate === 0) return null
-  return Math.max(0, Math.round(balance / dailyRate))
 }
 
 function predictCategoryBudgets(expenses: Expense[], income: Income[]) {
@@ -668,6 +659,23 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
 
   // Shared by the overview, Expenses and Income tabs so picking a month in one
   // carries over to the others.
+  const [monthPickerOpen, setMonthPickerOpen] = useState(false)
+  const closeMonthPicker = useCallback(() => setMonthPickerOpen(false), [])
+  const activeMonths = useMemo(() => {
+    const keys = new Set<string>()
+    for (const entry of [...expenses, ...income]) {
+      const date = parseLocalDate(entry.date)
+      keys.add(pickerMonthKey(date.getFullYear(), date.getMonth()))
+    }
+    return keys
+  }, [expenses, income])
+  function selectMonth(month: Date) {
+    const today = new Date()
+    setMonthOffset((month.getFullYear() - today.getFullYear()) * 12 + (month.getMonth() - today.getMonth()))
+    setSummaryScope('month')
+    setMonthPickerOpen(false)
+  }
+
   const monthControls = (
     <div className="flex flex-wrap items-center gap-3">
       <div className="flex gap-1 rounded-xl border border-[#E0E2D9] bg-[#ECEDE6] p-1" role="group" aria-label="Summary scope">
@@ -679,7 +687,10 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
             key={option.id}
             type="button"
             aria-pressed={summaryScope === option.id}
-            onClick={() => setSummaryScope(option.id)}
+            onClick={() => {
+              setSummaryScope(option.id)
+              setMonthPickerOpen(option.id === 'month')
+            }}
             className={`whitespace-nowrap rounded-lg px-3 py-2 text-[11px] font-semibold transition ${
               summaryScope === option.id
                 ? 'bg-white text-[#242522] shadow-sm'
@@ -697,27 +708,52 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
         </p>
       ) : (
         <>
-          <button
-            type="button"
-            onClick={() => setMonthOffset(offset => offset - 1)}
-            disabled={!canGoBackAMonth}
-            aria-label="Previous month"
-            className="grid size-9 place-items-center rounded-xl border border-[#DFE0DA] bg-white text-[#5C5F57] transition hover:border-[#BFC2B9] hover:text-[#242522] disabled:cursor-not-allowed disabled:opacity-35"
-          >
-            <ChevronLeft size={16} aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setMonthOffset(offset => Math.min(0, offset + 1))}
-            disabled={viewingCurrentMonth}
-            aria-label="Next month"
-            className="grid size-9 place-items-center rounded-xl border border-[#DFE0DA] bg-white text-[#5C5F57] transition hover:border-[#BFC2B9] hover:text-[#242522] disabled:cursor-not-allowed disabled:opacity-35"
-          >
-            <ChevronRight size={16} aria-hidden="true" />
-          </button>
-          <p aria-live="polite" className="text-sm font-semibold tracking-[-0.01em] text-[#242522]">
-            {viewedMonthLabel}
-          </p>
+          {/* Arrows and the month stay together as one control so they never
+              wrap apart on a narrow screen. */}
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setMonthOffset(offset => offset - 1)}
+              disabled={!canGoBackAMonth}
+              aria-label="Previous month"
+              className="grid size-9 place-items-center rounded-xl border border-[#DFE0DA] bg-white text-[#5C5F57] transition hover:border-[#BFC2B9] hover:text-[#242522] disabled:cursor-not-allowed disabled:opacity-35"
+            >
+              <ChevronLeft size={16} aria-hidden="true" />
+            </button>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setMonthPickerOpen(open => !open)}
+                aria-expanded={monthPickerOpen}
+                aria-haspopup="dialog"
+                aria-live="polite"
+                className="flex h-9 items-center gap-2 rounded-xl border border-[#DFE0DA] bg-white px-3 text-sm font-semibold tracking-[-0.01em] text-[#242522] transition hover:border-[#BFC2B9]"
+              >
+                <CalendarDays size={15} className="text-[#AC5A3D]" aria-hidden="true" />
+                {viewedMonthLabel}
+                <ChevronDown size={14} className={`text-[#85887F] transition ${monthPickerOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
+              </button>
+              {monthPickerOpen && (
+                <MonthPicker
+                  value={viewedMonth}
+                  min={earliestMonth}
+                  max={startOfMonth(new Date())}
+                  activeMonths={activeMonths}
+                  onSelect={selectMonth}
+                  onClose={closeMonthPicker}
+                />
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => setMonthOffset(offset => Math.min(0, offset + 1))}
+              disabled={viewingCurrentMonth}
+              aria-label="Next month"
+              className="grid size-9 place-items-center rounded-xl border border-[#DFE0DA] bg-white text-[#5C5F57] transition hover:border-[#BFC2B9] hover:text-[#242522] disabled:cursor-not-allowed disabled:opacity-35"
+            >
+              <ChevronRight size={16} aria-hidden="true" />
+            </button>
+          </div>
           {!viewingCurrentMonth && (
             <button
               type="button"
@@ -734,9 +770,10 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
 
   const spentFigure = showingRunning ? runningTotals.spent : totalSpentThisMonth
   const earnedFigure = showingRunning ? runningTotals.earned : totalIncomeThisMonth
-  const leftFigure = showingRunning ? runningTotals.balance : amountLeftThisMonth
+  // In the month view the balance still includes everything carried in from
+  // earlier months; only spent/earned are limited to the month itself.
+  const leftFigure = showingRunning ? runningTotals.balance : balanceBroughtForward + amountLeftThisMonth
   const spentShare = earnedFigure > 0 ? (spentFigure / earnedFigure) * 100 : 0
-  const runway = useMemo(() => computeRunway(expenses, income), [expenses, income])
   const monthlyAverages = useMemo(() => computeMonthlyAverages(expenses, income), [expenses, income])
   const avgMonthlySavings = monthlyAverages.potential
   const savingsPotential = avgMonthlySavings
@@ -777,12 +814,14 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
 
   const now = new Date()
   // Budgets follow whichever month is on screen, so browsing back shows the
-  // limits that were in force then. Notifications below deliberately stay on
-  // the real current month — an alert is about now, not what you're reading.
+  // limits that were in force then. A limit carries into every later month
+  // until it's changed (lib/budgets.ts); spending against it resets monthly.
+  // Notifications below deliberately stay on the real current month.
   const currentMonth = viewedMonth.getMonth() + 1
   const currentYear = viewedMonth.getFullYear()
-  const currentBudgets = budgets.filter(
-    budget => budget.month === currentMonth && budget.year === currentYear,
+  const currentBudgets = useMemo(
+    () => budgetsInForce(budgets, currentMonth, currentYear),
+    [budgets, currentMonth, currentYear],
   )
   const suggestions = useMemo(() => predictCategoryBudgets(expenses, income), [expenses, income])
   const upcomingPayments = useMemo(() => getUpcomingPayments(expenses), [expenses])
@@ -1385,8 +1424,6 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
             </section>
           )}
 
-          <BankSyncPanel expenses={expenses} income={income} />
-
           {insightError && (
             <div className="mt-4 rounded-xl bg-[#FFF0EA] px-4 py-3 text-[13px] font-medium text-[#B9573A]">{insightError}</div>
           )}
@@ -1402,7 +1439,11 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                 <div className={`${styles.summaryCard} ${styles.heroCard} col-span-2 lg:row-span-2`}>
                   <div aria-hidden="true" className="pointer-events-none absolute -bottom-16 -right-12 size-56 rounded-full border-[28px] border-white/[0.035]" />
                   <div className={styles.summaryHeader}>
-                    <p className={styles.summaryLabel}>{showingRunning ? 'Balance left' : `Left ${monthWord}`}</p>
+                    <p className={styles.summaryLabel}>
+                      {showingRunning || viewingCurrentMonth
+                        ? 'Balance left'
+                        : `Balance at end of ${viewedMonth.toLocaleDateString('en-CA', { month: 'long' })}`}
+                    </p>
                     <span className={styles.summaryIcon}><Wallet size={16} className="text-[#E98563]" aria-hidden="true" /></span>
                   </div>
                   <AnimatedMoney
@@ -1413,13 +1454,13 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                   <p className={styles.summaryNote}>
                     {showingRunning
                       ? 'Everything earned minus everything spent'
-                      : `${formatCAD(balanceBroughtForward)} carried in${amountLeftThisMonth >= 0 ? '' : ' · spending outpaced income'}`}
+                      : `${formatCAD(balanceBroughtForward)} carried over · ${amountLeftThisMonth >= 0 ? '+' : '−'}${formatCAD(Math.abs(amountLeftThisMonth))} ${monthWord}`}
                   </p>
                   <div className="relative mt-auto pt-6">
                     <div className="mb-2 flex items-baseline justify-between gap-3 text-[11px] text-[#B0B5A9]">
                       <span>
                         {earnedFigure > 0
-                          ? `You've spent ${Math.round(spentShare)}% of what you earned`
+                          ? `You've spent ${Math.round(spentShare)}% of what you earned${showingRunning ? '' : ` ${monthWord}`}`
                           : spentFigure > 0 ? 'Spending with no income logged yet' : 'Nothing logged yet'}
                       </span>
                     </div>
@@ -1441,7 +1482,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                   <p className={styles.summaryNote}>
                     {showingRunning
                       ? `${formatCAD(totalSpentThisMonth)} of it ${viewingCurrentMonth ? 'this month' : monthWord}`
-                      : `${monthExpenses.length} transactions`}
+                      : `${monthExpenses.length} transaction${monthExpenses.length === 1 ? '' : 's'}`}
                   </p>
                 </div>
 
@@ -1454,7 +1495,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                   <p className={styles.summaryNote}>
                     {showingRunning
                       ? `${formatCAD(totalIncomeThisMonth)} of it ${viewingCurrentMonth ? 'this month' : monthWord}`
-                      : `${income.filter(item => item.is_recurring).length} recurring sources`}
+                      : `${income.filter(item => item.is_recurring).length} recurring source${income.filter(item => item.is_recurring).length === 1 ? '' : 's'}`}
                   </p>
                   <button
                     type="button"
@@ -1502,7 +1543,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                   )}
                 </div>
 
-                <div ref={savingsCardRef} className={`${styles.summaryCard} ${savingsPotential >= 0 ? styles.savingsCard : ''}`}>
+                <div ref={savingsCardRef} className={`${styles.summaryCard} col-span-2 ${savingsPotential >= 0 ? styles.savingsCard : ''}`}>
                   <div className={styles.summaryHeader}>
                     <p className={styles.summaryLabel}>Savings potential</p>
                     <span className={styles.summaryIcon}><PiggyBank size={16} className={savingsPotential >= 0 ? 'text-[#58755F]' : 'text-[#D86F4E]'} aria-hidden="true" /></span>
@@ -1575,18 +1616,9 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                     </div>
                   )}
                 </div>
-
-                <div className={styles.summaryCard}>
-                  <div className={styles.summaryHeader}>
-                    <p className={styles.summaryLabel}>Budget runway</p>
-                    <span className={styles.summaryIcon}><WalletCards size={16} className="text-[#D86F4E]" aria-hidden="true" /></span>
-                  </div>
-                  <p className={`${styles.summaryValue} text-[#242522]`}>
-                    {runway ?? '—'} <span className="text-sm font-medium tracking-normal text-[#85887F]">days</span>
-                  </p>
-                  <p className={styles.summaryNote}>How long your balance lasts at your current spending rate</p>
-                </div>
               </section>
+
+              <BankSyncPanel expenses={expenses} income={income} />
 
               <SpendingLimitCard
                 key={JSON.stringify(spendingLimit)}
@@ -1610,7 +1642,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <h2 className="text-base font-semibold tracking-[-0.02em] text-[#242522]">Monthly budgets</h2>
-                      <p className="mt-1 text-xs text-[#85887F]">{viewingCurrentMonth ? 'Keep each category on track' : `Limits set for ${viewedMonthLabel}`}</p>
+                      <p className="mt-1 text-xs text-[#85887F]">{viewingCurrentMonth ? 'Limits repeat every month · spending resets on the 1st' : `Limits in force for ${viewedMonthLabel}`}</p>
                     </div>
                     <button
                       type="button"

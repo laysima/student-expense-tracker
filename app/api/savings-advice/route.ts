@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
 import { describeAnthropicError } from '@/lib/anthropic-error'
+import { budgetsInForce } from '@/lib/budgets'
 
 export async function POST() {
   const apiKey = process.env.ANTHROPIC_API_KEY
@@ -29,10 +30,8 @@ export async function POST() {
       .gte('date', thirtyDaysAgo),
     supabase
       .from('budgets')
-      .select('category, amount_cad')
-      .eq('user_id', user.id)
-      .eq('month', now.getMonth() + 1)
-      .eq('year', now.getFullYear()),
+      .select('category, amount_cad, month, year')
+      .eq('user_id', user.id),
   ])
 
   if (!expenses?.length) {
@@ -51,7 +50,7 @@ export async function POST() {
     .filter(expense => expense.is_recurring)
     .map(expense => ({ category: expense.category, amountCad: expense.amount_cad, cycle: expense.recur_cycle, note: expense.note }))
 
-  const currentBudgets = (budgets ?? []).map(budget => ({
+  const currentBudgets = budgetsInForce(budgets ?? [], now.getMonth() + 1, now.getFullYear()).map(budget => ({
     category: budget.category,
     limitCad: budget.amount_cad,
     spentCad: Math.round((spendByCategory[budget.category] ?? 0) * 100) / 100,

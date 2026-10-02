@@ -8,6 +8,10 @@ const CATEGORIES = ['Rent', 'Groceries', 'Tuition', 'Transport', 'Utilities', 'E
 interface ExistingBudget {
   category: string
   amount_cad: number
+  // The month the limit was set in; earlier than the modal's month when it
+  // carried over.
+  month: number
+  year: number
 }
 
 interface Suggestion {
@@ -62,7 +66,10 @@ export default function AddBudgetModal({ userId, month, year, existingBudgets, s
     setLoading(true)
     setError('')
     const supabase = createClient()
-    const { error: saveError } = existingForCategory
+    // A budget carried over from an earlier month is changed by recording a
+    // new limit for this month, which then carries forward in its place.
+    const setThisMonth = existingForCategory && existingForCategory.month === month && existingForCategory.year === year
+    const { error: saveError } = setThisMonth
       ? await supabase
           .from('budgets')
           .update({ amount_cad: Number(amount) })
@@ -102,7 +109,7 @@ export default function AddBudgetModal({ userId, month, year, existingBudgets, s
             <div>
               <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#658069]">This month</p>
               <h2 id="add-budget-title" className="text-[24px] font-semibold tracking-[-0.035em] text-[#242522]">{existingForCategory ? 'Edit budget' : 'Set a budget'}</h2>
-              <p className="mt-1 text-[12px] text-[#85887F]">{existingForCategory ? 'Update this category’s spending limit.' : 'Choose a comfortable spending limit.'}</p>
+              <p className="mt-1 text-[12px] text-[#85887F]">{existingForCategory ? 'Update this category’s limit. The new amount applies from this month on.' : 'Set a monthly limit. It repeats every month until you change it.'}</p>
             </div>
             <button type="button" onClick={onClose} className="-mr-3 -mt-1 rounded-lg px-3 py-2 text-[13px] font-semibold text-[#85887F] transition hover:text-[#242522]">
               Close

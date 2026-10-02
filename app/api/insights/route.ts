@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
 import { describeAnthropicError } from '@/lib/anthropic-error'
+import { budgetsInForce } from '@/lib/budgets'
 
 const CYCLE_MULTIPLIER: Record<string, number> = {
   weekly: 52 / 12,
@@ -46,9 +47,7 @@ export async function POST() {
     supabase
       .from('budgets')
       .select('category, amount_cad, month, year')
-      .eq('user_id', user.id)
-      .eq('month', new Date().getMonth() + 1)
-      .eq('year', new Date().getFullYear()),
+      .eq('user_id', user.id),
   ])
 
   if (!expenses?.length && !income?.length) {
@@ -71,7 +70,7 @@ export async function POST() {
     last30DaysSpendByCategory: spendByCategory,
     totalSpentLast30Days: Object.values(spendByCategory).reduce((a, b) => a + b, 0),
     monthlyRecurringIncomeCad: Math.round(monthlyIncome * 100) / 100,
-    currentBudgets: (budgets ?? []).map(b => ({ category: b.category, limitCad: b.amount_cad })),
+    currentBudgets: budgetsInForce(budgets ?? [], new Date().getMonth() + 1, new Date().getFullYear()).map(b => ({ category: b.category, limitCad: b.amount_cad })),
   }
 
   const anthropic = new Anthropic({ apiKey })
