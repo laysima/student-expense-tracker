@@ -40,6 +40,7 @@ import AddSavingsGoalModal from './AddSavingsGoalModal'
 import BankSyncPanel from './BankSyncPanel'
 import NotificationsPanel from './NotificationsPanel'
 import StatementModal from './StatementModal'
+import SpendingBreakdownModal from './SpendingBreakdownModal'
 import FinancialChart from './FinancialChart'
 import SpendingLimitCard from './SpendingLimitCard'
 import SpendingAlertSync from './SpendingAlertSync'
@@ -48,7 +49,7 @@ import styles from './dashboard.module.css'
 import SettingsPanel from './SettingsPanel'
 import AnimatedMoney from './AnimatedMoney'
 import MonthPicker, { monthKey as pickerMonthKey } from './MonthPicker'
-import { budgetsInForce } from '@/lib/budgets'
+import { budgetsInForce, setBudgetForMonth } from '@/lib/budgets'
 import { categoryColor } from './chart-data'
 
 interface Profile {
@@ -546,6 +547,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
   const [editingIncome, setEditingIncome] = useState<Income | null>(null)
   const [editingBudgetCategory, setEditingBudgetCategory] = useState<string | null>(null)
   const [showStatement, setShowStatement] = useState(false)
+  const [showSpendingBreakdown, setShowSpendingBreakdown] = useState(false)
   const [predicting, setPredicting] = useState(false)
   const [goalModalOpen, setGoalModalOpen] = useState(false)
   const [fundingGoal, setFundingGoal] = useState<SavingsGoal | null>(null)
@@ -977,8 +979,9 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
 
     // Pinned to the real current month: browsing back through history should
     // never raise alerts about a month that has already closed.
+    // A limit of 0 marks a deleted budget, not a real limit to exceed.
     const realMonthBudgets = budgets.filter(
-      budget => budget.month === realMonth && budget.year === realYear,
+      budget => budget.month === realMonth && budget.year === realYear && budget.amount_cad > 0,
     )
     const realMonthExpenses = getMonthEntries(expenses, now)
     for (const budget of realMonthBudgets) {
@@ -1065,18 +1068,20 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
   async function handlePredictBudgets() {
     setPredicting(true)
     const supabase = createClient()
-    const toInsert = suggestions
-      .filter(suggestion => !currentBudgets.some(budget => budget.category === suggestion.category))
-      .map(suggestion => ({
+    const toSet = suggestions.filter(
+      suggestion => !currentBudgets.some(budget => budget.category === suggestion.category),
+    )
+
+    // Through setBudgetForMonth so a budget deleted earlier this month is
+    // revived in place instead of gaining a second row for the same month.
+    for (const suggestion of toSet) {
+      await setBudgetForMonth(supabase, {
         user_id: userId,
         category: suggestion.category,
         amount_cad: suggestion.suggested,
         month: currentMonth,
         year: currentYear,
-      }))
-
-    if (toInsert.length > 0) {
-      await supabase.from('budgets').insert(toInsert)
+      })
     }
     setPredicting(false)
     router.refresh()
@@ -1473,7 +1478,13 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                   </div>
                 </div>
 
-                <div className={`${styles.summaryCard} ${styles.spentCard}`}>
+                <button
+                  type="button"
+                  onClick={() => setShowSpendingBreakdown(true)}
+                  aria-haspopup="dialog"
+                  aria-label={`${showingRunning ? 'Spent in total' : `Spent ${monthWord}`}: ${formatCAD(spentFigure)}. Show what it was spent on`}
+                  className={`${styles.summaryCard} ${styles.spentCard} block w-full text-left transition hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B9573A]`}
+                >
                   <div className={styles.summaryHeader}>
                     <p className={styles.summaryLabel}>{showingRunning ? 'Spent in total' : `Spent ${monthWord}`}</p>
                     <span className={styles.summaryIcon}><ReceiptText size={16} className="text-[#D86F4E]" aria-hidden="true" /></span>
@@ -1483,8 +1494,11 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                     {showingRunning
                       ? `${formatCAD(totalSpentThisMonth)} of it ${viewingCurrentMonth ? 'this month' : monthWord}`
                       : `${monthExpenses.length} transaction${monthExpenses.length === 1 ? '' : 's'}`}
+                    <span className="ml-1.5 inline-flex items-center font-semibold text-[#B9573A]">
+                      See breakdown <ChevronRight size={12} aria-hidden="true" />
+                    </span>
                   </p>
-                </div>
+                </button>
 
                 <div ref={incomeCardRef} className={`${styles.summaryCard} ${styles.earnedCard}`}>
                   <div className={styles.summaryHeader}>
@@ -2160,6 +2174,17 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
           initialCategory={editingBudgetCategory}
           onClose={() => { setShowAddBudget(false); setEditingBudgetCategory(null) }}
           onSaved={handleEntrySaved}
+        />
+      )}
+
+      {showSpendingBreakdown && (
+        <SpendingBreakdownModal
+          title={showingRunning ? 'Spent in total' : `Spent ${monthWord}`}
+          periodLabel={showingRunning ? 'All time, up to today' : viewedMonthLabel}
+          expenses={showingRunning ? recordedExpenses : monthExpenses}
+          icons={CATEGORY_ICONS}
+          onViewAll={() => { setShowSpendingBreakdown(false); setActiveTab('expenses') }}
+          onClose={() => setShowSpendingBreakdown(false)}
         />
       )}
 

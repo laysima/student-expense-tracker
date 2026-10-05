@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { setBudgetForMonth } from '@/lib/budgets'
 
 const CATEGORIES = ['Rent', 'Groceries', 'Tuition', 'Transport', 'Utilities', 'Entertainment', 'Other']
 
@@ -44,6 +45,8 @@ export default function AddBudgetModal({ userId, month, year, existingBudgets, s
   )
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const monthLabel = new Date(year, month - 1, 1).toLocaleDateString('en-CA', { month: 'long', year: 'numeric' })
 
   // What actually gets written and matched against — the typed name when one
   // is given, otherwise the chip itself.
@@ -56,30 +59,21 @@ export default function AddBudgetModal({ userId, month, year, existingBudgets, s
   function selectCategory(next: string) {
     setCategory(next)
     setAmount(existingBudgets.find(budget => budget.category === next)?.amount_cad.toString() ?? '')
+    setConfirmingDelete(false)
   }
 
-  async function handleSave() {
-    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
-      setError('Please enter a valid amount.')
-      return
-    }
+  // A budget carried over from an earlier month is changed by recording a new
+  // limit for this month, which then carries forward in its place.
+  async function writeLimit(amountCad: number) {
     setLoading(true)
     setError('')
-    const supabase = createClient()
-    // A budget carried over from an earlier month is changed by recording a
-    // new limit for this month, which then carries forward in its place.
-    const setThisMonth = existingForCategory && existingForCategory.month === month && existingForCategory.year === year
-    const { error: saveError } = setThisMonth
-      ? await supabase
-          .from('budgets')
-          .update({ amount_cad: Number(amount) })
-          .eq('user_id', userId)
-          .eq('category', effectiveCategory)
-          .eq('month', month)
-          .eq('year', year)
-      : await supabase
-          .from('budgets')
-          .insert({ user_id: userId, category: effectiveCategory, amount_cad: Number(amount), month, year })
+    const saveError = await setBudgetForMonth(createClient(), {
+      user_id: userId,
+      category: effectiveCategory,
+      amount_cad: amountCad,
+      month,
+      year,
+    })
 
     if (saveError) {
       setError(saveError.message)
@@ -89,6 +83,20 @@ export default function AddBudgetModal({ userId, month, year, existingBudgets, s
 
     onSaved()
     onClose()
+  }
+
+  async function handleSave() {
+    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+      setError('Please enter a valid amount.')
+      return
+    }
+    await writeLimit(Number(amount))
+  }
+
+  // Deleting records a limit of 0 for this month rather than removing rows:
+  // the budget stops from here on, and earlier months keep the limits they had.
+  async function handleDelete() {
+    await writeLimit(0)
   }
 
   const inputClass = 'w-full rounded-xl border border-transparent bg-[#F1F2ED] px-4 py-3.5 text-base font-medium text-[#242522] placeholder-[#A4A79F] sm:text-[14px] outline-none transition focus:border-[#829A83] focus:bg-white focus:ring-4 focus:ring-[#829A83]/10'
@@ -185,6 +193,45 @@ export default function AddBudgetModal({ userId, month, year, existingBudgets, s
                 </button>
               )}
             </div>
+
+            {existingForCategory && (
+              confirmingDelete ? (
+                <div role="alertdialog" aria-labelledby="delete-budget-title" className="rounded-2xl border border-[#F3D3C7] bg-[#FFF6F2] p-4">
+                  <p id="delete-budget-title" className="text-[13px] font-semibold text-[#242522]">
+                    Delete the {effectiveCategory} budget?
+                  </p>
+                  <p className="mt-1 text-[12px] leading-5 text-[#85887F]">
+                    It stops from {monthLabel} onward. Earlier months keep their limits, and your expenses aren’t touched.
+                  </p>
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setConfirmingDelete(false)}
+                      disabled={loading}
+                      className="rounded-lg px-3 py-2 text-[12px] font-semibold text-[#5F625B] transition hover:bg-white disabled:opacity-50"
+                    >
+                      Keep it
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDelete}
+                      disabled={loading}
+                      className="rounded-lg bg-[#B9573A] px-3.5 py-2 text-[12px] font-semibold text-white transition hover:bg-[#A44B31] disabled:opacity-50"
+                    >
+                      {loading ? 'Deleting...' : 'Delete budget'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setConfirmingDelete(true)}
+                  className="text-[12px] font-semibold text-[#B9573A] transition hover:underline"
+                >
+                  Delete this budget
+                </button>
+              )
+            )}
           </div>
 
           <div className="flex shrink-0 items-center justify-between gap-3 border-t border-[#ECEDE7] px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 sm:gap-4 sm:border-t-0 sm:px-8 sm:pb-8">
@@ -195,7 +242,7 @@ export default function AddBudgetModal({ userId, month, year, existingBudgets, s
               disabled={loading}
               className="min-w-0 flex-1 rounded-xl sm:min-w-[168px] sm:flex-none bg-[#28352A] px-5 py-3.5 text-[13px] font-semibold text-white shadow-[0_8px_20px_rgba(40,53,42,0.16)] transition hover:-translate-y-0.5 hover:bg-[#344637] disabled:translate-y-0 disabled:opacity-50"
             >
-              {loading ? 'Saving...' : existingForCategory ? 'Save changes' : 'Save budget'}
+              {loading && !confirmingDelete ? 'Saving...' : existingForCategory ? 'Save changes' : 'Save budget'}
             </button>
           </div>
         </div>
