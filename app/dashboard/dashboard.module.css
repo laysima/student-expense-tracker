@@ -1,7 +1,16 @@
+/* Xtrack dashboard — soft grey canvas, white rounded cards, violet accent. */
+
 .dashboard {
+  --violet: #7c5cfa;
+  --violet-deep: #6243ee;
+  --violet-soft: #efeaff;
+  --ink: #16161d;
+  --muted: #8b8b9a;
+  --line: #ececf2;
+
   min-height: 100vh;
-  background: #ecede6;
-  color: #242522;
+  background: #f4f4f8;
+  color: var(--ink);
   font-weight: 400;
   font-variant-numeric: tabular-nums;
 }
@@ -29,152 +38,22 @@
   .dashboard :where(button.group:not(:disabled)):active {
     scale: none;
     opacity: 1;
-    background-color: #eeefe8;
+    background-color: #f1f0f7;
   }
 }
 
 .dashboard :where(button, a, input, select, textarea):focus-visible {
-  outline: 2px solid #c96042;
-  outline-offset: 4px;
+  outline: 2px solid var(--violet);
+  outline-offset: 3px;
 }
 
+/* White card used by every section. */
 .panel {
-  --tone: transparent;
   min-width: 0;
-  border: 1px solid #d9dad1;
-  border-top: 3px solid var(--tone);
-  border-radius: 20px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
   background: #fff;
-  box-shadow: 0 1px 2px rgb(31 32 29 / 4%), 0 10px 28px rgb(31 32 29 / 5%);
-}
-
-/* Each section gets its own accent so they read as separate blocks instead of
-   one long run of white cards. Colours come from the category palette. */
-.panel[data-tone='ink'] { --tone: #3f4a40; }
-.panel[data-tone='spend'] { --tone: #e98563; }
-.panel[data-tone='earn'] { --tone: #829a83; }
-.panel[data-tone='plan'] { --tone: #8d9fb9; }
-.panel[data-tone='limit'] { --tone: #ceab68; }
-.panel[data-tone='neutral'] { --tone: #a7aaa0; }
-
-.summaryCard {
-  position: relative;
-  min-width: 0;
-  padding: 20px;
-  border: 1px solid #d9dad1;
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 1px 2px rgb(31 32 29 / 4%), 0 10px 28px rgb(31 32 29 / 5%);
-}
-
-.summaryHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 36px;
-}
-
-.summaryLabel {
-  color: #6e7269;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.5;
-}
-
-.summaryIcon {
-  display: grid;
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-  place-items: center;
-  border-radius: 10px;
-  background: #f2f3ee;
-}
-
-.summaryValue {
-  display: block;
-  margin-top: 18px;
-  overflow-wrap: anywhere;
-  font-size: clamp(1.5rem, 2.3vw, 2.125rem);
-  font-weight: 650;
-  line-height: 1.25;
-  letter-spacing: -0.045em;
-}
-
-.summaryNote {
-  margin-top: 8px;
-  color: #7a7e74;
-  font-size: 11px;
-  line-height: 1.65;
-}
-
-/* Balance hero: the first and largest number on the page. */
-.heroCard {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  padding: 24px;
-  border-color: #292c25;
-  background: linear-gradient(140deg, #2d3a2f 0%, #20261f 55%, #191d18 100%);
-  color: #fff;
-  box-shadow: 0 14px 36px rgb(31 32 29 / 16%);
-}
-
-.heroCard .summaryLabel {
-  color: #c2c6bb;
-  font-size: 13px;
-}
-
-.heroCard .summaryIcon {
-  background: rgb(233 133 99 / 14%);
-}
-
-.heroCard .summaryNote {
-  color: #b0b5a9;
-}
-
-.heroValue {
-  display: block;
-  margin-top: 18px;
-  font-size: clamp(2.6rem, 6vw, 4rem);
-  font-weight: 650;
-  line-height: 1.02;
-  letter-spacing: -0.055em;
-  overflow-wrap: anywhere;
-}
-
-.heroCents,
-.summaryCents {
-  font-size: 0.55em;
-  font-weight: 550;
-  letter-spacing: -0.02em;
-  opacity: 0.6;
-}
-
-
-.savingsCard {
-  border-color: #cbdcc8;
-  background: linear-gradient(145deg, #fbfdfa, #e9f1e7);
-}
-
-.savingsCard .summaryIcon,
-.earnedCard .summaryIcon {
-  background: #dfeadc;
-}
-
-.spentCard {
-  border-color: #f0cfc2;
-  background: linear-gradient(145deg, #fffaf8, #fdebe3);
-}
-
-.spentCard .summaryIcon {
-  background: #fbdccf;
-}
-
-.earnedCard {
-  border-color: #cbdcc8;
-  background: linear-gradient(145deg, #fbfdfa, #edf4eb);
+  box-shadow: 0 1px 2px rgb(22 22 29 / 3%), 0 12px 32px rgb(22 22 29 / 4%);
 }
 
 .sectionHeader {
@@ -182,56 +61,107 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 18px 24px;
-  border-bottom: 1px solid #e6e7e0;
-  background: #fafaf7;
+  gap: 12px;
+  padding: 18px 20px 14px;
 }
 
-/* Month divider inside the Expenses and Income lists. */
+/* Month divider inside long lists. */
 .monthDivider {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px 24px;
-  border-block: 1px solid #e6e7e0;
-  background: #f3f4ee;
+  padding: 10px 20px;
+  border-block: 1px solid var(--line);
+  background: #f8f8fb;
 }
 
-.monthDivider:first-child {
-  border-top: 0;
+/* ---- Home hero: the balance on a violet gradient ---------------------- */
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 18px 20px 64px;
+  background:
+    radial-gradient(120% 90% at 85% 0%, rgb(255 255 255 / 22%) 0%, transparent 55%),
+    radial-gradient(90% 70% at 0% 100%, rgb(64 32 200 / 30%) 0%, transparent 60%),
+    linear-gradient(160deg, #8d6bfb 0%, #9f82fb 50%, #b8a2fd 100%);
+  color: #fff;
 }
 
-@media (max-width: 639px) {
-  .summaryCard {
-    padding: 16px;
+/* Soft glossy streak across the hero, like light on glass. */
+.hero::after {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -10%;
+  width: 70%;
+  height: 160%;
+  background: linear-gradient(115deg, transparent 35%, rgb(255 255 255 / 14%) 50%, transparent 65%);
+  pointer-events: none;
+}
+
+.heroValue {
+  display: block;
+  font-size: clamp(2.6rem, 11vw, 3.6rem);
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
+}
+
+.heroCents,
+.cents {
+  font-size: 0.62em;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  opacity: 0.55;
+}
+
+/* The content sheet that overlaps the hero on phones. */
+.sheet {
+  position: relative;
+  margin-top: -36px;
+  border-radius: 28px 28px 0 0;
+  background: #f4f4f8;
+  padding: 20px 16px 0;
+}
+
+@media (min-width: 1024px) {
+  .hero {
+    border-radius: 28px;
+    padding: 24px 32px 40px;
   }
 
-
-  .summaryLabel {
-    font-size: 11px;
+  .sheet {
+    margin-top: 0;
+    border-radius: 0;
+    padding: 24px 0 0;
+    background: transparent;
   }
+}
 
-  .summaryValue {
-    font-size: 25px;
-  }
+/* Floating "+" in the bottom bar. */
+.fab {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border-radius: 999px;
+  background: linear-gradient(160deg, #9b7dfb, #7c5cfa);
+  color: #fff;
+  box-shadow: 0 10px 24px rgb(124 92 250 / 40%), 0 0 0 6px #fff;
+  transition: transform 150ms ease;
+}
 
-  .heroCard {
-    padding: 20px;
-  }
+.fab:hover {
+  transform: translateY(-2px);
+}
 
-  .summaryNote {
-    font-size: 11px;
-  }
-
-  .sectionHeader {
-    padding: 16px 20px;
-  }
-
-  .monthDivider {
-    padding: 10px 20px;
-  }
+.bottomNav {
+  padding-bottom: env(safe-area-inset-bottom);
+  border-top: 1px solid var(--line);
+  background: rgb(255 255 255 / 94%);
+  backdrop-filter: blur(16px);
 }
 
 @media (prefers-reduced-motion: reduce) {

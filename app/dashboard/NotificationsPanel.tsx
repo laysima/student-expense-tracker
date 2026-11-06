@@ -19,7 +19,7 @@ interface Notification {
 interface Props {
   notifications: Notification[]
   onChanged: () => void
-  variant?: 'dark' | 'light' | 'rail'
+  variant?: 'dark' | 'light' | 'rail' | 'glass'
   onOpenChange?: (open: boolean) => void
   onReviewSpendingLimit?: () => void
 }
@@ -102,22 +102,24 @@ export default function NotificationsPanel({ notifications, onChanged, variant =
   }
 
   const buttonClass = isRail
-    ? `flex w-full items-center gap-3 rounded-xl px-[11px] py-3 text-left text-sm font-medium transition ${open ? 'bg-white/[0.1] text-[#E98563]' : 'text-white/55 hover:bg-white/[0.06] hover:text-white'}`
+    ? `flex w-full items-center gap-3 rounded-xl px-[11px] py-3 text-left text-sm font-medium transition ${open ? 'bg-white/[0.1] text-[#7C5CFA]' : 'text-white/55 hover:bg-white/[0.06] hover:text-white'}`
     : variant === 'dark'
       ? 'grid size-10 place-items-center rounded-xl bg-white/10 text-white/70 transition hover:bg-white/[0.16] data-popup-open:bg-white/20'
-      : 'grid size-10 place-items-center rounded-xl bg-[#F1F3EC] text-[#58755F] transition hover:bg-[#E5EBDD]'
+      : variant === 'glass'
+        ? 'grid size-10 place-items-center rounded-full bg-white/20 text-white ring-1 ring-white/30 backdrop-blur transition hover:bg-white/30 data-popup-open:bg-white/30'
+        : 'grid size-10 place-items-center rounded-full border border-[#ECECF2] bg-white text-[#16161D] transition hover:bg-[#F6F5FB]'
 
   return (
     <Popover.Root open={open} onOpenChange={changeOpen}>
       <Popover.Trigger
         aria-label={unreadCount ? `Notifications, ${unreadCount} unread` : 'Notifications'}
         title="Notifications"
-        className={`${buttonClass} cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E98563]`}
+        className={`${buttonClass} cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#7C5CFA]`}
       >
         <span className="relative grid size-[18px] shrink-0 place-items-center">
           <Bell size={18} strokeWidth={1.8} aria-hidden="true" />
           {unreadCount > 0 && (
-            <span aria-hidden="true" className="absolute -right-2 -top-2 grid min-w-4 place-items-center rounded-full bg-[#E98563] px-1 text-[9px] font-bold leading-4 text-[#191919] ring-2 ring-[#191A18]">
+            <span aria-hidden="true" className="absolute -right-2 -top-2 grid min-w-4 place-items-center rounded-full bg-[#F0534F] px-1 text-[9px] font-bold leading-4 text-white ring-2 ring-white">
               {unreadCount > 9 ? '9+' : unreadCount}
             </span>
           )}
@@ -143,27 +145,27 @@ export default function NotificationsPanel({ notifications, onChanged, variant =
             initialFocus={closeRef}
             finalFocus={() => window.matchMedia('(min-width: 1024px)').matches === isRail}
           >
-            <div className="shrink-0 border-b border-[#EAEBE6] px-5 py-4">
+            <div className="shrink-0 border-b border-[#ECECF2] px-5 py-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <Popover.Title className="text-sm font-semibold text-[#242522]">Notifications</Popover.Title>
-                  <Popover.Description className="mt-1 text-xs text-[#74776F]" aria-live="polite">
+                  <Popover.Title className="text-sm font-semibold text-[#16161D]">Notifications</Popover.Title>
+                  <Popover.Description className="mt-1 text-xs text-[#8B8B9A]" aria-live="polite">
                     {unreadCount ? `${unreadCount} unread update${unreadCount === 1 ? '' : 's'}` : 'You’re all caught up'}
                   </Popover.Description>
                 </div>
-                <Popover.Close ref={closeRef} aria-label="Close notifications" className="grid size-8 shrink-0 place-items-center rounded-lg text-[#85887F] transition hover:bg-[#F1F3EC] hover:text-[#242522]">
+                <Popover.Close ref={closeRef} aria-label="Close notifications" className="grid size-8 shrink-0 place-items-center rounded-lg text-[#8B8B9A] transition hover:bg-[#F4F2FD] hover:text-[#16161D]">
                   <X size={17} aria-hidden="true" />
                 </Popover.Close>
               </div>
               {unreadCount > 0 && (
-                <button type="button" onClick={() => markAsRead(unreadIds)} disabled={busy} className="mt-3 flex items-center gap-1.5 text-[11px] font-semibold text-[#58755F] hover:text-[#3F6548] disabled:opacity-50">
+                <button type="button" onClick={() => markAsRead(unreadIds)} disabled={busy} className="mt-3 flex items-center gap-1.5 text-[11px] font-semibold text-[#1C8F4E] hover:text-[#1C8F4E] disabled:opacity-50">
                   {busy ? <LoaderCircle size={13} className="animate-spin motion-reduce:animate-none" aria-hidden="true" /> : <CheckCheck size={13} aria-hidden="true" />}
                   {busy ? 'Marking as read…' : 'Mark all read'}
                 </button>
               )}
             </div>
 
-            {error && <p role="alert" className="shrink-0 border-b border-[#F0D9CE] bg-[#FFF3EC] px-5 py-3 text-xs leading-5 text-[#B9573A]">{error}</p>}
+            {error && <p role="alert" className="shrink-0 border-b border-[#F0D9CE] bg-[#FFF3EC] px-5 py-3 text-xs leading-5 text-[#D93F3F]">{error}</p>}
 
             {notifications.length > 0 ? (
               <ul className={styles.list} aria-label="Recent notifications">
@@ -176,23 +178,23 @@ export default function NotificationsPanel({ notifications, onChanged, variant =
                         type="button"
                         onClick={() => !read && markAsRead([item.id])}
                         disabled={busy}
-                        className={`flex w-full items-start gap-3 px-5 py-4 text-left transition hover:bg-[#F5F6F0] disabled:cursor-wait ${read ? 'bg-white' : 'bg-[#FFF8F3]'}`}
+                        className={`flex w-full items-start gap-3 px-5 py-4 text-left transition hover:bg-[#F6F5FB] disabled:cursor-wait ${read ? 'bg-white' : 'bg-[#FFF8F3]'}`}
                       >
-                        <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-[#FFF0EA] text-[#D86F4E]">
+                        <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-[#FDECEC] text-[#D86F4E]">
                           <Icon size={15} aria-hidden="true" />
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="flex items-start gap-2">
-                            <span className="min-w-0 flex-1 break-words text-[13px] font-semibold leading-5 text-[#343630]">{item.title}</span>
-                            {!read && <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#E98563]" aria-hidden="true" />}
+                            <span className="min-w-0 flex-1 break-words text-[13px] font-semibold leading-5 text-[#16161D]">{item.title}</span>
+                            {!read && <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-[#7C5CFA]" aria-hidden="true" />}
                             <span className="sr-only">{read ? 'Read' : 'Unread. Mark as read'}</span>
                           </span>
-                          {item.body && <span className="mt-1 block break-words text-xs leading-5 text-[#74776F]">{item.body}</span>}
-                          <time dateTime={item.created_at} className="mt-2 block text-[10px] text-[#85887F]">{timeAgo(item.created_at)}</time>
+                          {item.body && <span className="mt-1 block break-words text-xs leading-5 text-[#8B8B9A]">{item.body}</span>}
+                          <time dateTime={item.created_at} className="mt-2 block text-[10px] text-[#8B8B9A]">{timeAgo(item.created_at)}</time>
                         </span>
                       </button>
                       {item.dedupe_key?.startsWith('spending_limit:') && onReviewSpendingLimit && (
-                        <button type="button" onClick={() => { changeOpen(false); onReviewSpendingLimit() }} className="w-full px-5 pb-3 pt-1 text-left text-[11px] font-semibold text-[#58755F] hover:underline">View spending limit →</button>
+                        <button type="button" onClick={() => { changeOpen(false); onReviewSpendingLimit() }} className="w-full px-5 pb-3 pt-1 text-left text-[11px] font-semibold text-[#1C8F4E] hover:underline">View spending limit →</button>
                       )}
                     </li>
                   )
@@ -200,9 +202,9 @@ export default function NotificationsPanel({ notifications, onChanged, variant =
               </ul>
             ) : (
               <div className="flex flex-col items-center px-6 py-10 text-center">
-                <span className="grid size-12 place-items-center rounded-2xl bg-[#F1F3EC] text-[#829A83]"><Bell size={22} aria-hidden="true" /></span>
+                <span className="grid size-12 place-items-center rounded-2xl bg-[#F4F2FD] text-[#7C5CFA]"><Bell size={22} aria-hidden="true" /></span>
                 <p className="mt-4 text-sm font-medium text-[#454A3E]">No notifications yet</p>
-                <p className="mt-2 max-w-60 text-xs leading-5 text-[#85887F]">Bill reminders, budget updates, and AI insights will appear here.</p>
+                <p className="mt-2 max-w-60 text-xs leading-5 text-[#8B8B9A]">Bill reminders, budget updates, and AI insights will appear here.</p>
               </div>
             )}
           </Popover.Popup>

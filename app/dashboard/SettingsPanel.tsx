@@ -18,20 +18,20 @@ interface Props {
 type Feedback = { tone: 'ok' | 'error'; text: string } | null
 
 const inputClass =
-  'w-full rounded-xl border border-transparent bg-[#F1F2ED] px-4 py-3 text-base font-medium text-[#242522] placeholder-[#A4A79F] outline-none transition focus:border-[#829A83] focus:bg-white focus:ring-4 focus:ring-[#829A83]/15 sm:text-[14px]'
-const labelClass = 'mb-2 block text-[12px] font-semibold text-[#5F625B]'
+  'w-full rounded-xl border border-transparent bg-[#F4F4F8] px-4 py-3 text-base font-medium text-[#16161D] placeholder-[#A9A9B6] outline-none transition focus:border-[#7C5CFA] focus:bg-white focus:ring-4 focus:ring-[#7C5CFA]/15 sm:text-[14px]'
+const labelClass = 'mb-2 block text-[12px] font-semibold text-[#5E5E6E]'
 const primaryButton =
-  'flex items-center justify-center gap-2 rounded-xl bg-[#28352A] px-5 py-3 text-[13px] font-semibold text-white transition hover:bg-[#344637] disabled:opacity-50'
+  'flex items-center justify-center gap-2 rounded-xl bg-[#7C5CFA] px-5 py-3 text-[13px] font-semibold text-white transition hover:bg-[#6A48F5] disabled:opacity-50'
 
 function Section({ icon, title, description, tone, children }: { icon: ReactNode; title: string; description: string; tone: string; children: ReactNode }) {
   return (
     <section data-tone={tone} className={`${styles.panel} overflow-hidden`}>
       <div className={styles.sectionHeader}>
         <div className="flex items-center gap-3">
-          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#EFF0EB] text-[#3F4A40]">{icon}</span>
+          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-[#F4F2FD] text-[#6243EE]">{icon}</span>
           <div>
-            <h2 className="text-base font-semibold tracking-[-0.02em] text-[#242522]">{title}</h2>
-            <p className="mt-0.5 text-xs text-[#85887F]">{description}</p>
+            <h2 className="text-base font-semibold tracking-[-0.02em] text-[#16161D]">{title}</h2>
+            <p className="mt-0.5 text-xs text-[#8B8B9A]">{description}</p>
           </div>
         </div>
       </div>
@@ -45,7 +45,7 @@ function FeedbackLine({ feedback }: { feedback: Feedback }) {
   return (
     <p
       role={feedback.tone === 'error' ? 'alert' : 'status'}
-      className={`rounded-xl px-4 py-2.5 text-[12px] font-medium ${feedback.tone === 'error' ? 'bg-[#FFF0EA] text-[#B9573A]' : 'bg-[#EAF2E9] text-[#3F6548]'}`}
+      className={`rounded-xl px-4 py-2.5 text-[12px] font-medium ${feedback.tone === 'error' ? 'bg-[#FDECEC] text-[#D93F3F]' : 'bg-[#E6F6EC] text-[#1C8F4E]'}`}
     >
       {feedback.text}
     </p>
@@ -70,7 +70,7 @@ function PasswordInput({ id, label, value, onChange, autoComplete }: { id: strin
           type="button"
           onClick={() => setVisible(current => !current)}
           aria-label={visible ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`}
-          className="absolute right-2 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-[#85887F] hover:text-[#242522]"
+          className="absolute right-2 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-[#8B8B9A] hover:text-[#16161D]"
         >
           {visible ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
         </button>
@@ -175,11 +175,7 @@ export default function SettingsPanel({ userId, email, fullName, homeCurrency, o
   }
 
   return (
-    <div className="mt-7 space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold tracking-[-0.03em] text-[#242522]">Settings</h2>
-        <p className="mt-1 text-[13px] text-[#74776F]">Manage your profile, sign-in details and sessions.</p>
-      </div>
+    <div className="space-y-6">
 
       <div className="grid gap-6 xl:grid-cols-2">
         <Section icon={<UserRound size={17} aria-hidden="true" />} title="Profile" description="How Xtrack addresses you and shows your money" tone="ink">
@@ -195,7 +191,7 @@ export default function SettingsPanel({ userId, email, fullName, homeCurrency, o
                   <option key={code} value={code}>{code} — {label}</option>
                 ))}
               </select>
-              <p className="mt-2 text-[11px] leading-5 text-[#85887F]">Used when you log an amount in another currency. Amounts already saved don’t change.</p>
+              <p className="mt-2 text-[11px] leading-5 text-[#8B8B9A]">Used when you log an amount in another currency. Amounts already saved don’t change.</p>
             </div>
             <FeedbackLine feedback={profileFeedback} />
             <button type="submit" disabled={savingProfile || !profileChanged} className={primaryButton}>
@@ -209,7 +205,7 @@ export default function SettingsPanel({ userId, email, fullName, homeCurrency, o
           <form onSubmit={changeEmail} className="space-y-5">
             <div>
               <p className={labelClass}>Current email</p>
-              <p className="truncate rounded-xl bg-[#F7F8F3] px-4 py-3 text-[14px] font-medium text-[#343630]">{email}</p>
+              <p className="truncate rounded-xl bg-[#F6F5FB] px-4 py-3 text-[14px] font-medium text-[#16161D]">{email}</p>
             </div>
             <div>
               <label htmlFor="settings-email" className={labelClass}>New email</label>
@@ -240,30 +236,30 @@ export default function SettingsPanel({ userId, email, fullName, homeCurrency, o
           <div className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-[13px] font-semibold text-[#343630]">This device</p>
-                <p className="mt-0.5 text-[11px] text-[#85887F]">Sign out of Xtrack on this phone or browser.</p>
+                <p className="text-[13px] font-semibold text-[#16161D]">This device</p>
+                <p className="mt-0.5 text-[11px] text-[#8B8B9A]">Sign out of Xtrack on this phone or browser.</p>
               </div>
-              <button type="button" onClick={onSignOut} className="rounded-xl border border-[#DFE0DA] px-4 py-2.5 text-[13px] font-semibold text-[#3F4A40] transition hover:border-[#BFC2B9]">
+              <button type="button" onClick={onSignOut} className="rounded-xl border border-[#ECECF2] px-4 py-2.5 text-[13px] font-semibold text-[#6243EE] transition hover:border-[#D9D3FB]">
                 Sign out
               </button>
             </div>
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#EEEFEA] pt-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#F1F0F7] pt-4">
               <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-semibold text-[#343630]">All devices</p>
-                <p className="mt-0.5 text-[11px] text-[#85887F]">Useful if you signed in on a shared or lost device.</p>
+                <p className="text-[13px] font-semibold text-[#16161D]">All devices</p>
+                <p className="mt-0.5 text-[11px] text-[#8B8B9A]">Useful if you signed in on a shared or lost device.</p>
               </div>
               {confirmEverywhere ? (
                 <div className="flex items-center gap-2">
-                  <button type="button" onClick={() => setConfirmEverywhere(false)} className="px-2 py-2.5 text-[13px] font-semibold text-[#85887F] hover:text-[#242522]">
+                  <button type="button" onClick={() => setConfirmEverywhere(false)} className="px-2 py-2.5 text-[13px] font-semibold text-[#8B8B9A] hover:text-[#16161D]">
                     Cancel
                   </button>
-                  <button type="button" onClick={signOutEverywhere} disabled={signingOutEverywhere} className="flex items-center gap-2 rounded-xl bg-[#B9573A] px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-[#A44A30] disabled:opacity-50">
+                  <button type="button" onClick={signOutEverywhere} disabled={signingOutEverywhere} className="flex items-center gap-2 rounded-xl bg-[#D93F3F] px-4 py-2.5 text-[13px] font-semibold text-white transition hover:bg-[#A44A30] disabled:opacity-50">
                     {signingOutEverywhere && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
                     Sign out everywhere
                   </button>
                 </div>
               ) : (
-                <button type="button" onClick={() => setConfirmEverywhere(true)} className="rounded-xl border border-[#F0C5B5] px-4 py-2.5 text-[13px] font-semibold text-[#B9573A] transition hover:bg-[#FFF0EA]">
+                <button type="button" onClick={() => setConfirmEverywhere(true)} className="rounded-xl border border-[#F0C5B5] px-4 py-2.5 text-[13px] font-semibold text-[#D93F3F] transition hover:bg-[#FDECEC]">
                   Sign out everywhere
                 </button>
               )}

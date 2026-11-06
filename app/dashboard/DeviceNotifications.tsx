@@ -93,14 +93,14 @@ export default function DeviceNotifications() {
   return (
     <div className="rounded-xl border border-[#E5E8DF] bg-[#F8F9F5] p-4">
       <div className="flex flex-wrap items-center gap-3">
-        {status === 'on' ? <BellRing size={18} className="text-[#58755F]" aria-hidden="true" /> : <Bell size={18} className="text-[#85887F]" aria-hidden="true" />}
+        {status === 'on' ? <BellRing size={18} className="text-[#1C8F4E]" aria-hidden="true" /> : <Bell size={18} className="text-[#8B8B9A]" aria-hidden="true" />}
         <div className="min-w-[180px] flex-1">
-          <p className="text-xs font-semibold text-[#41443E]">{status === 'on' ? 'Device notifications on' : 'Device notifications'}</p>
-          <p className="mt-1 text-[11px] leading-5 text-[#74776F]">{description}</p>
+          <p className="text-xs font-semibold text-[#2A2A33]">{status === 'on' ? 'Device notifications on' : 'Device notifications'}</p>
+          <p className="mt-1 text-[11px] leading-5 text-[#8B8B9A]">{description}</p>
         </div>
-        {(status === 'on' || status === 'off') && <button type="button" disabled={busy} onClick={toggle} className="rounded-lg border border-[#D9DFD3] bg-white px-3 py-2 text-xs font-semibold text-[#58755F] hover:bg-[#EDF2E8] disabled:opacity-50">{busy ? 'Updating…' : status === 'on' ? 'Turn off on this device' : 'Enable on this device'}</button>}
+        {(status === 'on' || status === 'off') && <button type="button" disabled={busy} onClick={toggle} className="rounded-lg border border-[#D9DFD3] bg-white px-3 py-2 text-xs font-semibold text-[#1C8F4E] hover:bg-[#EDF2E8] disabled:opacity-50">{busy ? 'Updating…' : status === 'on' ? 'Turn off on this device' : 'Enable on this device'}</button>}
       </div>
-      {error && <p role="alert" className="mt-2 text-xs text-[#B9573A]">{error}</p>}
+      {error && <p role="alert" className="mt-2 text-xs text-[#D93F3F]">{error}</p>}
     </div>
   )
 }

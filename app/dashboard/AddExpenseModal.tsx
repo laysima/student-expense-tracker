@@ -161,8 +161,8 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
     onClose()
   }
 
-  const inputClass = 'w-full rounded-xl border border-transparent bg-[#F1F2ED] px-4 py-3.5 text-base font-medium text-[#242522] placeholder-[#A4A79F] sm:text-[14px] outline-none transition focus:border-[#E98563] focus:bg-white focus:ring-4 focus:ring-[#E98563]/10'
-  const labelClass = 'mb-2 block text-[12px] font-semibold text-[#5F625B]'
+  const inputClass = 'w-full rounded-xl border border-transparent bg-[#F4F4F8] px-4 py-3.5 text-base font-medium text-[#16161D] placeholder-[#A9A9B6] sm:text-[14px] outline-none transition focus:border-[#7C5CFA] focus:bg-white focus:ring-4 focus:ring-[#7C5CFA]/10'
+  const labelClass = 'mb-2 block text-[12px] font-semibold text-[#5E5E6E]'
 
   return (
     <>
@@ -173,21 +173,21 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
           role="dialog"
           aria-modal="true"
           aria-labelledby="add-expense-title"
-          className="xt-sheet flex max-h-[94dvh] w-full max-w-[520px] flex-col overflow-hidden rounded-t-[28px] bg-[#FCFCF9] sm:max-h-[90vh] sm:rounded-[28px] shadow-[0_30px_90px_rgba(16,17,14,0.28)]"
+          className="xt-sheet flex max-h-[94dvh] w-full max-w-[520px] flex-col overflow-hidden rounded-t-[28px] bg-[#FFFFFF] sm:max-h-[90vh] sm:rounded-[28px] shadow-[0_30px_90px_rgba(16,17,14,0.28)]"
         >
           <div className="flex shrink-0 items-start justify-between px-6 pb-3 pt-6 sm:px-8 sm:pt-8">
             <div>
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#C96042]">Money out</p>
-              <h2 id="add-expense-title" className="text-[24px] font-semibold tracking-[-0.035em] text-[#242522]">{isEditing ? 'Edit expense' : 'Add expense'}</h2>
-              <p className="mt-1 text-[12px] text-[#85887F]">{isEditing ? 'Update the details of this expense.' : 'Capture a purchase or upcoming cost.'}</p>
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#E5484D]">Money out</p>
+              <h2 id="add-expense-title" className="text-[24px] font-semibold tracking-[-0.035em] text-[#16161D]">{isEditing ? 'Edit expense' : 'Add expense'}</h2>
+              <p className="mt-1 text-[12px] text-[#8B8B9A]">{isEditing ? 'Update the details of this expense.' : 'Capture a purchase or upcoming cost.'}</p>
             </div>
-            <button type="button" onClick={onClose} className="-mr-3 -mt-1 rounded-lg px-3 py-2 text-[13px] font-semibold text-[#85887F] transition hover:text-[#242522]">
+            <button type="button" onClick={onClose} className="-mr-3 -mt-1 rounded-lg px-3 py-2 text-[13px] font-semibold text-[#8B8B9A] transition hover:text-[#16161D]">
               Close
             </button>
           </div>
 
           <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-6 py-5 sm:px-8">
-            {error && <div className="rounded-xl bg-[#FFF0EA] px-4 py-3 text-[13px] font-medium text-[#B9573A]">{error}</div>}
+            {error && <div className="rounded-xl bg-[#FDECEC] px-4 py-3 text-[13px] font-medium text-[#D93F3F]">{error}</div>}
 
             <div>
               <label className={labelClass}>Category</label>
@@ -200,8 +200,8 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
                     onClick={() => update('category', category)}
                     className={`rounded-full px-3.5 py-2 text-[12px] font-medium transition ${
                       form.category === category
-                        ? 'bg-[#4A2C23] text-white shadow-sm'
-                        : 'text-[#74776F] hover:bg-[#F4E9E4] hover:text-[#5B382D]'
+                        ? 'bg-[#7C5CFA] text-white shadow-sm'
+                        : 'text-[#8B8B9A] hover:bg-[#F4E9E4] hover:text-[#6A48F5]'
                     }`}
                   >
                     {category}
@@ -220,7 +220,7 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
                     aria-label="Custom expense category"
                     className={inputClass}
                   />
-                  <p className="mt-2 text-[11px] text-[#91948C]">
+                  <p className="mt-2 text-[11px] text-[#8B8B9A]">
                     Leave blank to just file it under Other.
                   </p>
                 </div>
@@ -241,16 +241,16 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
                 />
               </div>
               {canConvert && (
-                <button type="button" onClick={() => setShowConverter(value => !value)} className="mt-2.5 text-[11px] font-semibold text-[#C96042] hover:underline">
+                <button type="button" onClick={() => setShowConverter(value => !value)} className="mt-2.5 text-[11px] font-semibold text-[#E5484D] hover:underline">
                   {showConverter ? 'Hide currency converter' : `Convert from ${homeCurrency}`}
                 </button>
               )}
             </div>
 
-            <div className="flex items-center justify-between border-t border-[#E7E8E2] pt-5">
+            <div className="flex items-center justify-between border-t border-[#ECECF2] pt-5">
               <div>
-                <p className="text-[13px] font-semibold text-[#343630]">Split with others</p>
-                <p className="mt-0.5 text-[11px] text-[#91948C]">Only your share counts toward your spending</p>
+                <p className="text-[13px] font-semibold text-[#16161D]">Split with others</p>
+                <p className="mt-0.5 text-[11px] text-[#8B8B9A]">Only your share counts toward your spending</p>
               </div>
               <button
                 type="button"
@@ -258,14 +258,14 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
                 aria-checked={form.isSplit}
                 aria-label="Split with others"
                 onClick={() => update('isSplit', !form.isSplit)}
-                className={`tap-target relative h-7 w-12 shrink-0 rounded-full transition-colors ${form.isSplit ? 'bg-[#E98563]' : 'bg-[#D7D9D2]'}`}
+                className={`tap-target relative h-7 w-12 shrink-0 rounded-full transition-colors ${form.isSplit ? 'bg-[#7C5CFA]' : 'bg-[#D7D9D2]'}`}
               >
                 <span className={`absolute left-1 top-1 size-5 rounded-full bg-white shadow-sm transition-transform ${form.isSplit ? 'translate-x-5' : 'translate-x-0'}`} />
               </button>
             </div>
 
             {form.isSplit && (
-              <div className="rounded-2xl bg-[#FFF0EA] p-4">
+              <div className="rounded-2xl bg-[#FDECEC] p-4">
                 <label className={labelClass}>Split between how many people? <span className="font-normal text-[#A0A39B]">Including you</span></label>
                 <input
                   type="number"
@@ -276,7 +276,7 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
                   className={inputClass}
                 />
                 {yourShare !== null && (
-                  <p className="mt-2.5 text-[11px] font-medium text-[#B9573A]">
+                  <p className="mt-2.5 text-[11px] font-medium text-[#D93F3F]">
                     Your share: {new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(yourShare)} — this is what gets tracked
                   </p>
                 )}
@@ -284,7 +284,7 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
             )}
 
             {canConvert && showConverter && (
-              <div className="rounded-2xl bg-[#FFF0EA] p-4">
+              <div className="rounded-2xl bg-[#FDECEC] p-4">
                 <label className={labelClass}>Amount in {homeCurrency}</label>
                 <div className="flex gap-2">
                   <input
@@ -299,12 +299,12 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
                     type="button"
                     onClick={() => fetchConversion(form.originalAmount)}
                     disabled={converting || !form.originalAmount}
-                    className="whitespace-nowrap rounded-xl bg-[#E98563] px-4 py-3 text-[12px] font-semibold text-white transition hover:bg-[#D87452] disabled:opacity-40"
+                    className="whitespace-nowrap rounded-xl bg-[#7C5CFA] px-4 py-3 text-[12px] font-semibold text-white transition hover:bg-[#D87452] disabled:opacity-40"
                   >
                     {converting ? 'Converting…' : 'Convert'}
                   </button>
                 </div>
-                {convertedAmount && <p className="mt-2 text-[11px] font-medium text-[#B9573A]">≈ CA${convertedAmount.toFixed(2)} at today&apos;s rate — applied above</p>}
+                {convertedAmount && <p className="mt-2 text-[11px] font-medium text-[#D93F3F]">≈ CA${convertedAmount.toFixed(2)} at today&apos;s rate — applied above</p>}
               </div>
             )}
 
@@ -324,10 +324,10 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
               <input type="date" value={form.date} onChange={event => update('date', event.target.value)} className={inputClass} />
             </div>
 
-            <div className="flex items-center justify-between border-t border-[#E7E8E2] pt-5">
+            <div className="flex items-center justify-between border-t border-[#ECECF2] pt-5">
               <div>
-                <p className="text-[13px] font-semibold text-[#343630]">Repeat this expense</p>
-                <p className="mt-0.5 text-[11px] text-[#91948C]">Logged for you automatically each time it comes due</p>
+                <p className="text-[13px] font-semibold text-[#16161D]">Repeat this expense</p>
+                <p className="mt-0.5 text-[11px] text-[#8B8B9A]">Logged for you automatically each time it comes due</p>
               </div>
               <button
                 type="button"
@@ -335,7 +335,7 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
                 aria-checked={form.isRecurring}
                 aria-label="Repeat this expense"
                 onClick={() => update('isRecurring', !form.isRecurring)}
-                className={`tap-target relative h-7 w-12 shrink-0 rounded-full transition-colors ${form.isRecurring ? 'bg-[#E98563]' : 'bg-[#D7D9D2]'}`}
+                className={`tap-target relative h-7 w-12 shrink-0 rounded-full transition-colors ${form.isRecurring ? 'bg-[#7C5CFA]' : 'bg-[#D7D9D2]'}`}
               >
                 <span className={`absolute left-1 top-1 size-5 rounded-full bg-white shadow-sm transition-transform ${form.isRecurring ? 'translate-x-5' : 'translate-x-0'}`} />
               </button>
@@ -344,14 +344,14 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
             {form.isRecurring && (
               <div>
                 <label className={labelClass}>Repeats</label>
-                <div className="flex flex-wrap gap-1 rounded-xl bg-[#F1F2ED] p-1">
+                <div className="flex flex-wrap gap-1 rounded-xl bg-[#F4F4F8] p-1">
                   {CYCLES.map(cycle => (
                     <button
                       key={cycle}
                       type="button"
                       onClick={() => update('recurCycle', cycle)}
                       className={`flex-1 rounded-lg px-3 py-2 text-[11px] font-semibold capitalize transition ${
-                        form.recurCycle === cycle ? 'bg-white text-[#A64F35] shadow-sm' : 'text-[#85887F] hover:text-[#343630]'
+                        form.recurCycle === cycle ? 'bg-white text-[#A64F35] shadow-sm' : 'text-[#8B8B9A] hover:text-[#16161D]'
                       }`}
                     >
                       {cycle}
@@ -365,22 +365,22 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
           <div className="flex shrink-0 items-center justify-between gap-3 border-t border-[#ECEDE7] px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 sm:gap-4 sm:border-t-0 sm:px-8 sm:pb-8">
             {confirmingDelete ? (
               <div className="flex items-center gap-3">
-                <span className="text-[12px] font-medium text-[#B9573A]">Delete this expense?</span>
+                <span className="text-[12px] font-medium text-[#D93F3F]">Delete this expense?</span>
                 <button
                   type="button"
                   onClick={handleDelete}
                   disabled={loading}
-                  className="tap-target text-[13px] font-semibold text-[#B9573A] underline underline-offset-2 transition hover:text-[#9E4630] disabled:opacity-50"
+                  className="tap-target text-[13px] font-semibold text-[#D93F3F] underline underline-offset-2 transition hover:text-[#C53434] disabled:opacity-50"
                 >
                   {loading ? 'Deleting...' : 'Yes, delete'}
                 </button>
-                <button type="button" onClick={() => setConfirmingDelete(false)} className="tap-target text-[13px] font-semibold text-[#85887F] transition hover:text-[#242522]">No</button>
+                <button type="button" onClick={() => setConfirmingDelete(false)} className="tap-target text-[13px] font-semibold text-[#8B8B9A] transition hover:text-[#16161D]">No</button>
               </div>
             ) : (
               <div className="flex items-center gap-4">
-                <button type="button" onClick={onClose} className="px-2 py-3 text-[13px] font-semibold text-[#85887F] transition hover:text-[#242522]">Cancel</button>
+                <button type="button" onClick={onClose} className="px-2 py-3 text-[13px] font-semibold text-[#8B8B9A] transition hover:text-[#16161D]">Cancel</button>
                 {isEditing && (
-                  <button type="button" onClick={() => setConfirmingDelete(true)} className="tap-target text-[13px] font-semibold text-[#B9573A] transition hover:text-[#9E4630]">Delete</button>
+                  <button type="button" onClick={() => setConfirmingDelete(true)} className="tap-target text-[13px] font-semibold text-[#D93F3F] transition hover:text-[#C53434]">Delete</button>
                 )}
               </div>
             )}
@@ -389,7 +389,7 @@ export default function AddExpenseModal({ userId, homeCurrency, expense, onClose
                 type="button"
                 onClick={handleSave}
                 disabled={loading}
-                className="min-w-0 flex-1 rounded-xl sm:min-w-[168px] sm:flex-none bg-[#4A2C23] px-5 py-3.5 text-[13px] font-semibold text-white shadow-[0_8px_20px_rgba(74,44,35,0.16)] transition hover:-translate-y-0.5 hover:bg-[#5B382D] disabled:translate-y-0 disabled:opacity-50"
+                className="min-w-0 flex-1 rounded-xl sm:min-w-[168px] sm:flex-none bg-[#7C5CFA] px-5 py-3.5 text-[13px] font-semibold text-white shadow-[0_8px_20px_rgba(124,92,250,0.16)] transition hover:-translate-y-0.5 hover:bg-[#6A48F5] disabled:translate-y-0 disabled:opacity-50"
               >
                 {loading ? 'Saving...' : isEditing ? 'Save changes' : 'Save expense'}
               </button>

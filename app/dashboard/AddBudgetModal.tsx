@@ -99,8 +99,8 @@ export default function AddBudgetModal({ userId, month, year, existingBudgets, s
     await writeLimit(0)
   }
 
-  const inputClass = 'w-full rounded-xl border border-transparent bg-[#F1F2ED] px-4 py-3.5 text-base font-medium text-[#242522] placeholder-[#A4A79F] sm:text-[14px] outline-none transition focus:border-[#829A83] focus:bg-white focus:ring-4 focus:ring-[#829A83]/10'
-  const labelClass = 'mb-2 block text-[12px] font-semibold text-[#5F625B]'
+  const inputClass = 'w-full rounded-xl border border-transparent bg-[#F4F4F8] px-4 py-3.5 text-base font-medium text-[#16161D] placeholder-[#A9A9B6] sm:text-[14px] outline-none transition focus:border-[#7C5CFA] focus:bg-white focus:ring-4 focus:ring-[#7C5CFA]/10'
+  const labelClass = 'mb-2 block text-[12px] font-semibold text-[#5E5E6E]'
 
   return (
     <>
@@ -111,21 +111,21 @@ export default function AddBudgetModal({ userId, month, year, existingBudgets, s
           role="dialog"
           aria-modal="true"
           aria-labelledby="add-budget-title"
-          className="xt-sheet flex max-h-[94dvh] w-full max-w-[520px] flex-col overflow-hidden rounded-t-[28px] bg-[#FCFCF9] sm:max-h-[90vh] sm:rounded-[28px] shadow-[0_30px_90px_rgba(16,17,14,0.28)]"
+          className="xt-sheet flex max-h-[94dvh] w-full max-w-[520px] flex-col overflow-hidden rounded-t-[28px] bg-[#FFFFFF] sm:max-h-[90vh] sm:rounded-[28px] shadow-[0_30px_90px_rgba(16,17,14,0.28)]"
         >
           <div className="flex shrink-0 items-start justify-between px-6 pb-3 pt-6 sm:px-8 sm:pt-8">
             <div>
               <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#658069]">This month</p>
-              <h2 id="add-budget-title" className="text-[24px] font-semibold tracking-[-0.035em] text-[#242522]">{existingForCategory ? 'Edit budget' : 'Set a budget'}</h2>
-              <p className="mt-1 text-[12px] text-[#85887F]">{existingForCategory ? 'Update this category’s limit. The new amount applies from this month on.' : 'Set a monthly limit. It repeats every month until you change it.'}</p>
+              <h2 id="add-budget-title" className="text-[24px] font-semibold tracking-[-0.035em] text-[#16161D]">{existingForCategory ? 'Edit budget' : 'Set a budget'}</h2>
+              <p className="mt-1 text-[12px] text-[#8B8B9A]">{existingForCategory ? 'Update this category’s limit. The new amount applies from this month on.' : 'Set a monthly limit. It repeats every month until you change it.'}</p>
             </div>
-            <button type="button" onClick={onClose} className="-mr-3 -mt-1 rounded-lg px-3 py-2 text-[13px] font-semibold text-[#85887F] transition hover:text-[#242522]">
+            <button type="button" onClick={onClose} className="-mr-3 -mt-1 rounded-lg px-3 py-2 text-[13px] font-semibold text-[#8B8B9A] transition hover:text-[#16161D]">
               Close
             </button>
           </div>
 
           <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-6 py-5 sm:px-8">
-            {error && <div className="rounded-xl bg-[#FFF0EA] px-4 py-3 text-[13px] font-medium text-[#B9573A]">{error}</div>}
+            {error && <div className="rounded-xl bg-[#FDECEC] px-4 py-3 text-[13px] font-medium text-[#D93F3F]">{error}</div>}
 
             <div>
               <label className={labelClass}>Category</label>
@@ -138,8 +138,8 @@ export default function AddBudgetModal({ userId, month, year, existingBudgets, s
                     onClick={() => selectCategory(item)}
                     className={`rounded-full px-3.5 py-2 text-[12px] font-medium transition ${
                       category === item
-                        ? 'bg-[#28352A] text-white shadow-sm'
-                        : 'text-[#74776F] hover:bg-[#ECEEE8] hover:text-[#343630]'
+                        ? 'bg-[#7C5CFA] text-white shadow-sm'
+                        : 'text-[#8B8B9A] hover:bg-[#ECEEE8] hover:text-[#16161D]'
                     }`}
                   >
                     {item}
@@ -158,7 +158,7 @@ export default function AddBudgetModal({ userId, month, year, existingBudgets, s
                     aria-label="Custom budget category"
                     className={inputClass}
                   />
-                  <p className="mt-2 text-[11px] text-[#91948C]">
+                  <p className="mt-2 text-[11px] text-[#8B8B9A]">
                     Match the name you used on your expenses so spending counts toward it.
                   </p>
                 </div>
@@ -197,10 +197,10 @@ export default function AddBudgetModal({ userId, month, year, existingBudgets, s
             {existingForCategory && (
               confirmingDelete ? (
                 <div role="alertdialog" aria-labelledby="delete-budget-title" className="rounded-2xl border border-[#F3D3C7] bg-[#FFF6F2] p-4">
-                  <p id="delete-budget-title" className="text-[13px] font-semibold text-[#242522]">
+                  <p id="delete-budget-title" className="text-[13px] font-semibold text-[#16161D]">
                     Delete the {effectiveCategory} budget?
                   </p>
-                  <p className="mt-1 text-[12px] leading-5 text-[#85887F]">
+                  <p className="mt-1 text-[12px] leading-5 text-[#8B8B9A]">
                     It stops from {monthLabel} onward. Earlier months keep their limits, and your expenses aren’t touched.
                   </p>
                   <div className="mt-3 flex gap-2">
@@ -208,7 +208,7 @@ export default function AddBudgetModal({ userId, month, year, existingBudgets, s
                       type="button"
                       onClick={() => setConfirmingDelete(false)}
                       disabled={loading}
-                      className="rounded-lg px-3 py-2 text-[12px] font-semibold text-[#5F625B] transition hover:bg-white disabled:opacity-50"
+                      className="rounded-lg px-3 py-2 text-[12px] font-semibold text-[#5E5E6E] transition hover:bg-white disabled:opacity-50"
                     >
                       Keep it
                     </button>
@@ -216,7 +216,7 @@ export default function AddBudgetModal({ userId, month, year, existingBudgets, s
                       type="button"
                       onClick={handleDelete}
                       disabled={loading}
-                      className="rounded-lg bg-[#B9573A] px-3.5 py-2 text-[12px] font-semibold text-white transition hover:bg-[#A44B31] disabled:opacity-50"
+                      className="rounded-lg bg-[#D93F3F] px-3.5 py-2 text-[12px] font-semibold text-white transition hover:bg-[#A44B31] disabled:opacity-50"
                     >
                       {loading ? 'Deleting...' : 'Delete budget'}
                     </button>
@@ -226,7 +226,7 @@ export default function AddBudgetModal({ userId, month, year, existingBudgets, s
                 <button
                   type="button"
                   onClick={() => setConfirmingDelete(true)}
-                  className="text-[12px] font-semibold text-[#B9573A] transition hover:underline"
+                  className="text-[12px] font-semibold text-[#D93F3F] transition hover:underline"
                 >
                   Delete this budget
                 </button>
@@ -235,12 +235,12 @@ export default function AddBudgetModal({ userId, month, year, existingBudgets, s
           </div>
 
           <div className="flex shrink-0 items-center justify-between gap-3 border-t border-[#ECEDE7] px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 sm:gap-4 sm:border-t-0 sm:px-8 sm:pb-8">
-            <button type="button" onClick={onClose} className="px-2 py-3 text-[13px] font-semibold text-[#85887F] transition hover:text-[#242522]">Cancel</button>
+            <button type="button" onClick={onClose} className="px-2 py-3 text-[13px] font-semibold text-[#8B8B9A] transition hover:text-[#16161D]">Cancel</button>
             <button
               type="button"
               onClick={handleSave}
               disabled={loading}
-              className="min-w-0 flex-1 rounded-xl sm:min-w-[168px] sm:flex-none bg-[#28352A] px-5 py-3.5 text-[13px] font-semibold text-white shadow-[0_8px_20px_rgba(40,53,42,0.16)] transition hover:-translate-y-0.5 hover:bg-[#344637] disabled:translate-y-0 disabled:opacity-50"
+              className="min-w-0 flex-1 rounded-xl sm:min-w-[168px] sm:flex-none bg-[#7C5CFA] px-5 py-3.5 text-[13px] font-semibold text-white shadow-[0_8px_20px_rgba(124,92,250,0.16)] transition hover:-translate-y-0.5 hover:bg-[#6A48F5] disabled:translate-y-0 disabled:opacity-50"
             >
               {loading && !confirmingDelete ? 'Saving...' : existingForCategory ? 'Save changes' : 'Save budget'}
             </button>

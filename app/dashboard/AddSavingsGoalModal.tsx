@@ -61,8 +61,8 @@ export default function AddSavingsGoalModal({ userId, goal, avgMonthlySavings, s
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const inputClass = 'w-full rounded-xl border border-transparent bg-[#F1F2ED] px-4 py-3.5 text-base font-medium text-[#242522] placeholder-[#A4A79F] sm:text-[14px] outline-none transition focus:border-[#829A83] focus:bg-white focus:ring-4 focus:ring-[#829A83]/10'
-  const labelClass = 'mb-2 block text-[12px] font-semibold text-[#5F625B]'
+  const inputClass = 'w-full rounded-xl border border-transparent bg-[#F4F4F8] px-4 py-3.5 text-base font-medium text-[#16161D] placeholder-[#A9A9B6] sm:text-[14px] outline-none transition focus:border-[#7C5CFA] focus:bg-white focus:ring-4 focus:ring-[#7C5CFA]/10'
+  const labelClass = 'mb-2 block text-[12px] font-semibold text-[#5E5E6E]'
 
   const amountNumber = Number(targetAmount)
   const hasValidAmount = Boolean(targetAmount) && !isNaN(amountNumber) && amountNumber > 0
@@ -93,10 +93,10 @@ export default function AddSavingsGoalModal({ userId, goal, avgMonthlySavings, s
   }
 
   const FEASIBILITY_STYLES: Record<string, string> = {
-    comfortable: 'bg-[#EAF2E9] text-[#3F6548]',
+    comfortable: 'bg-[#E6F6EC] text-[#1C8F4E]',
     ambitious: 'bg-[#FFF3E2] text-[#96631E]',
-    unrealistic: 'bg-[#FFF0EA] text-[#B9573A]',
-    unknown: 'bg-[#F1F2ED] text-[#5F625B]',
+    unrealistic: 'bg-[#FDECEC] text-[#D93F3F]',
+    unknown: 'bg-[#F4F4F8] text-[#5E5E6E]',
   }
 
   async function handleCreateGoal() {
@@ -162,27 +162,27 @@ export default function AddSavingsGoalModal({ userId, goal, avgMonthlySavings, s
           role="dialog"
           aria-modal="true"
           aria-labelledby="savings-goal-title"
-          className="xt-sheet flex max-h-[94dvh] w-full max-w-[480px] flex-col overflow-hidden rounded-t-[28px] bg-[#FCFCF9] sm:max-h-[90vh] sm:rounded-[28px] shadow-[0_30px_90px_rgba(16,17,14,0.28)]"
+          className="xt-sheet flex max-h-[94dvh] w-full max-w-[480px] flex-col overflow-hidden rounded-t-[28px] bg-[#FFFFFF] sm:max-h-[90vh] sm:rounded-[28px] shadow-[0_30px_90px_rgba(16,17,14,0.28)]"
         >
           <div className="flex shrink-0 items-start justify-between px-6 pb-3 pt-6 sm:px-8 sm:pt-8">
             <div>
               <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#658069]">
                 {isAddingFunds ? 'Log savings' : 'New goal'}
               </p>
-              <h2 id="savings-goal-title" className="text-[24px] font-semibold tracking-[-0.035em] text-[#242522]">
+              <h2 id="savings-goal-title" className="text-[24px] font-semibold tracking-[-0.035em] text-[#16161D]">
                 {isAddingFunds ? `Add to ${goal!.title}` : 'Set a savings goal'}
               </h2>
-              <p className="mt-1 text-[12px] text-[#85887F]">
+              <p className="mt-1 text-[12px] text-[#8B8B9A]">
                 {isAddingFunds ? 'Record money you have set aside toward this goal.' : 'Give a purpose to what you save each month.'}
               </p>
             </div>
-            <button type="button" onClick={onClose} className="-mr-3 -mt-1 rounded-lg px-3 py-2 text-[13px] font-semibold text-[#85887F] transition hover:text-[#242522]">
+            <button type="button" onClick={onClose} className="-mr-3 -mt-1 rounded-lg px-3 py-2 text-[13px] font-semibold text-[#8B8B9A] transition hover:text-[#16161D]">
               Close
             </button>
           </div>
 
           <div className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-6 py-5 sm:px-8">
-            {error && <div className="rounded-xl bg-[#FFF0EA] px-4 py-3 text-[13px] font-medium text-[#B9573A]">{error}</div>}
+            {error && <div className="rounded-xl bg-[#FDECEC] px-4 py-3 text-[13px] font-medium text-[#D93F3F]">{error}</div>}
 
             {isAddingFunds ? (
               <div>
@@ -199,14 +199,14 @@ export default function AddSavingsGoalModal({ userId, goal, avgMonthlySavings, s
                     className={`${inputClass} pl-9 text-[18px]`}
                   />
                 </div>
-                <p className="mt-2.5 text-[11px] text-[#85887F]">
+                <p className="mt-2.5 text-[11px] text-[#8B8B9A]">
                   Currently at {money(goal!.current_amount_cad)} of {money(goal!.target_amount_cad)}
                 </p>
               </div>
             ) : (
               <>
                 {suggestion && (
-                  <div className="flex gap-2.5 rounded-2xl bg-[#EAF2E9] p-4 text-[12px] leading-5 text-[#3F6548]">
+                  <div className="flex gap-2.5 rounded-2xl bg-[#E6F6EC] p-4 text-[12px] leading-5 text-[#1C8F4E]">
                     <Sparkles size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
                     <p>
                       <span className="font-semibold">AI suggestion applied below. </span>
@@ -287,7 +287,7 @@ export default function AddSavingsGoalModal({ userId, goal, avgMonthlySavings, s
                 )}
 
                 {!targetDate && monthsToReachAtCurrentPace !== null && (
-                  <div className="rounded-2xl bg-[#F1F2ED] p-4 text-[12px] leading-5 text-[#5F625B]">
+                  <div className="rounded-2xl bg-[#F4F4F8] p-4 text-[12px] leading-5 text-[#5E5E6E]">
                     <p>
                       At your typical pace of {money(avgMonthlySavings)}/month, you&apos;d reach this goal in about{' '}
                       <strong>{Math.max(1, Math.ceil(monthsToReachAtCurrentPace))} month{Math.ceil(monthsToReachAtCurrentPace) === 1 ? '' : 's'}</strong>.
@@ -306,12 +306,12 @@ export default function AddSavingsGoalModal({ userId, goal, avgMonthlySavings, s
           </div>
 
           <div className="flex shrink-0 items-center justify-between gap-3 border-t border-[#ECEDE7] px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 sm:gap-4 sm:border-t-0 sm:px-8 sm:pb-8">
-            <button type="button" onClick={onClose} className="px-2 py-3 text-[13px] font-semibold text-[#85887F] transition hover:text-[#242522]">Cancel</button>
+            <button type="button" onClick={onClose} className="px-2 py-3 text-[13px] font-semibold text-[#8B8B9A] transition hover:text-[#16161D]">Cancel</button>
             <button
               type="button"
               onClick={isAddingFunds ? handleAddFunds : handleCreateGoal}
               disabled={loading}
-              className="min-w-0 flex-1 rounded-xl sm:min-w-[168px] sm:flex-none bg-[#28352A] px-5 py-3.5 text-[13px] font-semibold text-white shadow-[0_8px_20px_rgba(40,53,42,0.16)] transition hover:-translate-y-0.5 hover:bg-[#344637] disabled:translate-y-0 disabled:opacity-50"
+              className="min-w-0 flex-1 rounded-xl sm:min-w-[168px] sm:flex-none bg-[#7C5CFA] px-5 py-3.5 text-[13px] font-semibold text-white shadow-[0_8px_20px_rgba(124,92,250,0.16)] transition hover:-translate-y-0.5 hover:bg-[#6A48F5] disabled:translate-y-0 disabled:opacity-50"
             >
               {loading ? 'Saving...' : isAddingFunds ? 'Add funds' : 'Create goal'}
             </button>

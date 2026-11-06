@@ -17,10 +17,16 @@ interface Props {
   activeMonths: Set<string>
   onSelect: (month: Date) => void
   onClose: () => void
+  /** Shows an "All time" choice above the grid. */
+  onSelectAll?: () => void
+  /** True while "All time" is the active scope (no month is highlighted). */
+  allSelected?: boolean
+  /** Which edge of the trigger the panel lines up with. */
+  align?: 'left' | 'center' | 'right'
 }
 
 /** A year-at-a-time grid of months, shown as a popover under the trigger. */
-export default function MonthPicker({ value, min, max, activeMonths, onSelect, onClose }: Props) {
+export default function MonthPicker({ value, min, max, activeMonths, onSelect, onClose, onSelectAll, allSelected = false, align = 'left' }: Props) {
   const [year, setYear] = useState(value.getFullYear())
   const panelRef = useRef<HTMLDivElement>(null)
   const selectedRef = useRef<HTMLButtonElement>(null)
@@ -51,15 +57,29 @@ export default function MonthPicker({ value, min, max, activeMonths, onSelect, o
       ref={panelRef}
       role="dialog"
       aria-label="Choose a month"
-      className="absolute left-0 top-full z-40 mt-2 w-[288px] max-w-[calc(100vw-32px)] rounded-2xl border border-[#DFE0DA] bg-white p-4 shadow-[0_20px_60px_rgba(16,17,14,0.18)]"
+      className={`absolute top-full z-40 mt-2 w-[288px] max-w-[calc(100vw-32px)] rounded-3xl border border-[#ECECF2] bg-white p-4 text-[#16161D] shadow-[0_24px_60px_rgba(22,22,29,0.18)] ${
+        align === 'right' ? 'right-0' : align === 'center' ? 'left-1/2 -translate-x-1/2' : 'left-0'
+      }`}
     >
+      {onSelectAll && (
+        <button
+          type="button"
+          onClick={onSelectAll}
+          aria-pressed={allSelected}
+          className={`mb-3 flex h-11 w-full items-center justify-center rounded-2xl text-[13px] font-semibold transition ${
+            allSelected ? 'bg-[#7C5CFA] text-white' : 'bg-[#F4F2FD] text-[#6243EE] hover:bg-[#ECE7FE]'
+          }`}
+        >
+          All time
+        </button>
+      )}
       <div className="mb-3 flex items-center justify-between">
         <button
           type="button"
           onClick={() => setYear(current => current - 1)}
           disabled={year <= min.getFullYear()}
           aria-label="Previous year"
-          className="grid size-9 place-items-center rounded-lg text-[#5C5F57] transition hover:bg-[#F1F2ED] disabled:opacity-30"
+          className="grid size-9 place-items-center rounded-lg text-[#5C5F57] transition hover:bg-[#F4F4F8] disabled:opacity-30"
         >
           <ChevronLeft size={16} aria-hidden="true" />
         </button>
@@ -69,7 +89,7 @@ export default function MonthPicker({ value, min, max, activeMonths, onSelect, o
           onClick={() => setYear(current => current + 1)}
           disabled={year >= max.getFullYear()}
           aria-label="Next year"
-          className="grid size-9 place-items-center rounded-lg text-[#5C5F57] transition hover:bg-[#F1F2ED] disabled:opacity-30"
+          className="grid size-9 place-items-center rounded-lg text-[#5C5F57] transition hover:bg-[#F4F4F8] disabled:opacity-30"
         >
           <ChevronRight size={16} aria-hidden="true" />
         </button>
@@ -79,7 +99,7 @@ export default function MonthPicker({ value, min, max, activeMonths, onSelect, o
         {MONTHS.map((label, month) => {
           const index = year * 12 + month
           const disabled = index < minIndex || index > maxIndex
-          const selected = year === value.getFullYear() && month === value.getMonth()
+          const selected = !allSelected && year === value.getFullYear() && month === value.getMonth()
           const isCurrent = index === maxIndex
           const hasActivity = activeMonths.has(monthKey(year, month))
           return (
@@ -93,15 +113,15 @@ export default function MonthPicker({ value, min, max, activeMonths, onSelect, o
               onClick={() => onSelect(new Date(year, month, 1))}
               className={`relative flex h-11 flex-col items-center justify-center rounded-xl text-[13px] font-semibold transition disabled:cursor-not-allowed disabled:text-[#C9CBC3] ${
                 selected
-                  ? 'bg-[#242522] text-white'
+                  ? 'bg-[#7C5CFA] text-white'
                   : isCurrent
-                    ? 'bg-[#FAEEE7] text-[#AC5A3D] hover:bg-[#F6E2D7]'
-                    : 'text-[#343630] hover:bg-[#F1F2ED]'
+                    ? 'bg-[#F4F2FD] text-[#6243EE] hover:bg-[#ECE7FE]'
+                    : 'text-[#2A2A33] hover:bg-[#F4F4F8]'
               }`}
             >
               {label}
               {hasActivity && !disabled && (
-                <span aria-hidden="true" className={`absolute bottom-1.5 size-1 rounded-full ${selected ? 'bg-white/70' : 'bg-[#E98563]'}`} />
+                <span aria-hidden="true" className={`absolute bottom-1.5 size-1 rounded-full ${selected ? 'bg-white/70' : 'bg-[#7C5CFA]'}`} />
               )}
             </button>
           )
