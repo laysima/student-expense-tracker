@@ -3,7 +3,7 @@
    content-hashed build files under /_next/static/. Authenticated financial
    pages and API responses always go to the network and are never stored. */
 const CACHING = /[?&]cache=1(&|$)/.test(self.location.search || '')
-const SHELL_CACHE = 'xtrack-shell-v1'
+const SHELL_CACHE = 'xtrack-shell-v2'
 const STATIC_CACHE = 'xtrack-static-v1'
 const STATIC_LIMIT = 200
 

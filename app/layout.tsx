@@ -64,10 +64,7 @@ export default function RootLayout({
         <style dangerouslySetInnerHTML={{ __html: SPLASH_CSS }} />
         <script dangerouslySetInnerHTML={{ __html: SPLASH_SCRIPT }} />
       </head>
-      <body
-        className="min-h-full flex flex-col"
-        style={{ fontFamily: "var(--font-poppins), sans-serif" }}
-      >
+      <body className="min-h-full flex flex-col">
         <LaunchSplash />
         <ServiceWorker />
         {children}
