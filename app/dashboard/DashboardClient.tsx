@@ -510,7 +510,7 @@ function CategoryIcon({ category, small = false }: { category: string; small?: b
 
 function IncomeIcon({ small = false }: { small?: boolean }) {
   return (
-    <div className={`grid shrink-0 place-items-center rounded-2xl bg-[#E6F6EC] text-[#1C8F4E] ${small ? 'size-9' : 'size-11'}`}>
+    <div className={`grid shrink-0 place-items-center rounded-2xl bg-[#EAF2E9] text-[#3F6548] ${small ? 'size-9' : 'size-11'}`}>
       <ArrowDownLeft size={small ? 16 : 18} strokeWidth={2.2} aria-hidden="true" />
     </div>
   )
@@ -519,7 +519,7 @@ function IncomeIcon({ small = false }: { small?: boolean }) {
 function SectionTitle({ title, action, id }: { title: string; action?: ReactNode; id?: string }) {
   return (
     <div className="mb-3 flex items-center justify-between gap-3 px-1">
-      <h2 id={id} className="text-[15px] font-semibold tracking-[-0.01em] text-[#16161D]">{title}</h2>
+      <h2 id={id} className="text-[15px] font-semibold tracking-[-0.01em] text-[#242522]">{title}</h2>
       {action}
     </div>
   )
@@ -532,7 +532,7 @@ function TextAction({ children, onClick, disabled, title }: { children: ReactNod
       onClick={onClick}
       disabled={disabled}
       title={title}
-      className="tap-target flex items-center gap-1 text-xs font-semibold text-[#8B8B9A] transition hover:text-[#16161D] disabled:cursor-not-allowed disabled:opacity-50"
+      className="tap-target flex items-center gap-1 text-xs font-semibold text-[#85887F] transition hover:text-[#242522] disabled:cursor-not-allowed disabled:opacity-50"
     >
       {children}
     </button>
@@ -570,13 +570,13 @@ function ProgressRing({ value, color, size = 54 }: { value: number; color: strin
 // Change against the previous month. For spending, going up is the bad direction.
 function DeltaChip({ current, previous, upIsGood }: { current: number; previous: number; upIsGood: boolean }) {
   if (previous <= 0) {
-    return current > 0 ? <span className="rounded-full bg-[#F4F2FD] px-2 py-0.5 text-[10px] font-semibold text-[#6243EE]">New</span> : null
+    return current > 0 ? <span className="rounded-full bg-[#EAF2E9] px-2 py-0.5 text-[10px] font-semibold text-[#3F6548]">New</span> : null
   }
   const change = ((current - previous) / previous) * 100
   const up = change >= 0
   const good = up === upIsGood
   return (
-    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${good ? 'bg-[#E6F6EC] text-[#1C8F4E]' : 'bg-[#FDECEC] text-[#D93F3F]'}`}>
+    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${good ? 'bg-[#EAF2E9] text-[#3F6548]' : 'bg-[#FFF0EA] text-[#B9573A]'}`}>
       {up ? '+' : '−'}{Math.abs(Math.round(change))}%
     </span>
   )
@@ -586,17 +586,17 @@ function EmptyState({ type, onAction }: { type: 'expense' | 'income'; onAction: 
   const isExpense = type === 'expense'
   return (
     <div className="flex min-h-56 flex-col items-center justify-center px-5 py-8 text-center">
-      <div className={`mb-4 grid size-12 place-items-center rounded-2xl ${isExpense ? 'bg-[#FDECEC] text-[#E5484D]' : 'bg-[#E6F6EC] text-[#1C8F4E]'}`}>
+      <div className={`mb-4 grid size-12 place-items-center rounded-2xl ${isExpense ? 'bg-[#FFF0EA] text-[#C96042]' : 'bg-[#EAF2E9] text-[#3F6548]'}`}>
         {isExpense ? <ReceiptText size={22} aria-hidden="true" /> : <TrendingUp size={22} aria-hidden="true" />}
       </div>
-      <h3 className="text-sm font-semibold text-[#16161D]">No {type} added yet</h3>
-      <p className="mt-1 max-w-xs text-xs leading-5 text-[#8B8B9A]">
+      <h3 className="text-sm font-semibold text-[#242522]">No {type} added yet</h3>
+      <p className="mt-1 max-w-xs text-xs leading-5 text-[#85887F]">
         Add your first {type} to start seeing your money take shape here.
       </p>
       <button
         type="button"
         onClick={onAction}
-        className="mt-5 rounded-full bg-[#7C5CFA] px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-[#6A48F5]"
+        className="mt-5 rounded-full bg-[#28352A] px-5 py-2.5 text-xs font-semibold text-white transition hover:bg-[#344637]"
       >
         Add {type}
       </button>
@@ -754,7 +754,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
 
   // The period selector: a pill that opens the month picker, with "All time"
   // as the first choice. Shared by every tab so the period follows you.
-  function renderPeriodPill(tone: 'glass' | 'light', align: 'left' | 'center' | 'right' = 'right') {
+  function renderPeriodPill(align: 'left' | 'center' | 'right' = 'right') {
     return (
       <div className="relative">
         <button
@@ -763,11 +763,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
           aria-expanded={monthPickerOpen}
           aria-haspopup="dialog"
           aria-label={`Period: ${showingRunning ? 'All time' : viewedMonthLabel}. Change period`}
-          className={`flex h-10 items-center gap-1.5 rounded-full px-4 text-[13px] font-semibold transition ${
-            tone === 'glass'
-              ? 'bg-white/20 text-white ring-1 ring-white/30 backdrop-blur hover:bg-white/30'
-              : 'border border-[#ECECF2] bg-white text-[#16161D] hover:bg-[#F6F5FB]'
-          }`}
+          className={`flex h-10 items-center gap-1.5 rounded-full border px-4 text-[13px] font-semibold transition ${monthPickerOpen ? 'border-[#28352A] bg-[#28352A] text-white' : 'border-[#DFE0DA] bg-white text-[#242522] hover:bg-[#F1F2ED]'}`}
         >
           {showingRunning ? 'All time' : viewedMonthLabel}
           <ChevronDown size={15} className={`transition ${monthPickerOpen ? 'rotate-180' : ''}`} aria-hidden="true" />
@@ -1203,7 +1199,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
 
   const pageHeader = (title: string, extra?: ReactNode) => (
     <header className="flex items-center justify-between gap-3 px-4 pb-4 pt-5 lg:px-0 lg:pt-0">
-      <h1 className="text-[22px] font-semibold tracking-[-0.03em] text-[#16161D] lg:text-[28px]">{title}</h1>
+      <h1 className="text-[22px] font-semibold tracking-[-0.03em] text-[#242522] lg:text-[28px]">{title}</h1>
       <div className="flex items-center gap-2">
         {extra}
         <NotificationsPanel notifications={notifications} onChanged={() => router.refresh()} variant="light" onReviewSpendingLimit={reviewSpendingLimit} />
@@ -1216,35 +1212,35 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
       type="button"
       key={item.id}
       onClick={() => openEditActivity(item)}
-      className="group flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition hover:bg-[#F6F5FB]"
+      className="group flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition hover:bg-[#F1F2ED]"
     >
       {item.type === 'expense' ? <CategoryIcon category={item.category} /> : <IncomeIcon />}
       <div className="min-w-0 flex-1">
-        <p className="flex items-center gap-2 text-sm font-semibold text-[#16161D]">
+        <p className="flex items-center gap-2 text-sm font-semibold text-[#242522]">
           <span className="truncate">{item.title}</span>
           {isRecentlyAdded(item.createdAt, now) && (
-            <span className="shrink-0 rounded-full bg-[#F4F2FD] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-[#6243EE]">New</span>
+            <span className="shrink-0 rounded-full bg-[#EAF2E9] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-[#3F6548]">New</span>
           )}
         </p>
-        <p className="mt-0.5 flex items-center gap-1.5 truncate text-[11px] text-[#8B8B9A]">
+        <p className="mt-0.5 flex items-center gap-1.5 truncate text-[11px] text-[#85887F]">
           <span className="truncate">{item.category}</span>
           {item.tag && <><span aria-hidden="true">·</span><span className="truncate">{item.tag}</span></>}
         </p>
       </div>
       <div className="shrink-0 text-right">
-        <p className={`text-sm font-semibold ${item.type === 'expense' ? 'text-[#E5484D]' : 'text-[#1C8F4E]'}`}>
+        <p className={`text-sm font-semibold ${item.type === 'expense' ? 'text-[#C96042]' : 'text-[#3F6548]'}`}>
           {item.type === 'expense' ? '−' : '+'}{formatCAD(item.amount)}
         </p>
-        {item.original && <p className="mt-0.5 text-[11px] text-[#8B8B9A]">{item.original}</p>}
+        {item.original && <p className="mt-0.5 text-[11px] text-[#85887F]">{item.original}</p>}
       </div>
     </button>
   )
 
   const quickAddOptions = [
-    { id: 'expense' as const, label: 'Expense', note: 'Money out', icon: ArrowUpRight, tint: 'bg-[#FDECEC] text-[#E5484D]' },
-    { id: 'income' as const, label: 'Income', note: 'Money in', icon: ArrowDownLeft, tint: 'bg-[#E6F6EC] text-[#1C8F4E]' },
-    { id: 'budget' as const, label: 'Budget', note: 'Monthly limit', icon: PiggyBank, tint: 'bg-[#EAF1FE] text-[#3B79E8]' },
-    { id: 'goal' as const, label: 'Savings goal', note: 'Something to save for', icon: Target, tint: 'bg-[#FEF0E4] text-[#D86A16]' },
+    { id: 'expense' as const, label: 'Expense', note: 'Money out', icon: ArrowUpRight, tint: 'bg-[#FFF0EA] text-[#C96042]' },
+    { id: 'income' as const, label: 'Income', note: 'Money in', icon: ArrowDownLeft, tint: 'bg-[#EAF2E9] text-[#3F6548]' },
+    { id: 'budget' as const, label: 'Budget', note: 'Monthly limit', icon: PiggyBank, tint: 'bg-[#EAF2E9] text-[#58755F]' },
+    { id: 'goal' as const, label: 'Savings goal', note: 'Something to save for', icon: Target, tint: 'bg-[#FFF0EA] text-[#B85D3F]' },
   ]
 
   return (
@@ -1256,14 +1252,14 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
       />
 
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-[#ECECF2] bg-white px-4 py-6 lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-[#DFE0DA] bg-white px-4 py-6 lg:flex">
         <div className="px-2">
           <SiteLogo size="compact" surface="light" />
         </div>
         <button
           type="button"
           onClick={() => setQuickAddOpen(true)}
-          className="mt-8 flex h-11 items-center justify-center gap-2 rounded-full bg-[#7C5CFA] text-[13px] font-semibold text-white shadow-[0_10px_24px_rgba(124,92,250,0.3)] transition hover:bg-[#6A48F5]"
+          className="mt-8 flex h-11 items-center justify-center gap-2 rounded-full bg-[#28352A] text-[13px] font-semibold text-white shadow-[0_10px_24px_rgba(40,53,42,0.3)] transition hover:bg-[#344637]"
         >
           <Plus size={16} strokeWidth={2.4} aria-hidden="true" /> New entry
         </button>
@@ -1277,7 +1273,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                 aria-current={active ? 'page' : undefined}
                 onClick={() => switchTab(item.id)}
                 className={`flex w-full items-center gap-3 rounded-2xl px-3.5 py-3 text-left text-sm font-medium transition ${
-                  active ? 'bg-[#F4F2FD] text-[#6243EE]' : 'text-[#6B6B7A] hover:bg-[#F6F5FB] hover:text-[#16161D]'
+                  active ? 'bg-[#EAF2E9] text-[#3F6548]' : 'text-[#74776F] hover:bg-[#F1F2ED] hover:text-[#242522]'
                 }`}
               >
                 <item.icon size={19} strokeWidth={active ? 2.3 : 1.9} aria-hidden="true" />
@@ -1286,58 +1282,62 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
             )
           })}
         </nav>
-        <div className="mt-auto flex items-center gap-3 rounded-2xl bg-[#F6F5FB] p-3">
-          <div className="grid size-9 shrink-0 place-items-center rounded-full bg-[#7C5CFA] text-xs font-bold text-white">{initials}</div>
+        <div className="mt-auto flex items-center gap-3 rounded-2xl bg-[#F1F2ED] p-3">
+          <div className="grid size-9 shrink-0 place-items-center rounded-full bg-[#28352A] text-xs font-bold text-white">{initials}</div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-semibold text-[#16161D]">{profile?.full_name ?? 'Xtrack user'}</p>
-            <p className="text-[10px] text-[#8B8B9A]">Currency · {homeCurrency}</p>
+            <p className="truncate text-xs font-semibold text-[#242522]">{profile?.full_name ?? 'Xtrack user'}</p>
+            <p className="text-[10px] text-[#85887F]">Currency · {homeCurrency}</p>
           </div>
           <button
             type="button"
             onClick={handleSignOut}
             aria-label="Sign out"
             title="Sign out"
-            className="grid size-8 shrink-0 place-items-center rounded-lg text-[#8B8B9A] transition hover:bg-white hover:text-[#E5484D]"
+            className="grid size-8 shrink-0 place-items-center rounded-lg text-[#85887F] transition hover:bg-white hover:text-[#C96042]"
           >
             <LogOut size={16} aria-hidden="true" />
           </button>
         </div>
       </aside>
 
-      <div className="pb-28 lg:pb-12 lg:pl-60">
+      <div className="pb-[calc(7rem+env(safe-area-inset-bottom))] lg:pb-12 lg:pl-60">
         <main className="mx-auto max-w-[1180px] lg:px-8 lg:pt-8">
           {/* ---------------------------------------------------------------- HOME */}
           {activeTab === 'home' && (
             <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-6">
               <div className="min-w-0">
-                <section aria-label="Balance" className={styles.hero}>
-                  <div className="relative z-10 flex items-center justify-between gap-3">
-                    <button
-                      type="button"
-                      onClick={() => switchTab('settings')}
-                      aria-label="Profile and settings"
-                      className="flex items-center gap-2.5"
-                    >
-                      <span className="grid size-11 place-items-center rounded-full bg-white text-sm font-bold text-[#6243EE] ring-4 ring-white/25">{initials}</span>
-                      <span className="hidden text-left lg:block">
-                        <span className="block text-[11px] text-white/75">Welcome back</span>
-                        <span className="block text-sm font-semibold">{firstName}</span>
-                      </span>
-                    </button>
-                    {renderPeriodPill('glass', 'center')}
-                    <NotificationsPanel notifications={notifications} onChanged={() => router.refresh()} variant="glass" onReviewSpendingLimit={reviewSpendingLimit} />
+                <header className="relative z-20 flex items-center justify-between gap-3 px-4 pb-4 pt-5 lg:px-0 lg:pt-0">
+                  <button
+                    type="button"
+                    onClick={() => switchTab('settings')}
+                    aria-label="Profile and settings"
+                    className="flex min-w-0 items-center gap-2.5"
+                  >
+                    <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#28352A] text-[13px] font-bold text-white">{initials}</span>
+                    <span className="min-w-0 text-left">
+                      <span className="block text-[11px] text-[#85887F]">Welcome back</span>
+                      <span className="block truncate text-sm font-semibold text-[#242522]">{firstName}</span>
+                    </span>
+                  </button>
+                  <div className="flex items-center gap-2">
+                    {renderPeriodPill('right')}
+                    <NotificationsPanel notifications={notifications} onChanged={() => router.refresh()} variant="light" onReviewSpendingLimit={reviewSpendingLimit} />
                   </div>
+                </header>
 
-                  <div className="relative z-10 mt-8 text-center">
-                    <p className="text-[13px] font-medium text-white/80">{balanceLabel}</p>
-                    <AnimatedMoney value={leftFigure} className={`${styles.heroValue} mt-1.5`} centsClassName={styles.heroCents} />
-                    <p className="mt-3 inline-flex items-center gap-1 rounded-full bg-white/18 px-3 py-1 text-[12px] font-medium text-white ring-1 ring-white/25" style={{ backgroundColor: 'rgb(255 255 255 / 0.16)' }}>
-                      {netThisPeriod >= 0 ? <TrendingUp size={13} aria-hidden="true" /> : <TrendingDown size={13} aria-hidden="true" />}
-                      {netThisPeriod >= 0 ? '+' : '−'}{formatCAD(Math.abs(netThisPeriod))} {monthWord}
-                    </p>
-                    {!showingRunning && (
-                      <p className="mt-2 text-[11px] text-white/75">{formatCAD(balanceBroughtForward)} carried over from earlier months</p>
-                    )}
+                <section aria-label="Balance" className={styles.hero}>
+                  <div className="relative z-10">
+                    <p className="text-[13px] font-medium text-[#C2C6BB]">{balanceLabel}</p>
+                    <AnimatedMoney value={leftFigure} className={`${styles.heroValue} mt-2`} centsClassName={styles.heroCents} />
+                    <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+                      <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[12px] font-semibold ${netThisPeriod >= 0 ? 'bg-[#829A83]/25 text-[#CFE0CC]' : 'bg-[#E98563]/20 text-[#F2B39C]'}`}>
+                        {netThisPeriod >= 0 ? <TrendingUp size={13} aria-hidden="true" /> : <TrendingDown size={13} aria-hidden="true" />}
+                        {netThisPeriod >= 0 ? '+' : '−'}{formatCAD(Math.abs(netThisPeriod))} {monthWord}
+                      </span>
+                      {!showingRunning && (
+                        <span className="text-[11px] text-[#B0B5A9]">{formatCAD(balanceBroughtForward)} carried over</span>
+                      )}
+                    </div>
                   </div>
                 </section>
 
@@ -1346,32 +1346,32 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                   <section aria-labelledby="your-money" className={`${styles.panel} p-4`}>
                     <div className="mb-3 flex items-center justify-between px-1">
                       <h2 id="your-money" className="flex items-center gap-1.5 text-[15px] font-semibold tracking-[-0.01em]">
-                        Your Money <span className="text-[11px] font-medium text-[#8B8B9A]">· {periodWord}</span>
+                        Your Money <span className="text-[11px] font-medium text-[#85887F]">· {periodWord}</span>
                       </h2>
                       <TextAction onClick={() => setShowSpendingBreakdown(true)}>
                         Details <ChevronRight size={14} aria-hidden="true" />
                       </TextAction>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <button type="button" onClick={() => openReport('income')} className="rounded-[20px] border border-[#ECECF2] p-4 text-left transition hover:border-[#D9D3FB] hover:bg-[#FBFAFF]">
-                        <span className="grid size-10 place-items-center rounded-full bg-[#EAF1FE] text-[#3B79E8]"><ArrowDownLeft size={18} strokeWidth={2.2} aria-hidden="true" /></span>
-                        <p className="mt-4 text-xs font-medium text-[#8B8B9A]">Income</p>
-                        <AnimatedMoney value={earnedFigure} className="mt-1 block text-[clamp(1.05rem,5vw,1.4rem)] font-semibold tracking-[-0.03em] text-[#16161D]" centsClassName={styles.cents} />
+                      <button type="button" onClick={() => openReport('income')} className="rounded-[20px] border border-[#DFE0DA] p-4 text-left transition hover:border-[#B8CEB5] hover:bg-[#FCFCF9]">
+                        <span className="grid size-10 place-items-center rounded-full bg-[#EAF2E9] text-[#58755F]"><ArrowDownLeft size={18} strokeWidth={2.2} aria-hidden="true" /></span>
+                        <p className="mt-4 text-xs font-medium text-[#85887F]">Income</p>
+                        <AnimatedMoney value={earnedFigure} className="mt-1 block text-[clamp(1.05rem,5vw,1.4rem)] font-semibold tracking-[-0.03em] text-[#242522]" centsClassName={styles.cents} />
                       </button>
-                      <button type="button" onClick={() => openReport('expense')} className="rounded-[20px] border border-[#ECECF2] p-4 text-left transition hover:border-[#D9D3FB] hover:bg-[#FBFAFF]">
-                        <span className="grid size-10 place-items-center rounded-full bg-[#FDECEC] text-[#E5484D]"><ArrowUpRight size={18} strokeWidth={2.2} aria-hidden="true" /></span>
-                        <p className="mt-4 text-xs font-medium text-[#8B8B9A]">Expenses</p>
-                        <AnimatedMoney value={spentFigure} className="mt-1 block text-[clamp(1.05rem,5vw,1.4rem)] font-semibold tracking-[-0.03em] text-[#16161D]" centsClassName={styles.cents} />
+                      <button type="button" onClick={() => openReport('expense')} className="rounded-[20px] border border-[#DFE0DA] p-4 text-left transition hover:border-[#B8CEB5] hover:bg-[#FCFCF9]">
+                        <span className="grid size-10 place-items-center rounded-full bg-[#FFF0EA] text-[#C96042]"><ArrowUpRight size={18} strokeWidth={2.2} aria-hidden="true" /></span>
+                        <p className="mt-4 text-xs font-medium text-[#85887F]">Expenses</p>
+                        <AnimatedMoney value={spentFigure} className="mt-1 block text-[clamp(1.05rem,5vw,1.4rem)] font-semibold tracking-[-0.03em] text-[#242522]" centsClassName={styles.cents} />
                       </button>
                     </div>
                     {earnedFigure > 0 && (
                       <div className="mt-4 px-1">
-                        <div className="mb-1.5 flex justify-between text-[11px] text-[#8B8B9A]">
+                        <div className="mb-1.5 flex justify-between text-[11px] text-[#85887F]">
                           <span>Spent {Math.round(spentShare)}% of income</span>
                           <span>{formatCAD(Math.max(0, earnedFigure - spentFigure))} unspent</span>
                         </div>
-                        <div className="h-2 overflow-hidden rounded-full bg-[#F1F0F7]" aria-hidden="true">
-                          <div className={`h-full rounded-full ${spentShare >= 100 ? 'bg-[#E5484D]' : 'bg-[#7C5CFA]'}`} style={{ width: `${Math.min(100, spentShare)}%` }} />
+                        <div className="h-2 overflow-hidden rounded-full bg-[#EAEBE6]" aria-hidden="true">
+                          <div className={`h-full rounded-full ${spentShare >= 100 ? 'bg-[#C96042]' : 'bg-[#28352A]'}`} style={{ width: `${Math.min(100, spentShare)}%` }} />
                         </div>
                       </div>
                     )}
@@ -1381,9 +1381,9 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                   <button
                     type="button"
                     onClick={() => { switchTab('plan'); requestAnimationFrame(() => document.getElementById('savings')?.scrollIntoView({ block: 'start' })) }}
-                    className="mt-4 flex w-full items-center gap-3 rounded-full bg-[#16161D] px-5 py-3.5 text-left text-white transition hover:bg-[#24242E]"
+                    className="mt-4 flex w-full items-center gap-3 rounded-full bg-[#242522] px-5 py-3.5 text-left text-white transition hover:bg-[#343630]"
                   >
-                    <Sparkles size={16} className="shrink-0 text-[#B9A6FD]" aria-hidden="true" />
+                    <Sparkles size={16} className="shrink-0 text-[#F2A68B]" aria-hidden="true" />
                     <span className="min-w-0 flex-1 truncate text-[13px] font-medium">
                       {savingsPotential > 0
                         ? <>Save up to <span className="font-semibold">{formatCAD(savingsPotential)}</span>/mo</>
@@ -1395,21 +1395,21 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                   </button>
 
                   {activePayday && (
-                    <section aria-label="Payday check-in" className="mt-4 rounded-[24px] border border-[#CFE9D8] bg-[#EEF9F2] p-5">
+                    <section aria-label="Payday check-in" className="mt-4 rounded-[24px] border border-[#B8CEB5] bg-[#F2F6ED] p-5">
                       <div className="flex items-start gap-3">
-                        <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[#D3EFDD] text-[#1C8F4E]">
+                        <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-[#DDEBD8] text-[#3F6548]">
                           <CalendarClock size={18} aria-hidden="true" />
                         </span>
                         <div className="min-w-0">
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#1C8F4E]">Payday check-in</p>
-                          <p className="mt-1 text-[15px] font-semibold tracking-[-0.01em] text-[#16161D]">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#3F6548]">Payday check-in</p>
+                          <p className="mt-1 text-[15px] font-semibold tracking-[-0.01em] text-[#242522]">
                             How much were you paid on {formatDate(activePayday.dueDate, true)}?
                           </p>
                           <p className="mt-1 text-xs leading-5 text-[#4D6B58]">
                             {activePayday.source} repeats {activePayday.cycle} and is usually{' '}
                             <span className="font-semibold">{formatCAD(activePayday.expectedAmount)}</span>.
                           </p>
-                          {paydayError && <p className="mt-2 text-xs font-medium text-[#D93F3F]">{paydayError}</p>}
+                          {paydayError && <p className="mt-2 text-xs font-medium text-[#B9573A]">{paydayError}</p>}
                         </div>
                       </div>
 
@@ -1425,11 +1425,11 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                               aria-label="Amount you were paid"
                               value={paydayAmount}
                               onChange={event => setPaydayAmount(event.target.value)}
-                              className="w-full rounded-2xl border border-[#CFE9D8] bg-white py-3 pl-8 pr-3 text-base font-semibold text-[#16161D] outline-none focus:border-[#1C8F4E] sm:w-40 sm:text-[15px]"
+                              className="w-full rounded-2xl border border-[#B8CEB5] bg-white py-3 pl-8 pr-3 text-base font-semibold text-[#242522] outline-none focus:border-[#3F6548] sm:w-40 sm:text-[15px]"
                             />
                           </div>
                           <div className="flex items-center gap-3">
-                            <button type="button" onClick={() => confirmPayday(activePayday, Number(paydayAmount))} disabled={savingPayday} className="rounded-full bg-[#16161D] px-5 py-3 text-[13px] font-semibold text-white disabled:opacity-50">
+                            <button type="button" onClick={() => confirmPayday(activePayday, Number(paydayAmount))} disabled={savingPayday} className="rounded-full bg-[#242522] px-5 py-3 text-[13px] font-semibold text-white disabled:opacity-50">
                               {savingPayday ? 'Saving…' : 'Log payment'}
                             </button>
                             <button type="button" onClick={() => { setEditingPayday(false); setPaydayError('') }} className="text-[13px] font-semibold text-[#4D6B58]">Cancel</button>
@@ -1437,13 +1437,13 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                         </div>
                       ) : (
                         <div className="mt-4 flex flex-wrap items-center gap-2">
-                          <button type="button" onClick={() => confirmPayday(activePayday, activePayday.expectedAmount)} disabled={savingPayday} className="rounded-full bg-[#16161D] px-5 py-3 text-[13px] font-semibold text-white disabled:opacity-50">
+                          <button type="button" onClick={() => confirmPayday(activePayday, activePayday.expectedAmount)} disabled={savingPayday} className="rounded-full bg-[#242522] px-5 py-3 text-[13px] font-semibold text-white disabled:opacity-50">
                             {savingPayday ? 'Saving…' : `Yes, log ${formatCAD(activePayday.expectedAmount)}`}
                           </button>
                           <button
                             type="button"
                             onClick={() => { setPaydayAmount(activePayday.expectedAmount.toFixed(2)); setEditingPayday(true); setPaydayError('') }}
-                            className="rounded-full border border-[#CFE9D8] bg-white px-5 py-3 text-[13px] font-semibold text-[#1C8F4E]"
+                            className="rounded-full border border-[#B8CEB5] bg-white px-5 py-3 text-[13px] font-semibold text-[#3F6548]"
                           >
                             Different amount
                           </button>
@@ -1451,7 +1451,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                         </div>
                       )}
                       {duePaydays.length > 1 && (
-                        <p className="mt-4 border-t border-[#CFE9D8] pt-3 text-[11px] text-[#4D6B58]">
+                        <p className="mt-4 border-t border-[#B8CEB5] pt-3 text-[11px] text-[#4D6B58]">
                           {duePaydays.length - 1} earlier payday{duePaydays.length - 1 === 1 ? '' : 's'} still to confirm after this one.
                         </p>
                       )}
@@ -1464,7 +1464,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                       id="transactions"
                       title="Transactions"
                       action={
-                        <span className="rounded-full bg-[#F4F2FD] px-3 py-1 text-[11px] font-semibold text-[#6243EE]">{showingRunning ? 'All time' : viewedMonth.toLocaleDateString('en-CA', { month: 'short', year: 'numeric' })}</span>
+                        <span className="rounded-full bg-[#EAF2E9] px-3 py-1 text-[11px] font-semibold text-[#3F6548]">{showingRunning ? 'All time' : viewedMonth.toLocaleDateString('en-CA', { month: 'short', year: 'numeric' })}</span>
                       }
                     />
                     {dayGroups.groups.length > 0 ? (
@@ -1472,16 +1472,16 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                         {dayGroups.groups.map(group => (
                           <div key={group.key}>
                             <div className="mb-2 flex items-baseline justify-between px-1 text-[12px]">
-                              <span className="text-[#8B8B9A]">{dayLabel(group.date)}</span>
-                              <span className="text-[#8B8B9A]">
-                                Total <span className="font-semibold text-[#16161D]">{group.net >= 0 ? '+' : '−'}{formatCAD(Math.abs(group.net))}</span>
+                              <span className="text-[#85887F]">{dayLabel(group.date)}</span>
+                              <span className="text-[#85887F]">
+                                Total <span className="font-semibold text-[#242522]">{group.net >= 0 ? '+' : '−'}{formatCAD(Math.abs(group.net))}</span>
                               </span>
                             </div>
                             <div className={`${styles.panel} p-1.5`}>{group.items.map(transactionRow)}</div>
                           </div>
                         ))}
                         {dayGroups.total > 12 && (
-                          <button type="button" onClick={() => openReport('expense')} className="w-full rounded-full border border-[#ECECF2] bg-white py-3 text-[13px] font-semibold text-[#6243EE] transition hover:bg-[#F6F5FB]">
+                          <button type="button" onClick={() => openReport('expense')} className="w-full rounded-full border border-[#DFE0DA] bg-white py-3 text-[13px] font-semibold text-[#3F6548] transition hover:bg-[#F1F2ED]">
                             View all {dayGroups.total} transactions
                           </button>
                         )}
@@ -1490,7 +1490,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                       <div className={styles.panel}>
                         {expenses.length + income.length === 0
                           ? <EmptyState type="expense" onAction={() => quickAdd('expense')} />
-                          : <p className="px-5 py-10 text-center text-sm text-[#8B8B9A]">Nothing recorded {monthWord}.</p>}
+                          : <p className="px-5 py-10 text-center text-sm text-[#85887F]">Nothing recorded {monthWord}.</p>}
                       </div>
                     )}
                   </section>
@@ -1512,14 +1512,14 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                           <CategoryIcon category={payment.category} small />
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-[13px] font-semibold">{payment.note ?? payment.category}</p>
-                            <p className="text-[11px] text-[#8B8B9A]">{payment.daysUntil === 0 ? 'Due today' : payment.daysUntil === 1 ? 'Tomorrow' : `In ${payment.daysUntil} days`}</p>
+                            <p className="text-[11px] text-[#85887F]">{payment.daysUntil === 0 ? 'Due today' : payment.daysUntil === 1 ? 'Tomorrow' : `In ${payment.daysUntil} days`}</p>
                           </div>
                           <span className="text-[13px] font-semibold">{formatCAD(payment.amount_cad)}</span>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="px-1 pb-2 text-xs text-[#8B8B9A]">No recurring bills yet.</p>
+                    <p className="px-1 pb-2 text-xs text-[#85887F]">No recurring bills yet.</p>
                   )}
                 </section>
                 <BankSyncPanel expenses={expenses} income={income} />
@@ -1530,23 +1530,23 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
           {/* -------------------------------------------------------------- REPORT */}
           {activeTab === 'report' && (
             <div>
-              {pageHeader('Report', renderPeriodPill('light', 'right'))}
+              {pageHeader('Report', renderPeriodPill('right'))}
               <div className="space-y-5 px-4 lg:px-0">
                 <div className="flex items-center gap-2">
-                  <div className="grid flex-1 grid-cols-2 rounded-full bg-[#ECECF2] p-1 sm:max-w-sm" role="group" aria-label="Report type">
+                  <div className="grid flex-1 grid-cols-2 rounded-full bg-[#DFE0DA] p-1 sm:max-w-sm" role="group" aria-label="Report type">
                     {(['expense', 'income'] as const).map(kind => (
                       <button
                         key={kind}
                         type="button"
                         aria-pressed={reportKind === kind}
                         onClick={() => setReportKind(kind)}
-                        className={`rounded-full py-2.5 text-[13px] font-semibold transition ${reportKind === kind ? 'bg-white text-[#16161D] shadow-sm' : 'text-[#8B8B9A] hover:text-[#16161D]'}`}
+                        className={`rounded-full py-2.5 text-[13px] font-semibold transition ${reportKind === kind ? 'bg-white text-[#242522] shadow-sm' : 'text-[#85887F] hover:text-[#242522]'}`}
                       >
                         {kind === 'expense' ? 'Expenses' : 'Income'}
                       </button>
                     ))}
                   </div>
-                  <button type="button" onClick={() => setShowStatement(true)} aria-label="Export statement" title="Export statement" className="grid size-11 shrink-0 place-items-center rounded-full border border-[#ECECF2] bg-white text-[#16161D] transition hover:bg-[#F6F5FB]">
+                  <button type="button" onClick={() => setShowStatement(true)} aria-label="Export statement" title="Export statement" className="grid size-11 shrink-0 place-items-center rounded-full border border-[#DFE0DA] bg-white text-[#242522] transition hover:bg-[#F1F2ED]">
                     <Printer size={17} aria-hidden="true" />
                   </button>
                   <button
@@ -1555,16 +1555,16 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                     disabled={!AI_FEATURES_ENABLED || generatingInsight}
                     aria-label={AI_FEATURES_ENABLED ? 'AI insight' : 'AI insight, coming soon'}
                     title={AI_FEATURES_ENABLED ? 'AI insight' : 'AI insights are coming soon'}
-                    className="grid size-11 shrink-0 place-items-center rounded-full border border-[#ECECF2] bg-white text-[#7C5CFA] transition hover:bg-[#F6F5FB] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="grid size-11 shrink-0 place-items-center rounded-full border border-[#DFE0DA] bg-white text-[#28352A] transition hover:bg-[#F1F2ED] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <Sparkles size={17} aria-hidden="true" />
                   </button>
                 </div>
-                {insightError && <p className="rounded-2xl bg-[#FDECEC] px-4 py-3 text-[13px] font-medium text-[#D93F3F]">{insightError}</p>}
+                {insightError && <p className="rounded-2xl bg-[#FFF0EA] px-4 py-3 text-[13px] font-medium text-[#B9573A]">{insightError}</p>}
 
                 <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
                   <section aria-labelledby="report-chart" className={`${styles.panel} p-5`}>
-                    <SectionTitle id="report-chart" title={`${reportTitle} Report`} action={<span className="text-[11px] font-medium text-[#8B8B9A]">{periodWord}</span>} />
+                    <SectionTitle id="report-chart" title={`${reportTitle} Report`} action={<span className="text-[11px] font-medium text-[#85887F]">{periodWord}</span>} />
                     {reportData.rows.length > 0 ? (
                       <div className="relative mx-auto aspect-square w-full max-w-[280px]">
                         <ResponsiveContainer width="100%" height="100%">
@@ -1587,7 +1587,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                               content={({ active, payload }) => {
                                 const row = active ? payload?.[0]?.payload as (typeof reportData.rows)[number] | undefined : undefined
                                 return row ? (
-                                  <div className="rounded-full bg-[#16161D] px-3 py-1.5 text-[11px] font-semibold text-white shadow-lg">
+                                  <div className="rounded-full bg-[#242522] px-3 py-1.5 text-[11px] font-semibold text-white shadow-lg">
                                     {row.name} · {Math.round(row.share)}%
                                   </div>
                                 ) : null
@@ -1597,7 +1597,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                         </ResponsiveContainer>
                         <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
                           <div>
-                            <p className="text-[11px] font-medium text-[#8B8B9A]">Total {reportTitle.toLowerCase()}</p>
+                            <p className="text-[11px] font-medium text-[#85887F]">Total {reportTitle.toLowerCase()}</p>
                             <AnimatedMoney value={reportData.total} className="mt-0.5 block text-[22px] font-semibold tracking-[-0.03em]" centsClassName={styles.cents} />
                           </div>
                         </div>
@@ -1609,10 +1609,10 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
 
                   <section aria-labelledby="report-breakdown">
                     <div className="mb-3 flex items-center justify-between px-1">
-                      <h2 id="report-breakdown" className="text-[13px] font-medium text-[#8B8B9A]">
+                      <h2 id="report-breakdown" className="text-[13px] font-medium text-[#85887F]">
                         {reportKind === 'expense' ? 'All expenses' : 'All income'}
                       </h2>
-                      <span className="text-[13px] text-[#8B8B9A]">Total <span className="font-semibold text-[#16161D]">{formatCAD(reportData.total)}</span></span>
+                      <span className="text-[13px] text-[#85887F]">Total <span className="font-semibold text-[#242522]">{formatCAD(reportData.total)}</span></span>
                     </div>
                     <div className="space-y-3">
                       {reportData.rows.map(row => (
@@ -1621,12 +1621,12 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                             {reportKind === 'expense' ? <CategoryIcon category={row.name} small /> : <IncomeIcon small />}
                             <div className="min-w-0 flex-1">
                               <p className="truncate text-sm font-semibold">{row.name}</p>
-                              <p className="text-[11px] text-[#8B8B9A]">{row.share < 1 && row.share > 0 ? '<1' : Math.round(row.share)}% of total</p>
+                              <p className="text-[11px] text-[#85887F]">{row.share < 1 && row.share > 0 ? '<1' : Math.round(row.share)}% of total</p>
                             </div>
                             <div className="text-right">
                               <p className="text-sm font-semibold">{formatCAD(row.amount)}</p>
                               {reportData.compare && (
-                                <p className="mt-0.5 flex items-center justify-end gap-1 text-[10px] text-[#8B8B9A]">
+                                <p className="mt-0.5 flex items-center justify-end gap-1 text-[10px] text-[#85887F]">
                                   <DeltaChip current={row.amount} previous={row.previous} upIsGood={reportKind === 'income'} />
                                   {row.previous > 0 && 'vs last month'}
                                 </p>
@@ -1652,13 +1652,13 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                           : <TextAction onClick={handleGetSavingsTips} disabled={loadingTips}>{loadingTips ? 'Thinking…' : 'Get tips'}</TextAction>
                       }
                     />
-                    {tipsError && <p className="text-[12px] font-medium text-[#D93F3F]">{tipsError}</p>}
+                    {tipsError && <p className="text-[12px] font-medium text-[#B9573A]">{tipsError}</p>}
                     {savingsTips && (
                       <div className="grid gap-3 sm:grid-cols-2">
                         {savingsTips.map((tip, index) => (
-                          <div key={index} className="rounded-2xl bg-[#F6F5FB] p-4">
+                          <div key={index} className="rounded-2xl bg-[#F1F2ED] p-4">
                             <p className="text-[13px] font-semibold">{tip.title}</p>
-                            <p className="mt-1.5 text-[12px] leading-5 text-[#5E5E6E]">{tip.body}</p>
+                            <p className="mt-1.5 text-[12px] leading-5 text-[#5F625B]">{tip.body}</p>
                           </div>
                         ))}
                       </div>
@@ -1679,61 +1679,61 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                   <div className={styles.sectionHeader}>
                     <div>
                       <h2 id="report-list" className="text-[15px] font-semibold tracking-[-0.01em]">{reportTitle} history</h2>
-                      <p className="mt-0.5 text-xs text-[#8B8B9A]">
+                      <p className="mt-0.5 text-xs text-[#85887F]">
                         {(reportKind === 'expense' ? listedExpenseCount : listedIncomeCount)} entr{(reportKind === 'expense' ? listedExpenseCount : listedIncomeCount) === 1 ? 'y' : 'ies'} · {periodWord}
                       </p>
                     </div>
-                    <p className={`text-sm font-semibold ${reportKind === 'expense' ? 'text-[#E5484D]' : 'text-[#1C8F4E]'}`}>
+                    <p className={`text-sm font-semibold ${reportKind === 'expense' ? 'text-[#C96042]' : 'text-[#3F6548]'}`}>
                       {formatCAD(reportKind === 'expense' ? listedExpenseTotal : listedIncomeTotal)}
                     </p>
                   </div>
                   {(reportKind === 'expense' ? expenses.length : income.length) === 0 ? (
                     <EmptyState type={reportKind} onAction={() => quickAdd(reportKind)} />
                   ) : listGroups.length === 0 ? (
-                    <p className="px-5 py-10 text-center text-sm text-[#8B8B9A]">No {reportTitle.toLowerCase()} recorded in {viewedMonthLabel}.</p>
+                    <p className="px-5 py-10 text-center text-sm text-[#85887F]">No {reportTitle.toLowerCase()} recorded in {viewedMonthLabel}.</p>
                   ) : listGroups.map(group => (
                     <div key={group.key}>
                       <div className={styles.monthDivider}>
-                        <p className="text-[12px] font-semibold text-[#16161D]">{group.label} <span className="font-normal text-[#8B8B9A]">· {group.entries.length}</span></p>
-                        <p className={`text-[12px] font-semibold ${reportKind === 'expense' ? 'text-[#E5484D]' : 'text-[#1C8F4E]'}`}>
+                        <p className="text-[12px] font-semibold text-[#242522]">{group.label} <span className="font-normal text-[#85887F]">· {group.entries.length}</span></p>
+                        <p className={`text-[12px] font-semibold ${reportKind === 'expense' ? 'text-[#C96042]' : 'text-[#3F6548]'}`}>
                           {reportKind === 'expense' ? '−' : '+'}{formatCAD(group.total)}
                         </p>
                       </div>
                       <div className="p-1.5">
                         {reportKind === 'expense'
                           ? (group.entries as Expense[]).map(expense => (
-                            <button key={expense.id} type="button" onClick={() => openEditExpense(expense)} className="group flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition hover:bg-[#F6F5FB]">
+                            <button key={expense.id} type="button" onClick={() => openEditExpense(expense)} className="group flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition hover:bg-[#F1F2ED]">
                               <CategoryIcon category={expense.category} />
                               <div className="min-w-0 flex-1">
                                 <p className="flex items-center gap-2 text-sm font-semibold">
                                   <span className="truncate">{expense.note ?? expense.category}</span>
-                                  {group.upcoming.has(expense.id) && <span className="shrink-0 rounded-full bg-[#F1F0F7] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-[#6B6B7A]">Upcoming</span>}
-                                  {expense.recurring_source_id && <span className="shrink-0 rounded-full bg-[#F4F2FD] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-[#6243EE]">Auto</span>}
+                                  {group.upcoming.has(expense.id) && <span className="shrink-0 rounded-full bg-[#EAEBE6] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-[#74776F]">Upcoming</span>}
+                                  {expense.recurring_source_id && <span className="shrink-0 rounded-full bg-[#EAF2E9] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-[#3F6548]">Auto</span>}
                                 </p>
-                                <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-[#8B8B9A]">
+                                <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-[#85887F]">
                                   {expense.category} · {formatDate(expense.date, true)}
                                   {expense.split_count && <span className="inline-flex items-center gap-1"><Users size={11} aria-hidden="true" />{expense.split_count}</span>}
                                 </p>
                               </div>
                               <div className="shrink-0 text-right">
-                                <p className="text-sm font-semibold text-[#16161D]">−{formatCAD(expense.amount_cad)}</p>
-                                {expense.original_amount && expense.original_currency && <p className="text-[11px] text-[#8B8B9A]">{expense.original_currency} {expense.original_amount}</p>}
+                                <p className="text-sm font-semibold text-[#242522]">−{formatCAD(expense.amount_cad)}</p>
+                                {expense.original_amount && expense.original_currency && <p className="text-[11px] text-[#85887F]">{expense.original_currency} {expense.original_amount}</p>}
                               </div>
                             </button>
                           ))
                           : (group.entries as Income[]).map(item => (
-                            <button key={item.id} type="button" onClick={() => openEditIncome(item)} className="group flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition hover:bg-[#F6F5FB]">
+                            <button key={item.id} type="button" onClick={() => openEditIncome(item)} className="group flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left transition hover:bg-[#F1F2ED]">
                               <IncomeIcon />
                               <div className="min-w-0 flex-1">
                                 <p className="flex items-center gap-2 text-sm font-semibold">
                                   <span className="truncate">{item.source}</span>
-                                  {group.upcoming.has(item.id) && <span className="shrink-0 rounded-full bg-[#F1F0F7] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-[#6B6B7A]">Upcoming</span>}
+                                  {group.upcoming.has(item.id) && <span className="shrink-0 rounded-full bg-[#EAEBE6] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.06em] text-[#74776F]">Upcoming</span>}
                                 </p>
-                                <p className="mt-0.5 text-[11px] text-[#8B8B9A]">
+                                <p className="mt-0.5 text-[11px] text-[#85887F]">
                                   {formatDate(item.date, true)}{item.is_recurring && ` · Recurring ${item.recur_cycle}`}
                                 </p>
                               </div>
-                              <p className="shrink-0 text-sm font-semibold text-[#1C8F4E]">+{formatCAD(item.amount_cad)}</p>
+                              <p className="shrink-0 text-sm font-semibold text-[#3F6548]">+{formatCAD(item.amount_cad)}</p>
                             </button>
                           ))}
                       </div>
@@ -1749,8 +1749,8 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
             <div>
               {pageHeader('My Plan', (
                 <>
-                  {renderPeriodPill('light', 'right')}
-                  <button type="button" onClick={() => setQuickAddOpen(true)} aria-label="Add a goal or budget" className="grid size-10 place-items-center rounded-full bg-[#16161D] text-white transition hover:bg-[#2A2A35]">
+                  {renderPeriodPill('right')}
+                  <button type="button" onClick={() => setQuickAddOpen(true)} aria-label="Add a goal or budget" className="grid size-10 place-items-center rounded-full bg-[#242522] text-white transition hover:bg-[#2A2A35]">
                     <Plus size={18} strokeWidth={2.4} aria-hidden="true" />
                   </button>
                 </>
@@ -1775,7 +1775,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                       </div>
                     }
                   />
-                  {goalSuggestionError && <p className="mb-3 rounded-2xl bg-[#FDECEC] px-4 py-3 text-[12px] font-medium text-[#D93F3F]">{goalSuggestionError}</p>}
+                  {goalSuggestionError && <p className="mb-3 rounded-2xl bg-[#FFF0EA] px-4 py-3 text-[12px] font-medium text-[#B9573A]">{goalSuggestionError}</p>}
                   {savingsGoals.length > 0 ? (
                     <div className="space-y-4">
                       {savingsGoals.map(goal => {
@@ -1793,30 +1793,30 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                           <article key={goal.id} className={`${styles.panel} overflow-hidden`}>
                             <div className="p-5">
                               <div className="flex items-start gap-3">
-                                <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#FEF0E4] text-[#D86A16]"><Target size={18} aria-hidden="true" /></span>
+                                <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-[#FFF0EA] text-[#B85D3F]"><Target size={18} aria-hidden="true" /></span>
                                 <div className="min-w-0 flex-1">
                                   <p className="truncate text-sm font-semibold">{goal.title}</p>
-                                  <p className="mt-0.5 text-[11px] text-[#8B8B9A]">{goal.target_date ? `Target ${formatDate(goal.target_date, true)}` : 'No deadline'}</p>
+                                  <p className="mt-0.5 text-[11px] text-[#85887F]">{goal.target_date ? `Target ${formatDate(goal.target_date, true)}` : 'No deadline'}</p>
                                 </div>
-                                <button type="button" onClick={() => { setFundingGoal(goal); setGoalModalOpen(true) }} className="flex shrink-0 items-center gap-1 rounded-full bg-[#F4F2FD] px-3 py-1.5 text-[11px] font-semibold text-[#6243EE] transition hover:bg-[#ECE7FE]">
+                                <button type="button" onClick={() => { setFundingGoal(goal); setGoalModalOpen(true) }} className="flex shrink-0 items-center gap-1 rounded-full bg-[#EAF2E9] px-3 py-1.5 text-[11px] font-semibold text-[#3F6548] transition hover:bg-[#EAF2E9]">
                                   <Plus size={12} aria-hidden="true" /> Add money
                                 </button>
                               </div>
                               <p className="mt-5 text-[22px] font-semibold tracking-[-0.03em]">
-                                {formatCAD(goal.current_amount_cad)} <span className="text-[13px] font-normal tracking-normal text-[#8B8B9A]">out of {formatCAD(goal.target_amount_cad)}</span>
+                                {formatCAD(goal.current_amount_cad)} <span className="text-[13px] font-normal tracking-normal text-[#85887F]">out of {formatCAD(goal.target_amount_cad)}</span>
                               </p>
                               <div className="relative mt-4 h-2.5 rounded-full bg-[#FDE9DA]" role="progressbar" aria-label={`${goal.title} progress`} aria-valuenow={Math.round(percentage)} aria-valuemin={0} aria-valuemax={100}>
-                                <div className="h-full rounded-full bg-[#F2832C]" style={{ width: `${percentage}%` }} />
-                                <span aria-hidden="true" className="absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-white bg-[#F2832C] shadow" style={{ left: `${Math.max(3, Math.min(97, percentage))}%` }} />
+                                <div className="h-full rounded-full bg-[#E98563]" style={{ width: `${percentage}%` }} />
+                                <span aria-hidden="true" className="absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-white bg-[#E98563] shadow" style={{ left: `${Math.max(3, Math.min(97, percentage))}%` }} />
                               </div>
                               <div className="mt-2 flex justify-between text-[11px]">
-                                <span className="text-[#8B8B9A]">Your progress · {Math.round(percentage)}%</span>
+                                <span className="text-[#85887F]">Your progress · {Math.round(percentage)}%</span>
                                 <span className="font-semibold">{formatCAD(remaining)} left</span>
                               </div>
                             </div>
                             {pace && (
                               <p className={`flex items-center gap-2 px-5 py-2.5 text-[12px] font-medium ${
-                                pace === 'behind' ? 'bg-[#F2832C] text-white' : pace === 'reached' ? 'bg-[#7C5CFA] text-white' : 'bg-[#E6F6EC] text-[#1C8F4E]'
+                                pace === 'behind' ? 'bg-[#E98563] text-white' : pace === 'reached' ? 'bg-[#28352A] text-white' : 'bg-[#EAF2E9] text-[#3F6548]'
                               }`}>
                                 <CircleAlert size={14} aria-hidden="true" />
                                 {pace === 'behind' && neededPerMonth !== null && `Behind pace: needs ${formatCAD(neededPerMonth)}/month, you save about ${formatCAD(avgMonthlySavings)}`}
@@ -1830,10 +1830,10 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                     </div>
                   ) : (
                     <div className={`${styles.panel} flex flex-col items-center px-6 py-10 text-center`}>
-                      <span className="grid size-12 place-items-center rounded-2xl bg-[#FEF0E4] text-[#D86A16]"><Target size={22} aria-hidden="true" /></span>
+                      <span className="grid size-12 place-items-center rounded-2xl bg-[#FFF0EA] text-[#B85D3F]"><Target size={22} aria-hidden="true" /></span>
                       <p className="mt-4 text-sm font-semibold">No goals yet</p>
-                      <p className="mt-1 max-w-xs text-xs leading-5 text-[#8B8B9A]">A trip, a laptop, an emergency fund — give your savings a target.</p>
-                      <button type="button" onClick={() => quickAdd('goal')} className="mt-5 rounded-full bg-[#7C5CFA] px-5 py-2.5 text-xs font-semibold text-white hover:bg-[#6A48F5]">Set a goal</button>
+                      <p className="mt-1 max-w-xs text-xs leading-5 text-[#85887F]">A trip, a laptop, an emergency fund — give your savings a target.</p>
+                      <button type="button" onClick={() => quickAdd('goal')} className="mt-5 rounded-full bg-[#28352A] px-5 py-2.5 text-xs font-semibold text-white hover:bg-[#344637]">Set a goal</button>
                     </div>
                   )}
 
@@ -1842,18 +1842,18 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                     <SectionTitle id="savings-title" title="Savings potential" />
                     <AnimatedMoney
                       value={savingsPotential}
-                      className={`block text-[28px] font-semibold tracking-[-0.03em] ${savingsPotential >= 0 ? 'text-[#16161D]' : 'text-[#E5484D]'}`}
+                      className={`block text-[28px] font-semibold tracking-[-0.03em] ${savingsPotential >= 0 ? 'text-[#242522]' : 'text-[#C96042]'}`}
                       centsClassName={styles.cents}
                     />
-                    <p className="mt-1 text-xs text-[#8B8B9A]">
+                    <p className="mt-1 text-xs text-[#85887F]">
                       {savingsPotential > 0
-                        ? <>a month · about <span className="font-semibold text-[#16161D]">{formatCAD(weeklySavingsTarget)}</span> a week</>
+                        ? <>a month · about <span className="font-semibold text-[#242522]">{formatCAD(weeklySavingsTarget)}</span> a week</>
                         : 'Your average spending is above your average income right now.'}
                     </p>
-                    <div className="mt-4 space-y-2 rounded-2xl bg-[#F6F5FB] p-4 text-[12px]">
-                      <p className="text-[11px] text-[#8B8B9A]">Averaged over {monthlyAverages.months} month{monthlyAverages.months === 1 ? '' : 's'} of activity</p>
-                      <div className="flex justify-between"><span className="text-[#5E5E6E]">Average income</span><span className="font-semibold">{formatCAD(avgMonthlyIncome)}</span></div>
-                      <div className="flex justify-between"><span className="text-[#5E5E6E]">Average spending</span><span className="font-semibold">−{formatCAD(avgMonthlySpend)}</span></div>
+                    <div className="mt-4 space-y-2 rounded-2xl bg-[#F1F2ED] p-4 text-[12px]">
+                      <p className="text-[11px] text-[#85887F]">Averaged over {monthlyAverages.months} month{monthlyAverages.months === 1 ? '' : 's'} of activity</p>
+                      <div className="flex justify-between"><span className="text-[#5F625B]">Average income</span><span className="font-semibold">{formatCAD(avgMonthlyIncome)}</span></div>
+                      <div className="flex justify-between"><span className="text-[#5F625B]">Average spending</span><span className="font-semibold">−{formatCAD(avgMonthlySpend)}</span></div>
                     </div>
                     {topSpendCategories.length > 0 && (
                       <div className="mt-4">
@@ -1862,7 +1862,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                           {topSpendCategories.map(category => (
                             <div key={category.name} className="flex items-center gap-3 text-[12px]">
                               <CategoryIcon category={category.name} small />
-                              <span className="flex-1 text-[#5E5E6E]">{category.name}</span>
+                              <span className="flex-1 text-[#5F625B]">{category.name}</span>
                               <span className="font-semibold">{formatCAD(category.amount)}</span>
                             </div>
                           ))}
@@ -1879,7 +1879,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                     title="Budgets"
                     action={<TextAction onClick={() => quickAdd('budget')}><Plus size={13} aria-hidden="true" /> Add budget</TextAction>}
                   />
-                  <p className="-mt-2 mb-3 px-1 text-[11px] text-[#8B8B9A]">
+                  <p className="-mt-2 mb-3 px-1 text-[11px] text-[#85887F]">
                     {viewingCurrentMonth ? 'Limits repeat every month · spending resets on the 1st' : `Limits in force for ${viewedMonthLabel}`}
                   </p>
                   {currentBudgets.length > 0 ? (
@@ -1895,30 +1895,30 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                             type="button"
                             key={budget.category}
                             onClick={() => openEditBudget(budget.category)}
-                            className={`${styles.panel} flex w-full items-center gap-3 p-4 text-left transition hover:border-[#D9D3FB]`}
+                            className={`${styles.panel} flex w-full items-center gap-3 p-4 text-left transition hover:border-[#B8CEB5]`}
                           >
                             <CategoryIcon category={budget.category} />
                             <div className="min-w-0 flex-1">
                               <p className="truncate text-sm font-semibold">{budget.category}</p>
-                              <p className="mt-0.5 text-[12px] text-[#8B8B9A]">
-                                <span className={`font-semibold ${over ? 'text-[#E5484D]' : 'text-[#16161D]'}`}>{formatCAD(spent)}</span> of {formatCAD(budget.amount_cad)}
+                              <p className="mt-0.5 text-[12px] text-[#85887F]">
+                                <span className={`font-semibold ${over ? 'text-[#C96042]' : 'text-[#242522]'}`}>{formatCAD(spent)}</span> of {formatCAD(budget.amount_cad)}
                               </p>
-                              {over && <p className="mt-0.5 text-[11px] font-medium text-[#E5484D]">Over by {formatCAD(spent - budget.amount_cad)}</p>}
+                              {over && <p className="mt-0.5 text-[11px] font-medium text-[#C96042]">Over by {formatCAD(spent - budget.amount_cad)}</p>}
                             </div>
-                            <ProgressRing value={percent} color={over ? '#E5484D' : categoryColor(budget.category)} />
+                            <ProgressRing value={percent} color={over ? '#C96042' : categoryColor(budget.category)} />
                           </button>
                         )
                       })}
                     </div>
                   ) : (
                     <div className={`${styles.panel} flex flex-col items-center px-6 py-10 text-center`}>
-                      <span className="grid size-12 place-items-center rounded-2xl bg-[#EAF1FE] text-[#3B79E8]"><PiggyBank size={22} aria-hidden="true" /></span>
+                      <span className="grid size-12 place-items-center rounded-2xl bg-[#EAF2E9] text-[#58755F]"><PiggyBank size={22} aria-hidden="true" /></span>
                       <p className="mt-4 text-sm font-semibold">Give every dollar a plan</p>
-                      <p className="mt-1 max-w-xs text-xs leading-5 text-[#8B8B9A]">Set a monthly limit yourself, or start from your recent spending.</p>
+                      <p className="mt-1 max-w-xs text-xs leading-5 text-[#85887F]">Set a monthly limit yourself, or start from your recent spending.</p>
                       <div className="mt-5 flex flex-wrap justify-center gap-2">
-                        <button type="button" onClick={() => quickAdd('budget')} className="rounded-full bg-[#7C5CFA] px-5 py-2.5 text-xs font-semibold text-white hover:bg-[#6A48F5]">Set a budget</button>
+                        <button type="button" onClick={() => quickAdd('budget')} className="rounded-full bg-[#28352A] px-5 py-2.5 text-xs font-semibold text-white hover:bg-[#344637]">Set a budget</button>
                         {suggestions.length > 0 && (
-                          <button type="button" onClick={handlePredictBudgets} disabled={predicting} className="rounded-full border border-[#ECECF2] px-5 py-2.5 text-xs font-semibold text-[#6243EE] hover:bg-[#F6F5FB] disabled:opacity-50">
+                          <button type="button" onClick={handlePredictBudgets} disabled={predicting} className="rounded-full border border-[#DFE0DA] px-5 py-2.5 text-xs font-semibold text-[#3F6548] hover:bg-[#F1F2ED] disabled:opacity-50">
                             {predicting ? 'Creating…' : 'Use suggestions'}
                           </button>
                         )}
@@ -1941,7 +1941,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                     <SectionTitle
                       id="upcoming"
                       title="Upcoming payments"
-                      action={upcomingPayments.length > 0 ? <span className="text-[11px] text-[#8B8B9A]">Next in {upcomingPayments[0].daysUntil === 0 ? 'today' : `${upcomingPayments[0].daysUntil} day${upcomingPayments[0].daysUntil === 1 ? '' : 's'}`}</span> : undefined}
+                      action={upcomingPayments.length > 0 ? <span className="text-[11px] text-[#85887F]">Next in {upcomingPayments[0].daysUntil === 0 ? 'today' : `${upcomingPayments[0].daysUntil} day${upcomingPayments[0].daysUntil === 1 ? '' : 's'}`}</span> : undefined}
                     />
                     {upcomingPayments.length > 0 ? (
                       <div className={`${styles.panel} p-1.5`}>
@@ -1952,11 +1952,11 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                               <CategoryIcon category={payment.category} />
                               <div className="min-w-0 flex-1">
                                 <p className="truncate text-sm font-semibold">{payment.note ?? payment.category}</p>
-                                <p className="mt-0.5 text-[11px] text-[#8B8B9A]">{payment.category} · {formatDate(payment.nextDue.toISOString())}</p>
+                                <p className="mt-0.5 text-[11px] text-[#85887F]">{payment.category} · {formatDate(payment.nextDue.toISOString())}</p>
                               </div>
                               <div className="shrink-0 text-right">
                                 <p className="text-sm font-semibold">{formatCAD(payment.amount_cad)}</p>
-                                <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${urgent ? 'bg-[#FDECEC] text-[#D93F3F]' : 'bg-[#F1F0F7] text-[#6B6B7A]'}`}>
+                                <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold ${urgent ? 'bg-[#FFF0EA] text-[#B9573A]' : 'bg-[#EAEBE6] text-[#74776F]'}`}>
                                   {payment.daysUntil === 0 ? 'Due today' : payment.daysUntil === 1 ? 'Tomorrow' : `In ${payment.daysUntil} days`}
                                 </span>
                               </div>
@@ -1968,7 +1968,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
                       <div className={`${styles.panel} px-6 py-8 text-center`}>
                         <CalendarClock size={22} className="mx-auto text-[#B4B4C2]" aria-hidden="true" />
                         <p className="mt-3 text-sm font-medium">No upcoming payments</p>
-                        <p className="mt-1 text-xs text-[#8B8B9A]">Turn on “Repeat this expense” to track bills here.</p>
+                        <p className="mt-1 text-xs text-[#85887F]">Turn on “Repeat this expense” to track bills here.</p>
                       </div>
                     )}
                   </section>
@@ -2001,7 +2001,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
           {NAV_ITEMS.slice(0, 2).map(item => {
             const active = activeTab === item.id
             return (
-              <button key={item.id} type="button" aria-current={active ? 'page' : undefined} onClick={() => switchTab(item.id)} className={`flex flex-col items-center gap-1 pb-2 pt-1 text-[11px] font-semibold ${active ? 'text-[#16161D]' : 'text-[#9C9CAA]'}`}>
+              <button key={item.id} type="button" aria-current={active ? 'page' : undefined} onClick={() => switchTab(item.id)} className={`flex flex-col items-center gap-1 pb-2 pt-1 text-[11px] font-semibold ${active ? 'text-[#242522]' : 'text-[#91948C]'}`}>
                 <item.icon size={21} strokeWidth={active ? 2.3 : 1.9} aria-hidden="true" />
                 {item.label}
               </button>
@@ -2015,7 +2015,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
           {NAV_ITEMS.slice(2).map(item => {
             const active = activeTab === item.id
             return (
-              <button key={item.id} type="button" aria-current={active ? 'page' : undefined} onClick={() => switchTab(item.id)} className={`flex flex-col items-center gap-1 pb-2 pt-1 text-[11px] font-semibold ${active ? 'text-[#16161D]' : 'text-[#9C9CAA]'}`}>
+              <button key={item.id} type="button" aria-current={active ? 'page' : undefined} onClick={() => switchTab(item.id)} className={`flex flex-col items-center gap-1 pb-2 pt-1 text-[11px] font-semibold ${active ? 'text-[#242522]' : 'text-[#91948C]'}`}>
                 <item.icon size={21} strokeWidth={active ? 2.3 : 1.9} aria-hidden="true" />
                 {item.label}
               </button>
@@ -2026,7 +2026,7 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
 
       {quickAddOpen && (
         <>
-          <div className="fixed inset-0 z-40 bg-[#16161D]/40 backdrop-blur-[4px]" onClick={() => setQuickAddOpen(false)} />
+          <div className="fixed inset-0 z-40 bg-[#242522]/40 backdrop-blur-[4px]" onClick={() => setQuickAddOpen(false)} />
           <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-6" onClick={() => setQuickAddOpen(false)}>
             <div
               role="dialog"
@@ -2037,17 +2037,17 @@ export default function DashboardClient({ userId, email, profile, expenses, inco
             >
               <div className="mb-4 flex items-center justify-between">
                 <h2 id="quick-add-title" className="text-lg font-semibold tracking-[-0.02em]">Add new</h2>
-                <button type="button" onClick={() => setQuickAddOpen(false)} aria-label="Close" className="grid size-9 place-items-center rounded-full bg-[#F4F4F8] text-[#5E5E6E]">
+                <button type="button" onClick={() => setQuickAddOpen(false)} aria-label="Close" className="grid size-9 place-items-center rounded-full bg-[#F1F2ED] text-[#5F625B]">
                   <X size={16} aria-hidden="true" />
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 {quickAddOptions.map(option => (
-                  <button key={option.id} type="button" onClick={() => quickAdd(option.id)} className="flex flex-col items-start gap-3 rounded-[20px] border border-[#ECECF2] p-4 text-left transition hover:border-[#D9D3FB] hover:bg-[#FBFAFF]">
+                  <button key={option.id} type="button" onClick={() => quickAdd(option.id)} className="flex flex-col items-start gap-3 rounded-[20px] border border-[#DFE0DA] p-4 text-left transition hover:border-[#B8CEB5] hover:bg-[#FCFCF9]">
                     <span className={`grid size-10 place-items-center rounded-full ${option.tint}`}><option.icon size={18} strokeWidth={2.2} aria-hidden="true" /></span>
                     <span>
                       <span className="block text-sm font-semibold">{option.label}</span>
-                      <span className="block text-[11px] text-[#8B8B9A]">{option.note}</span>
+                      <span className="block text-[11px] text-[#85887F]">{option.note}</span>
                     </span>
                   </button>
                 ))}

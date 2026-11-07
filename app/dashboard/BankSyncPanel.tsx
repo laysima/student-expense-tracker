@@ -262,7 +262,7 @@ export default function BankSyncPanel({ expenses, income }: Props) {
   // Say so instead of silently hiding the panel.
   if (!status) {
     return error ? (
-      <p className="mt-6 rounded-2xl border border-[#F0C5B5] bg-[#FDECEC] px-5 py-4 text-[12px] font-medium text-[#D93F3F]">
+      <p className="mt-6 rounded-2xl border border-[#F0C5B5] bg-[#FFF0EA] px-5 py-4 text-[12px] font-medium text-[#B9573A]">
         Bank accounts: {error}
       </p>
     ) : null
@@ -294,15 +294,15 @@ export default function BankSyncPanel({ expenses, income }: Props) {
   }
 
   return (
-    <section aria-label="Bank accounts" className="mt-6 rounded-2xl border border-[#ECECF2] bg-white p-5 sm:p-6">
+    <section aria-label="Bank accounts" className="mt-6 rounded-2xl border border-[#DFE0DA] bg-white p-5 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-start gap-3.5">
-          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#F4F2FD] text-[#6243EE]">
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-[#EAF2E9] text-[#3F6548]">
             <Landmark size={19} aria-hidden="true" />
           </span>
           <div>
-            <h2 className="text-base font-semibold tracking-[-0.02em] text-[#16161D]">Bank accounts</h2>
-            <p className="mt-1 text-xs text-[#8B8B9A]">
+            <h2 className="text-base font-semibold tracking-[-0.02em] text-[#242522]">Bank accounts</h2>
+            <p className="mt-1 text-xs text-[#85887F]">
               {hasBanks
                 ? status.items.map(item => item.institution_name ?? 'Linked bank').join(' · ')
                 : 'Connect your bank and card purchases show up here to review — no more typing them in.'}
@@ -316,7 +316,7 @@ export default function BankSyncPanel({ expenses, income }: Props) {
               type="button"
               onClick={syncNow}
               disabled={busy !== null}
-              className="flex items-center gap-1.5 rounded-xl border border-[#ECECF2] px-3.5 py-2.5 text-xs font-semibold text-[#6243EE] transition hover:border-[#D9D3FB] disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-xl border border-[#DFE0DA] px-3.5 py-2.5 text-xs font-semibold text-[#3F6548] transition hover:border-[#B8CEB5] disabled:opacity-50"
             >
               {busy === 'sync' ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <RefreshCw size={13} aria-hidden="true" />}
               Sync now
@@ -326,7 +326,7 @@ export default function BankSyncPanel({ expenses, income }: Props) {
             type="button"
             onClick={startLinking}
             disabled={busy !== null}
-            className="flex items-center gap-1.5 rounded-xl bg-[#7C5CFA] px-3.5 py-2.5 text-xs font-semibold text-white transition hover:bg-[#6A48F5] disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-xl bg-[#28352A] px-3.5 py-2.5 text-xs font-semibold text-white transition hover:bg-[#344637] disabled:opacity-50"
           >
             {busy === 'link' && <Loader2 size={13} className="animate-spin" aria-hidden="true" />}
             {hasBanks ? 'Add another bank' : 'Connect bank'}
@@ -335,21 +335,21 @@ export default function BankSyncPanel({ expenses, income }: Props) {
       </div>
 
       {(message || error) && (
-        <p className={`mt-4 rounded-xl px-4 py-2.5 text-[12px] font-medium ${error ? 'bg-[#FDECEC] text-[#D93F3F]' : 'bg-[#E6F6EC] text-[#1C8F4E]'}`}>
+        <p className={`mt-4 rounded-xl px-4 py-2.5 text-[12px] font-medium ${error ? 'bg-[#FFF0EA] text-[#B9573A]' : 'bg-[#EAF2E9] text-[#3F6548]'}`}>
           {error || message}
         </p>
       )}
 
       {pending.length > 0 && (
-        <div className="mt-5 border-t border-[#ECECF2] pt-4">
+        <div className="mt-5 border-t border-[#DFE0DA] pt-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-            <label className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#8B8B9A]">
+            <label className="flex items-center gap-2.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#85887F]">
               <input
                 type="checkbox"
                 checked={allSelected}
                 onChange={toggleAll}
                 aria-label="Select every transaction"
-                className="size-4 accent-[#7C5CFA]"
+                className="size-4 accent-[#28352A]"
               />
               {selected.size > 0 ? `${selected.size} selected` : `To review · ${pending.length}`}
             </label>
@@ -359,7 +359,7 @@ export default function BankSyncPanel({ expenses, income }: Props) {
                 type="button"
                 onClick={() => resolve(targets, 'import')}
                 disabled={workingId !== null}
-                className="flex items-center gap-1.5 rounded-lg bg-[#7C5CFA] px-3 py-2 text-[12px] font-semibold text-white transition hover:bg-[#6A48F5] disabled:opacity-50"
+                className="flex items-center gap-1.5 rounded-lg bg-[#28352A] px-3 py-2 text-[12px] font-semibold text-white transition hover:bg-[#344637] disabled:opacity-50"
               >
                 {bulkBusy && <Loader2 size={12} className="animate-spin" aria-hidden="true" />}
                 {selected.size > 0 ? `Add selected (${targets.length})` : `Add all (${targets.length})`}
@@ -370,14 +370,14 @@ export default function BankSyncPanel({ expenses, income }: Props) {
                     type="button"
                     onClick={() => resolve(targets, 'dismiss')}
                     disabled={workingId !== null}
-                    className="rounded-lg border border-[#E2B6A6] bg-[#FDECEC] px-3 py-2 text-[12px] font-semibold text-[#D93F3F] transition hover:bg-[#FCE4DA] disabled:opacity-50"
+                    className="rounded-lg border border-[#E2B6A6] bg-[#FFF0EA] px-3 py-2 text-[12px] font-semibold text-[#B9573A] transition hover:bg-[#FCE4DA] disabled:opacity-50"
                   >
                     Skip {targets.length} for good
                   </button>
                   <button
                     type="button"
                     onClick={() => setConfirmingSkipAll(false)}
-                    className="px-1.5 text-[12px] font-semibold text-[#8B8B9A] transition hover:text-[#16161D]"
+                    className="px-1.5 text-[12px] font-semibold text-[#85887F] transition hover:text-[#242522]"
                   >
                     Cancel
                   </button>
@@ -387,14 +387,14 @@ export default function BankSyncPanel({ expenses, income }: Props) {
                   type="button"
                   onClick={() => setConfirmingSkipAll(true)}
                   disabled={workingId !== null}
-                  className="rounded-lg border border-[#ECECF2] px-3 py-2 text-[12px] font-semibold text-[#6243EE] transition hover:border-[#D9D3FB] disabled:opacity-50"
+                  className="rounded-lg border border-[#DFE0DA] px-3 py-2 text-[12px] font-semibold text-[#3F6548] transition hover:border-[#B8CEB5] disabled:opacity-50"
                 >
                   {selected.size > 0 ? `Skip selected (${targets.length})` : `Skip all (${targets.length})`}
                 </button>
               )}
             </div>
           </div>
-          <ul className="divide-y divide-[#F1F0F7]">
+          <ul className="divide-y divide-[#EAEBE6]">
             {pending.map(transaction => {
               const options = transaction.direction === 'out' ? EXPENSE_CATEGORIES : INCOME_SOURCES
               const chosen = choices[transaction.id] ?? transaction.suggested_category ?? 'Other'
@@ -409,24 +409,24 @@ export default function BankSyncPanel({ expenses, income }: Props) {
                     checked={selected.has(transaction.id)}
                     onChange={() => toggleRow(transaction.id)}
                     aria-label={`Select ${label}`}
-                    className="size-4 shrink-0 self-start accent-[#7C5CFA] sm:self-center"
+                    className="size-4 shrink-0 self-start accent-[#28352A] sm:self-center"
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold text-[#16161D]">{label}</p>
-                    <p className="mt-0.5 text-[11px] text-[#8B8B9A]">{formatDay(transaction.date)}</p>
+                    <p className="truncate text-sm font-semibold text-[#242522]">{label}</p>
+                    <p className="mt-0.5 text-[11px] text-[#85887F]">{formatDay(transaction.date)}</p>
                     {transaction.is_transfer && (
                       <p className="mt-1 flex items-center gap-1 text-[11px] font-medium text-[#7C8378]">
                         <ArrowLeftRight size={11} aria-hidden="true" /> Looks like a transfer between your accounts — usually skip it
                       </p>
                     )}
                     {duplicate && (
-                      <p className="mt-1 flex items-center gap-1 text-[11px] font-medium text-[#D93F3F]">
+                      <p className="mt-1 flex items-center gap-1 text-[11px] font-medium text-[#B9573A]">
                         <AlertTriangle size={11} aria-hidden="true" /> Possible duplicate of “{duplicate.label}” on {formatDay(duplicate.date)}
                       </p>
                     )}
                   </div>
 
-                  <span className={`shrink-0 text-sm font-semibold ${transaction.direction === 'out' ? 'text-[#E5484D]' : 'text-[#1C8F4E]'}`}>
+                  <span className={`shrink-0 text-sm font-semibold ${transaction.direction === 'out' ? 'text-[#C96042]' : 'text-[#3F6548]'}`}>
                     {transaction.direction === 'out' ? '−' : '+'}{formatCAD(Number(transaction.amount_cad))}
                   </span>
 
@@ -435,7 +435,7 @@ export default function BankSyncPanel({ expenses, income }: Props) {
                       value={chosen}
                       onChange={event => setChoices(current => ({ ...current, [transaction.id]: event.target.value }))}
                       aria-label={transaction.direction === 'out' ? 'Expense category' : 'Income source'}
-                      className="rounded-lg border border-[#ECECF2] bg-white px-2.5 py-2 text-base font-medium text-[#16161D] outline-none sm:text-[12px] focus:border-[#7C5CFA]"
+                      className="rounded-lg border border-[#DFE0DA] bg-white px-2.5 py-2 text-base font-medium text-[#242522] outline-none sm:text-[12px] focus:border-[#28352A]"
                     >
                       {selectOptions.map(option => (
                         <option key={option} value={option}>{option}</option>
@@ -445,7 +445,7 @@ export default function BankSyncPanel({ expenses, income }: Props) {
                       type="button"
                       onClick={() => resolve([transaction], 'import')}
                       disabled={working}
-                      className="rounded-lg bg-[#7C5CFA] px-3 py-2 text-[12px] font-semibold text-white transition hover:bg-[#6A48F5] disabled:opacity-50"
+                      className="rounded-lg bg-[#28352A] px-3 py-2 text-[12px] font-semibold text-white transition hover:bg-[#344637] disabled:opacity-50"
                     >
                       {working ? '…' : 'Add'}
                     </button>
@@ -453,7 +453,7 @@ export default function BankSyncPanel({ expenses, income }: Props) {
                       type="button"
                       onClick={() => resolve([transaction], 'dismiss')}
                       disabled={working}
-                      className="px-1.5 text-[12px] font-semibold text-[#8B8B9A] transition hover:text-[#16161D] disabled:opacity-50"
+                      className="px-1.5 text-[12px] font-semibold text-[#85887F] transition hover:text-[#242522] disabled:opacity-50"
                     >
                       Skip
                     </button>

@@ -1,15 +1,15 @@
-/* Xtrack dashboard — soft grey canvas, white rounded cards, violet accent. */
+/* Xtrack dashboard — warm off-white canvas, white rounded cards, forest
+   green and coral accents. */
 
 .dashboard {
-  --violet: #7c5cfa;
-  --violet-deep: #6243ee;
-  --violet-soft: #efeaff;
-  --ink: #16161d;
-  --muted: #8b8b9a;
-  --line: #ececf2;
+  --brand: #28352a;
+  --coral: #e98563;
+  --ink: #242522;
+  --muted: #85887f;
+  --line: #dfe0da;
 
   min-height: 100vh;
-  background: #f4f4f8;
+  background: #ecede6;
   color: var(--ink);
   font-weight: 400;
   font-variant-numeric: tabular-nums;
@@ -38,12 +38,12 @@
   .dashboard :where(button.group:not(:disabled)):active {
     scale: none;
     opacity: 1;
-    background-color: #f1f0f7;
+    background-color: #eaebe6;
   }
 }
 
 .dashboard :where(button, a, input, select, textarea):focus-visible {
-  outline: 2px solid var(--violet);
+  outline: 2px solid var(--coral);
   outline-offset: 3px;
 }
 
@@ -53,7 +53,7 @@
   border: 1px solid var(--line);
   border-radius: 24px;
   background: #fff;
-  box-shadow: 0 1px 2px rgb(22 22 29 / 3%), 0 12px 32px rgb(22 22 29 / 4%);
+  box-shadow: 0 1px 2px rgb(31 32 29 / 4%), 0 10px 28px rgb(31 32 29 / 5%);
 }
 
 .sectionHeader {
@@ -73,70 +73,62 @@
   gap: 12px;
   padding: 10px 20px;
   border-block: 1px solid var(--line);
-  background: #f8f8fb;
+  background: #f7f8f3;
 }
 
-/* ---- Home hero: the balance on a violet gradient ---------------------- */
+/* ---- Home balance card ---------------------------------------------- */
+/* A rounded card in line with the other sections, in the app's dark forest
+   green, so it reads as part of the page rather than a separate banner. */
 .hero {
   position: relative;
-  overflow: hidden;
-  padding: 18px 20px 64px;
-  background:
-    radial-gradient(120% 90% at 85% 0%, rgb(255 255 255 / 22%) 0%, transparent 55%),
-    radial-gradient(90% 70% at 0% 100%, rgb(64 32 200 / 30%) 0%, transparent 60%),
-    linear-gradient(160deg, #8d6bfb 0%, #9f82fb 50%, #b8a2fd 100%);
+  margin: 0 16px;
+  padding: 22px 22px 20px;
+  border: 1px solid #292c25;
+  border-radius: 24px;
+  background: linear-gradient(140deg, #2d3a2f 0%, #20261f 55%, #191d18 100%);
   color: #fff;
+  box-shadow: 0 14px 36px rgb(31 32 29 / 16%);
 }
 
-/* Soft glossy streak across the hero, like light on glass. */
+/* Soft coral glow in the corner, clipped to the card's own shape. */
 .hero::after {
   content: '';
   position: absolute;
-  top: -40%;
-  right: -10%;
-  width: 70%;
-  height: 160%;
-  background: linear-gradient(115deg, transparent 35%, rgb(255 255 255 / 14%) 50%, transparent 65%);
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(70% 90% at 100% 0%, rgb(233 133 99 / 16%) 0%, transparent 60%);
   pointer-events: none;
 }
 
 .heroValue {
   display: block;
-  font-size: clamp(2.6rem, 11vw, 3.6rem);
-  font-weight: 600;
+  font-size: clamp(2.5rem, 11vw, 3.6rem);
+  font-weight: 650;
   line-height: 1.05;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.05em;
   overflow-wrap: anywhere;
 }
 
 .heroCents,
 .cents {
-  font-size: 0.62em;
-  font-weight: 500;
+  font-size: 0.58em;
+  font-weight: 550;
   letter-spacing: -0.01em;
   opacity: 0.55;
 }
 
-/* The content sheet that overlaps the hero on phones. */
 .sheet {
-  position: relative;
-  margin-top: -36px;
-  border-radius: 28px 28px 0 0;
-  background: #f4f4f8;
-  padding: 20px 16px 0;
+  padding: 16px 16px 0;
 }
 
 @media (min-width: 1024px) {
   .hero {
-    border-radius: 28px;
-    padding: 24px 32px 40px;
+    margin: 0;
+    padding: 28px 32px 26px;
   }
 
   .sheet {
-    margin-top: 0;
-    border-radius: 0;
     padding: 24px 0 0;
-    background: transparent;
   }
 }
 
@@ -147,9 +139,9 @@
   height: 58px;
   place-items: center;
   border-radius: 999px;
-  background: linear-gradient(160deg, #9b7dfb, #7c5cfa);
+  background: linear-gradient(160deg, #3a4a3c, #28352a);
   color: #fff;
-  box-shadow: 0 10px 24px rgb(124 92 250 / 40%), 0 0 0 6px #fff;
+  box-shadow: 0 10px 24px rgb(40 53 42 / 35%), 0 0 0 6px #fff;
   transition: transform 150ms ease;
 }
 
@@ -158,7 +150,9 @@
 }
 
 .bottomNav {
-  padding-bottom: env(safe-area-inset-bottom);
+  /* Clear the iPhone home indicator (needs viewport-fit=cover, set in the
+     root layout), with a little breathing room on phones without one. */
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
   border-top: 1px solid var(--line);
   background: rgb(255 255 255 / 94%);
   backdrop-filter: blur(16px);

@@ -119,8 +119,8 @@ export default function AddIncomeModal({ userId, homeCurrency, income, onClose, 
     onClose()
   }
 
-  const inputClass = 'w-full rounded-xl border border-transparent bg-[#F4F4F8] px-4 py-3.5 text-base font-medium text-[#16161D] placeholder-[#A9A9B6] sm:text-[14px] outline-none transition focus:border-[#7C5CFA] focus:bg-white focus:ring-4 focus:ring-[#7C5CFA]/10'
-  const labelClass = 'mb-2 block text-[12px] font-semibold text-[#5E5E6E]'
+  const inputClass = 'w-full rounded-xl border border-transparent bg-[#F1F2ED] px-4 py-3.5 text-base font-medium text-[#242522] placeholder-[#A4A79F] sm:text-[14px] outline-none transition focus:border-[#28352A] focus:bg-white focus:ring-4 focus:ring-[#28352A]/10'
+  const labelClass = 'mb-2 block text-[12px] font-semibold text-[#5F625B]'
 
   return (
     <>
@@ -136,16 +136,16 @@ export default function AddIncomeModal({ userId, homeCurrency, income, onClose, 
           <div className="flex shrink-0 items-start justify-between px-6 pb-3 pt-6 sm:px-8 sm:pt-8">
             <div>
               <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#658069]">Money in</p>
-              <h2 id="add-income-title" className="text-[24px] font-semibold tracking-[-0.035em] text-[#16161D]">{isEditing ? 'Edit income' : 'Add income'}</h2>
-              <p className="mt-1 text-[12px] text-[#8B8B9A]">{isEditing ? 'Update the details of this income.' : 'Record money you received.'}</p>
+              <h2 id="add-income-title" className="text-[24px] font-semibold tracking-[-0.035em] text-[#242522]">{isEditing ? 'Edit income' : 'Add income'}</h2>
+              <p className="mt-1 text-[12px] text-[#85887F]">{isEditing ? 'Update the details of this income.' : 'Record money you received.'}</p>
             </div>
-            <button type="button" onClick={onClose} className="-mr-3 -mt-1 rounded-lg px-3 py-2 text-[13px] font-semibold text-[#8B8B9A] transition hover:text-[#16161D]">
+            <button type="button" onClick={onClose} className="-mr-3 -mt-1 rounded-lg px-3 py-2 text-[13px] font-semibold text-[#85887F] transition hover:text-[#242522]">
               Close
             </button>
           </div>
 
           <div className="min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-6 py-5 sm:px-8">
-            {error && <div className="rounded-xl bg-[#FDECEC] px-4 py-3 text-[13px] font-medium text-[#D93F3F]">{error}</div>}
+            {error && <div className="rounded-xl bg-[#FFF0EA] px-4 py-3 text-[13px] font-medium text-[#B9573A]">{error}</div>}
 
             <div>
               <label className={labelClass}>Income source</label>
@@ -158,8 +158,8 @@ export default function AddIncomeModal({ userId, homeCurrency, income, onClose, 
                     onClick={() => update('source', source)}
                     className={`rounded-full px-3.5 py-2 text-[12px] font-medium transition ${
                       form.source === source
-                        ? 'bg-[#7C5CFA] text-white shadow-sm'
-                        : 'text-[#8B8B9A] hover:bg-[#ECEEE8] hover:text-[#16161D]'
+                        ? 'bg-[#28352A] text-white shadow-sm'
+                        : 'text-[#85887F] hover:bg-[#ECEEE8] hover:text-[#242522]'
                     }`}
                   >
                     {source}
@@ -178,7 +178,7 @@ export default function AddIncomeModal({ userId, homeCurrency, income, onClose, 
                     aria-label="Custom income source"
                     className={inputClass}
                   />
-                  <p className="mt-2 text-[11px] text-[#8B8B9A]">
+                  <p className="mt-2 text-[11px] text-[#85887F]">
                     Leave blank to just file it under Other.
                   </p>
                 </div>
@@ -221,12 +221,12 @@ export default function AddIncomeModal({ userId, homeCurrency, income, onClose, 
                     type="button"
                     onClick={() => fetchConversion(form.originalAmount)}
                     disabled={converting || !form.originalAmount}
-                    className="whitespace-nowrap rounded-xl bg-[#7C5CFA] px-4 py-3 text-[12px] font-semibold text-white transition hover:bg-[#6F8971] disabled:opacity-40"
+                    className="whitespace-nowrap rounded-xl bg-[#28352A] px-4 py-3 text-[12px] font-semibold text-white transition hover:bg-[#6F8971] disabled:opacity-40"
                   >
                     {converting ? 'Converting…' : 'Convert'}
                   </button>
                 </div>
-                {convertedAmount && <p className="mt-2 text-[11px] font-medium text-[#1C8F4E]">≈ CA${convertedAmount.toFixed(2)} at today&apos;s rate — applied above</p>}
+                {convertedAmount && <p className="mt-2 text-[11px] font-medium text-[#3F6548]">≈ CA${convertedAmount.toFixed(2)} at today&apos;s rate — applied above</p>}
               </div>
             )}
 
@@ -235,10 +235,10 @@ export default function AddIncomeModal({ userId, homeCurrency, income, onClose, 
               <input type="date" value={form.date} onChange={event => update('date', event.target.value)} className={inputClass} />
             </div>
 
-            <div className="flex items-center justify-between border-t border-[#ECECF2] pt-5">
+            <div className="flex items-center justify-between border-t border-[#DFE0DA] pt-5">
               <div>
-                <p className="text-[13px] font-semibold text-[#16161D]">Repeat this income</p>
-                <p className="mt-0.5 text-[11px] text-[#8B8B9A]">Useful for wages, support, or scholarships</p>
+                <p className="text-[13px] font-semibold text-[#242522]">Repeat this income</p>
+                <p className="mt-0.5 text-[11px] text-[#85887F]">Useful for wages, support, or scholarships</p>
               </div>
               <button
                 type="button"
@@ -246,7 +246,7 @@ export default function AddIncomeModal({ userId, homeCurrency, income, onClose, 
                 aria-checked={form.isRecurring}
                 aria-label="Repeat this income"
                 onClick={() => update('isRecurring', !form.isRecurring)}
-                className={`tap-target relative h-7 w-12 shrink-0 rounded-full transition-colors ${form.isRecurring ? 'bg-[#7C5CFA]' : 'bg-[#D7D9D2]'}`}
+                className={`tap-target relative h-7 w-12 shrink-0 rounded-full transition-colors ${form.isRecurring ? 'bg-[#28352A]' : 'bg-[#D7D9D2]'}`}
               >
                 <span className={`absolute left-1 top-1 size-5 rounded-full bg-white shadow-sm transition-transform ${form.isRecurring ? 'translate-x-5' : 'translate-x-0'}`} />
               </button>
@@ -255,14 +255,14 @@ export default function AddIncomeModal({ userId, homeCurrency, income, onClose, 
             {form.isRecurring && (
               <div>
                 <label className={labelClass}>Repeats</label>
-                <div className="flex flex-wrap gap-1 rounded-xl bg-[#F4F4F8] p-1">
+                <div className="flex flex-wrap gap-1 rounded-xl bg-[#F1F2ED] p-1">
                   {CYCLES.map(cycle => (
                     <button
                       key={cycle}
                       type="button"
                       onClick={() => update('recurCycle', cycle)}
                       className={`flex-1 rounded-lg px-3 py-2 text-[11px] font-semibold capitalize transition ${
-                        form.recurCycle === cycle ? 'bg-white text-[#405B45] shadow-sm' : 'text-[#8B8B9A] hover:text-[#16161D]'
+                        form.recurCycle === cycle ? 'bg-white text-[#405B45] shadow-sm' : 'text-[#85887F] hover:text-[#242522]'
                       }`}
                     >
                       {cycle}
@@ -274,12 +274,12 @@ export default function AddIncomeModal({ userId, homeCurrency, income, onClose, 
           </div>
 
           <div className="flex shrink-0 items-center justify-between gap-3 border-t border-[#ECEDE7] px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 sm:gap-4 sm:border-t-0 sm:px-8 sm:pb-8">
-            <button type="button" onClick={onClose} className="px-2 py-3 text-[13px] font-semibold text-[#8B8B9A] transition hover:text-[#16161D]">Cancel</button>
+            <button type="button" onClick={onClose} className="px-2 py-3 text-[13px] font-semibold text-[#85887F] transition hover:text-[#242522]">Cancel</button>
             <button
               type="button"
               onClick={handleSave}
               disabled={loading}
-              className="min-w-0 flex-1 rounded-xl sm:min-w-[168px] sm:flex-none bg-[#7C5CFA] px-5 py-3.5 text-[13px] font-semibold text-white shadow-[0_8px_20px_rgba(124,92,250,0.16)] transition hover:-translate-y-0.5 hover:bg-[#6A48F5] disabled:translate-y-0 disabled:opacity-50"
+              className="min-w-0 flex-1 rounded-xl sm:min-w-[168px] sm:flex-none bg-[#28352A] px-5 py-3.5 text-[13px] font-semibold text-white shadow-[0_8px_20px_rgba(40,53,42,0.16)] transition hover:-translate-y-0.5 hover:bg-[#344637] disabled:translate-y-0 disabled:opacity-50"
             >
               {loading ? 'Saving...' : isEditing ? 'Save changes' : 'Save income'}
             </button>

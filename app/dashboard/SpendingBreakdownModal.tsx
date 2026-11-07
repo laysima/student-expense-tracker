@@ -93,22 +93,22 @@ export default function SpendingBreakdownModal({ title, periodLabel, expenses, i
         >
           <div className="flex shrink-0 items-start justify-between px-6 pb-3 pt-6 sm:px-8 sm:pt-8">
             <div>
-              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#D93F3F]">{title}</p>
-              <h2 id="spending-breakdown-title" className="text-[24px] font-semibold tracking-[-0.035em] text-[#16161D]">
+              <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#B9573A]">{title}</p>
+              <h2 id="spending-breakdown-title" className="text-[24px] font-semibold tracking-[-0.035em] text-[#242522]">
                 Where it went
               </h2>
-              <p className="mt-1 text-[12px] text-[#8B8B9A]">
+              <p className="mt-1 text-[12px] text-[#85887F]">
                 {formatCAD(total)} across {expenses.length} transaction{expenses.length === 1 ? '' : 's'} · {periodLabel}
               </p>
             </div>
-            <button type="button" onClick={onClose} className="-mr-3 -mt-1 rounded-lg px-3 py-2 text-[13px] font-semibold text-[#8B8B9A] transition hover:text-[#16161D]">
+            <button type="button" onClick={onClose} className="-mr-3 -mt-1 rounded-lg px-3 py-2 text-[13px] font-semibold text-[#85887F] transition hover:text-[#242522]">
               Close
             </button>
           </div>
 
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-4 sm:px-8">
             {groups.length === 0 ? (
-              <p className="py-10 text-center text-[13px] text-[#8B8B9A]">Nothing spent in this period yet.</p>
+              <p className="py-10 text-center text-[13px] text-[#85887F]">Nothing spent in this period yet.</p>
             ) : (
               <ul className="space-y-2">
                 {groups.map(group => {
@@ -132,14 +132,14 @@ export default function SpendingBreakdownModal({ title, periodLabel, expenses, i
                         </span>
                         <span className="min-w-0 flex-1">
                           <span className="flex items-baseline justify-between gap-3">
-                            <span className="truncate text-[13px] font-semibold text-[#16161D]">{group.category}</span>
-                            <span className="shrink-0 text-[13px] font-semibold tabular-nums text-[#16161D]">{formatCAD(group.total)}</span>
+                            <span className="truncate text-[13px] font-semibold text-[#242522]">{group.category}</span>
+                            <span className="shrink-0 text-[13px] font-semibold tabular-nums text-[#242522]">{formatCAD(group.total)}</span>
                           </span>
                           <span className="mt-1.5 flex items-center gap-2.5">
-                            <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#F1F0F7]" aria-hidden="true">
+                            <span className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#EAEBE6]" aria-hidden="true">
                               <span className="block h-full rounded-full" style={{ width: `${share}%`, backgroundColor: color }} />
                             </span>
-                            <span className="shrink-0 text-[11px] tabular-nums text-[#8B8B9A]">
+                            <span className="shrink-0 text-[11px] tabular-nums text-[#85887F]">
                               {Math.round(share)}% · {group.items.length}
                             </span>
                           </span>
@@ -147,17 +147,17 @@ export default function SpendingBreakdownModal({ title, periodLabel, expenses, i
                         <ChevronDown
                           size={16}
                           aria-hidden="true"
-                          className={`shrink-0 text-[#A9A9B6] transition-transform ${open ? 'rotate-180' : ''}`}
+                          className={`shrink-0 text-[#A4A79F] transition-transform ${open ? 'rotate-180' : ''}`}
                         />
                       </button>
 
                       {open && (
-                        <ul className="border-t border-[#F1F0F7] px-4 py-1">
+                        <ul className="border-t border-[#EAEBE6] px-4 py-1">
                           {group.items.map(item => (
                             <li key={item.id} className="flex items-center justify-between gap-3 py-2.5">
                               <span className="min-w-0">
-                                <span className="block truncate text-[13px] text-[#16161D]">{item.note || item.category}</span>
-                                <span className="mt-0.5 flex items-center gap-1.5 text-[11px] text-[#8B8B9A]">
+                                <span className="block truncate text-[13px] text-[#242522]">{item.note || item.category}</span>
+                                <span className="mt-0.5 flex items-center gap-1.5 text-[11px] text-[#85887F]">
                                   {formatDay(item.date)}
                                   {item.is_recurring && (
                                     <>
@@ -168,9 +168,9 @@ export default function SpendingBreakdownModal({ title, periodLabel, expenses, i
                                 </span>
                               </span>
                               <span className="shrink-0 text-right">
-                                <span className="block text-[13px] tabular-nums text-[#16161D]">{formatCAD(item.amount_cad)}</span>
+                                <span className="block text-[13px] tabular-nums text-[#242522]">{formatCAD(item.amount_cad)}</span>
                                 {item.original_currency && item.original_currency !== 'CAD' && item.original_amount != null && (
-                                  <span className="block text-[11px] tabular-nums text-[#8B8B9A]">
+                                  <span className="block text-[11px] tabular-nums text-[#85887F]">
                                     {formatOriginal(item.original_amount, item.original_currency)}
                                   </span>
                                 )}
@@ -187,11 +187,11 @@ export default function SpendingBreakdownModal({ title, periodLabel, expenses, i
           </div>
 
           <div className="flex shrink-0 items-center justify-between gap-3 border-t border-[#ECEDE7] px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 sm:gap-4 sm:border-t-0 sm:px-8 sm:pb-8">
-            <button type="button" onClick={onClose} className="px-2 py-3 text-[13px] font-semibold text-[#8B8B9A] transition hover:text-[#16161D]">Close</button>
+            <button type="button" onClick={onClose} className="px-2 py-3 text-[13px] font-semibold text-[#85887F] transition hover:text-[#242522]">Close</button>
             <button
               type="button"
               onClick={onViewAll}
-              className="min-w-0 flex-1 rounded-xl sm:min-w-[168px] sm:flex-none bg-[#7C5CFA] px-5 py-3.5 text-[13px] font-semibold text-white shadow-[0_8px_20px_rgba(124,92,250,0.16)] transition hover:-translate-y-0.5 hover:bg-[#6A48F5]"
+              className="min-w-0 flex-1 rounded-xl sm:min-w-[168px] sm:flex-none bg-[#28352A] px-5 py-3.5 text-[13px] font-semibold text-white shadow-[0_8px_20px_rgba(40,53,42,0.16)] transition hover:-translate-y-0.5 hover:bg-[#344637]"
             >
               See all expenses
             </button>

@@ -18,15 +18,15 @@ interface ChartOptions {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Rent: '#7C5CFA',
-  Groceries: '#4C8DF6',
-  Tuition: '#F2832C',
-  Transport: '#3DBE6B',
-  Utilities: '#F2B53A',
-  Entertainment: '#EC5E9A',
-  Other: '#9A9CAB',
+  Rent: '#E98563',
+  Groceries: '#829A83',
+  Tuition: '#8D9FB9',
+  Transport: '#CEAB68',
+  Utilities: '#AC91AC',
+  Entertainment: '#7CA4A1',
+  Other: '#A7AAA0',
 }
-const CUSTOM_COLORS = ['#2AB3AB', '#5E7CF2', '#F06F57', '#A86BF0', '#4FA9E8']
+const CUSTOM_COLORS = ['#B68571', '#8398AD', '#A3A56F', '#AB8FAB', '#72A29B']
 
 export function categoryColor(name: string) {
   if (Object.hasOwn(CATEGORY_COLORS, name)) return CATEGORY_COLORS[name]

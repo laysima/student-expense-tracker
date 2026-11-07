@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import LaunchSplash from "@/components/launch-splash/LaunchSplash";
@@ -20,6 +20,15 @@ const IPHONE_SCREENS = [
   [440, 956, 3], [420, 912, 3], [430, 932, 3], [428, 926, 3], [414, 896, 3], [414, 896, 2],
   [402, 874, 3], [393, 852, 3], [390, 844, 3], [375, 812, 3], [375, 667, 2],
 ] as const;
+
+// viewport-fit=cover makes iOS report the home-indicator inset through
+// env(safe-area-inset-bottom). Without it the inset reads 0 and the dashboard's
+// bottom tab bar sits down in the home-indicator strip on a home-screen app.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: "Xtrack — Expense Tracker",

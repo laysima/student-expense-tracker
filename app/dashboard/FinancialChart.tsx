@@ -31,7 +31,7 @@ export default function FinancialChart({ expenses, income, scope, month, onAddEx
   const data = useMemo(() => buildFinancialChartData({ expenses, income, scope, month }), [expenses, income, scope, month])
   const period = scope === 'running' ? 'All recorded activity' : month.toLocaleDateString('en-CA', { month: 'long', year: 'numeric' })
   const hasData = view === 'flow' ? data.transactionCount > 0 : data.categories.length > 0
-  const tooltipStyle = { background: '#252822', border: '1px solid #3C4036', borderRadius: 14, padding: '12px 16px', fontSize: 11, boxShadow: '0 8px 24px #16161D20' }
+  const tooltipStyle = { background: '#252822', border: '1px solid #3C4036', borderRadius: 14, padding: '12px 16px', fontSize: 11, boxShadow: '0 8px 24px #24252220' }
 
   return (
     <section data-tone="ink" className={`${styles.panel} flex flex-col p-5 sm:p-6`} aria-labelledby={`${gradientId}-heading`}>
@@ -42,10 +42,10 @@ export default function FinancialChart({ expenses, income, scope, month, onAddEx
           </span>
           <div>
             <h2 id={`${gradientId}-heading`} className="text-base font-semibold tracking-[-0.02em]">Money overview</h2>
-            <p className="mt-1 text-[11px] text-[#8B8B9A]">{period} <span aria-hidden="true">·</span> CAD</p>
+            <p className="mt-1 text-[11px] text-[#85887F]">{period} <span aria-hidden="true">·</span> CAD</p>
           </div>
         </div>
-        <div className="flex gap-1 rounded-xl bg-[#F1F0F7] p-1" role="group" aria-label="Chart view">
+        <div className="flex gap-1 rounded-xl bg-[#EAEBE6] p-1" role="group" aria-label="Chart view">
           {([
             { id: 'flow', label: 'Cash flow', icon: TrendingUp },
             { id: 'categories', label: 'Categories', icon: ChartPie },
@@ -65,12 +65,12 @@ export default function FinancialChart({ expenses, income, scope, month, onAddEx
 
       <dl className="mt-6 grid grid-cols-3 gap-3 border-b border-[#ECEEE6] pb-5">
         {[
-          { label: 'Income', value: data.incomeTotal, color: '#1C8F4E', dot: '#7C5CFA' },
-          { label: 'Spending', value: data.expenseTotal, color: '#B85D3F', dot: '#7C5CFA' },
+          { label: 'Income', value: data.incomeTotal, color: '#3F6548', dot: '#28352A' },
+          { label: 'Spending', value: data.expenseTotal, color: '#B85D3F', dot: '#28352A' },
           { label: 'Net cash flow', value: data.netTotal, color: data.netTotal < 0 ? '#B85D3F' : '#30352B', dot: '#555D4C' },
         ].map(item => (
           <div key={item.label} className="min-w-0">
-            <dt className="flex items-center gap-1.5 text-[10px] text-[#8B8B9A] sm:text-[11px]">
+            <dt className="flex items-center gap-1.5 text-[10px] text-[#85887F] sm:text-[11px]">
               <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full" style={{ background: item.dot }} />{item.label}
             </dt>
             <dd className="mt-2 break-all text-[clamp(0.9rem,1.65vw,1.35rem)] font-semibold tracking-[-0.04em]" style={{ color: item.color }}>{money(item.value)}</dd>
@@ -80,11 +80,11 @@ export default function FinancialChart({ expenses, income, scope, month, onAddEx
 
       {hasData ? view === 'flow' ? (
         <div className="pt-5">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 text-[10px] text-[#8B8B9A]">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 text-[10px] text-[#85887F]">
             <p>Cumulative income &amp; spending</p>
             <div className="flex items-center gap-4" aria-label="Chart legend">
-              <span className="flex items-center gap-1.5"><span aria-hidden="true" className="w-4 border-t-2 border-dashed border-[#7C5CFA]" />Income</span>
-              <span className="flex items-center gap-1.5"><span aria-hidden="true" className="w-4 border-t-2 border-[#7C5CFA]" />Spending</span>
+              <span className="flex items-center gap-1.5"><span aria-hidden="true" className="w-4 border-t-2 border-dashed border-[#28352A]" />Income</span>
+              <span className="flex items-center gap-1.5"><span aria-hidden="true" className="w-4 border-t-2 border-[#28352A]" />Spending</span>
             </div>
           </div>
           <div className="h-[250px] min-w-0 sm:h-[275px]" role="group" aria-label="Cumulative income and spending chart. Use the arrow keys to explore each point, or open the chart data below.">
@@ -92,12 +92,12 @@ export default function FinancialChart({ expenses, income, scope, month, onAddEx
               <AreaChart data={data.trend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }} accessibilityLayer>
                 <defs>
                   <linearGradient id={`${gradientId}-income`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#7C5CFA" stopOpacity={0.2} />
-                    <stop offset="100%" stopColor="#7C5CFA" stopOpacity={0.01} />
+                    <stop offset="0%" stopColor="#28352A" stopOpacity={0.2} />
+                    <stop offset="100%" stopColor="#28352A" stopOpacity={0.01} />
                   </linearGradient>
                   <linearGradient id={`${gradientId}-spending`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#7C5CFA" stopOpacity={0.24} />
-                    <stop offset="100%" stopColor="#7C5CFA" stopOpacity={0.02} />
+                    <stop offset="0%" stopColor="#28352A" stopOpacity={0.24} />
+                    <stop offset="100%" stopColor="#28352A" stopOpacity={0.02} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid vertical={false} stroke="#E9ECE3" strokeDasharray="3 5" />
@@ -127,7 +127,7 @@ export default function FinancialChart({ expenses, income, scope, month, onAddEx
               </PieChart>
             </ResponsiveContainer>
             <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-9 text-center" aria-hidden="true">
-              <span className="text-[10px] text-[#8B8B9A]">Total spent</span>
+              <span className="text-[10px] text-[#85887F]">Total spent</span>
               <span className="mt-1 w-full break-all text-lg font-semibold tracking-[-0.04em]">{money(data.expenseTotal)}</span>
               <span className="mt-1 text-[10px] text-[#92998A]">{data.categories.length} categories</span>
             </div>
@@ -161,7 +161,7 @@ export default function FinancialChart({ expenses, income, scope, month, onAddEx
           </p>
           <div className="mt-4 flex flex-wrap justify-center gap-3">
             <button type="button" onClick={onAddExpense} className="flex items-center gap-1 rounded-lg bg-[#FFF0E7] px-3 py-2 text-xs font-semibold text-[#B85D3F] transition hover:bg-[#FBE5D8]"><Plus size={13} aria-hidden="true" />Add expense</button>
-            {view === 'flow' && <button type="button" onClick={onAddIncome} className="flex items-center gap-1 rounded-lg bg-[#EAF2E7] px-3 py-2 text-xs font-semibold text-[#1C8F4E] transition hover:bg-[#DDEBD8]"><Plus size={13} aria-hidden="true" />Add income</button>}
+            {view === 'flow' && <button type="button" onClick={onAddIncome} className="flex items-center gap-1 rounded-lg bg-[#EAF2E7] px-3 py-2 text-xs font-semibold text-[#3F6548] transition hover:bg-[#DDEBD8]"><Plus size={13} aria-hidden="true" />Add income</button>}
           </div>
         </div>
       )}
@@ -175,7 +175,7 @@ export default function FinancialChart({ expenses, income, scope, month, onAddEx
         </p>
         {hasData && (
           <details key={`${view}-${scope}-${month.getTime()}`} className="group mt-2">
-            <summary className="flex w-fit cursor-pointer list-none items-center gap-1 text-[11px] font-semibold text-[#1C8F4E] [&::-webkit-details-marker]:hidden">
+            <summary className="flex w-fit cursor-pointer list-none items-center gap-1 text-[11px] font-semibold text-[#3F6548] [&::-webkit-details-marker]:hidden">
               View chart data <ChevronDown size={13} className="transition group-open:rotate-180" aria-hidden="true" />
             </summary>
             <div className="mt-3 max-h-52 overflow-auto rounded-xl border border-[#E7EADF]">
